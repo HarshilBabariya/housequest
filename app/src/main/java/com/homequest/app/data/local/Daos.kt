@@ -23,12 +23,6 @@ interface MemberDao {
     @Query("SELECT COUNT(*) FROM members")
     suspend fun count(): Int
 
-    @Query("SELECT COUNT(*) FROM members WHERE isSample = 1")
-    suspend fun sampleCount(): Int
-
-    @Query("DELETE FROM members WHERE isSample = 1")
-    suspend fun deleteSamples()
-
     @Insert
     suspend fun insert(member: MemberEntity): Long
 
@@ -112,12 +106,6 @@ interface ExpenseDao {
     @Query("UPDATE expenses SET category = :to WHERE category = :from")
     suspend fun reassignCategory(from: String, to: String)
 
-    @Query("SELECT COUNT(*) FROM expenses WHERE isSample = 1")
-    fun observeSampleCount(): Flow<Int>
-
-    @Query("DELETE FROM expenses WHERE isSample = 1")
-    suspend fun deleteSamples()
-
     @Insert
     suspend fun insert(expense: ExpenseEntity): Long
 
@@ -162,9 +150,6 @@ interface GroupDao {
     @Query("SELECT * FROM settlements")
     fun observeAllSettlements(): Flow<List<SettlementEntity>>
 
-    @Query("DELETE FROM `groups` WHERE isSample = 1")
-    suspend fun deleteSamples()
-
     @Insert
     suspend fun insert(group: GroupEntity): Long
 
@@ -204,12 +189,6 @@ interface ReminderDao {
 
     @Query("SELECT * FROM reminders WHERE id = :id")
     suspend fun byId(id: Long): ReminderEntity?
-
-    @Query("SELECT * FROM reminders WHERE isSample = 1")
-    suspend fun samples(): List<ReminderEntity>
-
-    @Query("DELETE FROM reminders WHERE isSample = 1")
-    suspend fun deleteSamples()
 
     @Insert
     suspend fun insert(reminder: ReminderEntity): Long

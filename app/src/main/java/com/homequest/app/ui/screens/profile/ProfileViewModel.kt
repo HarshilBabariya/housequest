@@ -25,14 +25,13 @@ data class ProfileState(
     val points: Int = 0,
     val streak: Int = 0,
     val memberCount: Int = 0,
-    val exportUnlocked: Boolean = false,
-    val sampleLoaded: Boolean = false
+    val exportUnlocked: Boolean = false
 )
 
 class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     private val settings = container.settingsRepository
 
-    private val base = combine(
+    val state: StateFlow<ProfileState> = combine(
         container.memberRepository.members,
         container.memberRepository.activeMember,
         settings.settings,
@@ -48,10 +47,7 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
             memberCount = members.size,
             exportUnlocked = Features.EXPORT_CSV in unlocked
         )
-    }
-
-    val state: StateFlow<ProfileState> = combine(base, container.sampleDataRepository.loaded) { s, sample -> s.copy(sampleLoaded = sample) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileState())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileState())
 
     fun setDarkMode(mode: DarkMode) = viewModelScope.launch { settings.setDarkMode(mode) }
     fun setCurrency(symbol: String) = viewModelScope.launch { settings.setCurrency(symbol) }
@@ -63,11 +59,6 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     fun setPinAndLock(memberId: Long, pin: String) = viewModelScope.launch {
         container.memberRepository.setPin(memberId, pin)
         settings.setAppLock(true)
-    }
-
-    fun toggleSampleData() = viewModelScope.launch {
-        if (state.value.sampleLoaded) container.sampleDataRepository.clear()
-        else container.sampleDataRepository.load(container.memberRepository.activeMemberId())
     }
 
     fun exportCsv(context: Context) = viewModelScope.launch {

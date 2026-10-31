@@ -176,11 +176,6 @@ fun ProfileScreen(
             ToggleRow(stringResource(R.string.rewards), stringResource(R.string.reward_notifs_sub), state.settings.rewardNotificationsEnabled, onChange = vm::setRewardNotifications, last = true)
         }
 
-        SectionHeader(stringResource(R.string.test_data))
-        HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
-            ToggleRow(stringResource(R.string.sample_data), stringResource(R.string.sample_data_sub), state.sampleLoaded, onChange = { vm.toggleSampleData() }, last = true)
-        }
-
         SectionHeader(stringResource(R.string.account))
         OutlinedButton(onClick = { confirmSignOut = true }, modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
             Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -188,7 +183,7 @@ fun ProfileScreen(
             Text(stringResource(R.string.log_out_switch), maxLines = 1)
         }
         Text(
-            stringResource(R.string.about_footer, "1.3.1"),
+            stringResource(R.string.about_footer, "1.3.2"),
             style = MaterialTheme.typography.labelSmall,
             color = scheme.onSurfaceVariant,
             modifier = Modifier.padding(20.dp)

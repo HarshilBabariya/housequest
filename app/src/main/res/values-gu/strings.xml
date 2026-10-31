@@ -451,9 +451,6 @@
     <string name="budget_alerts_sub" formatted="false">કોઈ પણ બજેટના 80% અને 100% પર</string>
     <string name="reminder_notifs_sub">નિયત સમયની યાદ અને ભરવાની તારીખો</string>
     <string name="reward_notifs_sub">બેજ અને લેવલ-અપ</string>
-    <string name="test_data">ટેસ્ટ ડેટા</string>
-    <string name="sample_data">નમૂના ડેટા</string>
-    <string name="sample_data_sub">45 દિવસના ડેમો ખર્ચ, બે સભ્યો, એક ગ્રુપ અને બિલ લોડ કરો — દૂર કરવા બંધ કરો</string>
     <string name="account">ખાતું</string>
     <string name="log_out_switch">લૉગ આઉટ / બદલો</string>
     <string name="log_out_q">લૉગ આઉટ કરવું?</string>

@@ -451,9 +451,6 @@
     <string name="budget_alerts_sub" formatted="false">At 80% and 100% of any budget</string>
     <string name="reminder_notifs_sub">Scheduled nudges and due dates</string>
     <string name="reward_notifs_sub">Badges and level-ups</string>
-    <string name="test_data">Test data</string>
-    <string name="sample_data">Sample data</string>
-    <string name="sample_data_sub">Load 45 days of demo expenses, two members, a group and bills — switch off to remove them</string>
     <string name="account">Account</string>
     <string name="log_out_switch">Log out / switch</string>
     <string name="log_out_q">Log out?</string>

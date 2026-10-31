@@ -8,7 +8,6 @@ import com.homequest.app.data.repository.GamificationRepository
 import com.homequest.app.data.repository.GroupRepository
 import com.homequest.app.data.repository.MemberRepository
 import com.homequest.app.data.repository.ReminderRepository
-import com.homequest.app.data.repository.SampleDataRepository
 import com.homequest.app.data.repository.SettingsRepository
 import com.homequest.app.notifications.BudgetMonitor
 import com.homequest.app.notifications.NotificationHelper
@@ -27,7 +26,6 @@ class AppContainer(context: Context) {
     val expenseRepository = ExpenseRepository(db.expenseDao(), db.budgetDao(), gamificationRepository, budgetMonitor)
     val groupRepository = GroupRepository(db.groupDao(), gamificationRepository)
     val reminderRepository = ReminderRepository(db.reminderDao(), reminderScheduler)
-    val sampleDataRepository = SampleDataRepository(db.memberDao(), db.expenseDao(), db.groupDao(), db.reminderDao(), reminderRepository)
 
     suspend fun bootstrap() {
         gamificationRepository.ensureInitialised()
