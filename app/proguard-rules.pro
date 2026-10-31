@@ -1,0 +1,1 @@
+-keep class com.homequest.app.notifications.ReminderWorker { *; }

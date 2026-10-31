@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HomeQuest</string>
+    <string name="channel_reminders">Expense reminders</string>
+    <string name="channel_budget">Budget alerts</string>
+    <string name="channel_rewards">Rewards</string>
+</resources>

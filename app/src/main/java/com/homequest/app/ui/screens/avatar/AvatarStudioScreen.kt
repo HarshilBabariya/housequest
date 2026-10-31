@@ -1,0 +1,199 @@
+package com.homequest.app.ui.screens.avatar
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import com.homequest.app.AppContainer
+import com.homequest.app.data.repository.avatar
+import com.homequest.app.domain.AvatarConfig
+import com.homequest.app.domain.HairColors
+import com.homequest.app.domain.RewardCatalog
+import com.homequest.app.domain.RewardItem
+import com.homequest.app.domain.RewardKind
+import com.homequest.app.domain.SkinTones
+import com.homequest.app.ui.appViewModel
+import com.homequest.app.ui.components.AvatarView
+import com.homequest.app.ui.components.SectionHeader
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+data class AvatarStudioState(
+    val memberName: String = "",
+    val config: AvatarConfig = AvatarConfig(),
+    val unlocked: Set<String> = emptySet(),
+    val points: Int = 0,
+    val dirty: Boolean = false
+)
+
+class AvatarStudioViewModel(private val container: AppContainer, private val memberId: Long) : ViewModel() {
+    private val draft = MutableStateFlow<AvatarConfig?>(null)
+    private val memberName = MutableStateFlow("")
+    private var saved = AvatarConfig()
+
+    val state: StateFlow<AvatarStudioState> = combine(
+        draft, memberName, container.gamificationRepository.unlockedIds, container.gamificationRepository.profile
+    ) { d, name, unlocked, profile ->
+        AvatarStudioState(name, d ?: saved, unlocked, profile.points, d != null && d != saved)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AvatarStudioState())
+
+    init {
+        viewModelScope.launch {
+            container.memberRepository.members.first().firstOrNull { it.id == memberId }?.let {
+                saved = it.avatar()
+                memberName.value = it.name
+                draft.value = saved
+            }
+        }
+    }
+
+    fun update(transform: AvatarConfig.() -> AvatarConfig) { draft.value = (draft.value ?: saved).transform() }
+
+    fun unlock(item: RewardItem) = viewModelScope.launch { container.gamificationRepository.redeem(item) }
+
+    fun save(onDone: () -> Unit) = viewModelScope.launch {
+        draft.value?.let { container.memberRepository.updateAvatar(memberId, it); saved = it }
+        onDone()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
+    val vm = appViewModel { AvatarStudioViewModel(it, memberId) }
+    val state by vm.state.collectAsStateWithLifecycle()
+    val scheme = MaterialTheme.colorScheme
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(if (state.memberName.isBlank()) "Avatar studio" else "${state.memberName}'s avatar") },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                actions = { Text("⭐ ${state.points}", Modifier.padding(end = 16.dp), style = MaterialTheme.typography.titleMedium) }
+            )
+        },
+        bottomBar = {
+            Button(onClick = { vm.save(onBack) }, enabled = state.dirty, modifier = Modifier.fillMaxWidth().padding(20.dp)) { Text("Save look") }
+        }
+    ) { padding ->
+        Column(Modifier.padding(padding).verticalScroll(rememberScrollState())) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(scheme.primaryContainer, scheme.background)))
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                AvatarView(state.config, size = 200.dp, animated = true)
+            }
+
+            SectionHeader("Skin tone")
+            SwatchRow(SkinTones, state.config.skinTone) { vm.update { copy(skinTone = it) } }
+            SectionHeader("Hair colour")
+            SwatchRow(HairColors, state.config.hairColor) { vm.update { copy(hairColor = it) } }
+
+            ItemRow("Hair style", RewardKind.HAIR, state, selectedId = state.config.hairId, onSelect = { vm.update { copy(hairId = it) } }, onUnlock = vm::unlock)
+            ItemRow("Outfit", RewardKind.OUTFIT, state, selectedId = state.config.outfitId, onSelect = { vm.update { copy(outfitId = it) } }, onUnlock = vm::unlock)
+            ItemRow("Accessory", RewardKind.ACCESSORY, state, selectedId = state.config.accessoryId, onSelect = { vm.update { copy(accessoryId = it) } }, onUnlock = vm::unlock)
+        }
+    }
+}
+
+@Composable
+private fun SwatchRow(colors: List<Color>, selected: Int, onSelect: (Int) -> Unit) {
+    LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        items(colors.size) { i ->
+            Box(
+                Modifier
+                    .size(40.dp)
+                    .border(3.dp, if (i == selected) MaterialTheme.colorScheme.primary else Color.Transparent, CircleShape)
+                    .padding(4.dp)
+                    .background(colors[i], CircleShape)
+                    .clickable { onSelect(i) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemRow(title: String, kind: RewardKind, state: AvatarStudioState, selectedId: String, onSelect: (String) -> Unit, onUnlock: (RewardItem) -> Unit) {
+    SectionHeader(title)
+    LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        items(RewardCatalog.ofKind(kind), key = { it.id }) { item ->
+            val unlocked = item.id in state.unlocked
+            val selected = item.id == selectedId
+            val affordable = state.points >= item.cost
+            Column(
+                Modifier
+                    .width(96.dp)
+                    .border(2.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                    .clickable { if (unlocked) onSelect(item.id) else if (affordable) onUnlock(item) }
+                    .padding(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(Modifier.alpha(if (unlocked) 1f else 0.5f)) {
+                    AvatarView(previewConfig(state.config, kind, item.id), size = 64.dp)
+                }
+                Text(item.name, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                Text(
+                    when {
+                        unlocked -> if (selected) "Wearing" else "Owned"
+                        affordable -> "⭐ ${item.cost} · tap"
+                        else -> "⭐ ${item.cost}"
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (unlocked || affordable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 10.sp
+                )
+            }
+        }
+    }
+}
+
+private fun previewConfig(base: AvatarConfig, kind: RewardKind, id: String) = when (kind) {
+    RewardKind.HAIR -> base.copy(hairId = id)
+    RewardKind.OUTFIT -> base.copy(outfitId = id)
+    RewardKind.ACCESSORY -> base.copy(accessoryId = id)
+    else -> base
+}
