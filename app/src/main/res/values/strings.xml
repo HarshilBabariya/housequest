@@ -14,7 +14,6 @@
     <string name="all">All</string>
     <string name="manage">Manage</string>
     <string name="see_all">See all</string>
-    <string name="none">None</string>
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
     <string name="continue_">Continue</string>
@@ -496,12 +495,8 @@
     <string name="day_of_month">Day of month</string>
     <string name="category_optional">Category (optional)</string>
     <string name="save_reminder">Save reminder</string>
-    <string name="monthly_total">Monthly total</string>
-    <string name="budget_for_month">Budget for the month</string>
     <string name="budget_boss_hint">Finish a month under budget to earn +100 points and the Budget Boss badge.</string>
     <string name="per_category">Per category</string>
-    <string name="limit">Limit</string>
-    <string name="spent_amount">Spent %1$s</string>
     <string name="spent_of">%1$s of %2$s</string>
     <string name="monthly_budget">Monthly budget</string>
     <string name="insights_locked_title">Advanced insights is locked</string>
@@ -514,6 +509,17 @@
     <string name="up_vs_last">Up %1$s%% vs last month</string>
     <string name="legend">Legend</string>
     <string name="share_amount">Share</string>
+    <string name="gender">Gender</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="mood_auto">Auto</string>
+    <string name="mood_auto_hint">Mood follows your budget and streak</string>
+    <string name="change_budget">Change budget</string>
+    <string name="set_monthly_budget">Set monthly budget</string>
+    <string name="limit_for">Limit for %1$s</string>
+    <string name="tap_to_set_limit">Tap to set a limit</string>
+    <string name="remove_limit">Remove limit</string>
+    <string name="amount">Amount</string>
     <string-array name="notif_nudge_titles">
         <item>Psst… 👀</item>
         <item>Your wallet called 📞</item>

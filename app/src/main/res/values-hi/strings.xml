@@ -14,7 +14,6 @@
     <string name="all">सभी</string>
     <string name="manage">प्रबंधित करें</string>
     <string name="see_all">सभी देखें</string>
-    <string name="none">कोई नहीं</string>
     <string name="today">आज</string>
     <string name="yesterday">कल</string>
     <string name="continue_">आगे बढ़ें</string>
@@ -496,12 +495,8 @@
     <string name="day_of_month">महीने का दिन</string>
     <string name="category_optional">श्रेणी (वैकल्पिक)</string>
     <string name="save_reminder">रिमाइंडर सहेजें</string>
-    <string name="monthly_total">मासिक कुल</string>
-    <string name="budget_for_month">महीने का बजट</string>
     <string name="budget_boss_hint">महीना बजट के भीतर पूरा करें और +100 पॉइंट व बजट बॉस बैज पाएँ।</string>
     <string name="per_category">श्रेणी अनुसार</string>
-    <string name="limit">सीमा</string>
-    <string name="spent_amount">%1$s खर्च</string>
     <string name="spent_of">%2$s में से %1$s</string>
     <string name="monthly_budget">मासिक बजट</string>
     <string name="insights_locked_title">एडवांस्ड इनसाइट्स लॉक है</string>
@@ -514,6 +509,17 @@
     <string name="up_vs_last">पिछले महीने से %1$s%% ज़्यादा</string>
     <string name="legend">संकेत</string>
     <string name="share_amount">हिस्सा</string>
+    <string name="gender">लिंग</string>
+    <string name="gender_male">पुरुष</string>
+    <string name="gender_female">महिला</string>
+    <string name="mood_auto">ऑटो</string>
+    <string name="mood_auto_hint">मूड आपके बजट और स्ट्रीक के हिसाब से बदलता है</string>
+    <string name="change_budget">बजट बदलें</string>
+    <string name="set_monthly_budget">मासिक बजट तय करें</string>
+    <string name="limit_for">%1$s की सीमा</string>
+    <string name="tap_to_set_limit">सीमा तय करने के लिए टैप करें</string>
+    <string name="remove_limit">सीमा हटाएँ</string>
+    <string name="amount">रकम</string>
     <string-array name="notif_nudge_titles">
         <item>पीएसटी… 👀</item>
         <item>आपके बटुए का फ़ोन आया 📞</item>

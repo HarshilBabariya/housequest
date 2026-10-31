@@ -23,7 +23,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         EarnedBadgeEntity::class,
         PointsLedgerEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class HomeQuestDatabase : RoomDatabase() {
@@ -61,9 +61,16 @@ abstract class HomeQuestDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE members ADD COLUMN gender TEXT NOT NULL DEFAULT 'MALE'")
+                db.execSQL("ALTER TABLE members ADD COLUMN mood TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         fun build(context: Context): HomeQuestDatabase =
             Room.databaseBuilder(context, HomeQuestDatabase::class.java, "homequest.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
     }
 }

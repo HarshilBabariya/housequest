@@ -4,8 +4,10 @@ import com.homequest.app.data.local.MemberDao
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.domain.Accessories
 import com.homequest.app.domain.AvatarConfig
+import com.homequest.app.domain.Gender
 import com.homequest.app.domain.HairColors
 import com.homequest.app.domain.HairStyles
+import com.homequest.app.domain.Mood
 import com.homequest.app.domain.Outfits
 import com.homequest.app.domain.Relations
 import com.homequest.app.domain.SkinTones
@@ -35,14 +37,14 @@ class MemberRepository(
         return if (active != 0L && dao.byId(active) != null) active else dao.owner()?.id ?: error("Owner member missing")
     }
 
-    suspend fun add(name: String, relation: String, phone: String): Long {
-        val id = dao.insert(newMember(name, relation, phone = phone, avatar = randomAvatar()))
+    suspend fun add(name: String, relation: String, phone: String, gender: Gender): Long {
+        val id = dao.insert(newMember(name, relation, phone = phone, avatar = randomAvatar(gender)))
         gamification.recordMemberAdded(dao.count() - 1)
         return id
     }
 
-    suspend fun updateDetails(member: MemberEntity, name: String, relation: String, phone: String) =
-        dao.update(member.copy(name = name.titleCased(), relation = relation, phone = phone.trim()))
+    suspend fun updateDetails(member: MemberEntity, name: String, relation: String, phone: String, gender: Gender) =
+        dao.update(member.copy(name = name.titleCased(), relation = relation, phone = phone.trim(), gender = gender))
 
     suspend fun updateAvatar(memberId: Long, avatar: AvatarConfig) {
         val member = dao.byId(memberId) ?: return
@@ -52,7 +54,9 @@ class MemberRepository(
                 hairId = avatar.hairId,
                 hairColor = avatar.hairColor,
                 outfitId = avatar.outfitId,
-                accessoryId = avatar.accessoryId
+                accessoryId = avatar.accessoryId,
+                gender = avatar.gender,
+                mood = avatar.mood?.name.orEmpty()
             )
         )
     }
@@ -77,12 +81,13 @@ class MemberRepository(
         if (settings.current().activeMemberId == member.id) signOut()
     }
 
-    private fun randomAvatar() = AvatarConfig(
+    private fun randomAvatar(gender: Gender) = AvatarConfig(
         skinTone = Random.nextInt(SkinTones.size),
-        hairId = listOf(HairStyles.SHORT, HairStyles.BUZZ, HairStyles.LONG, HairStyles.CURLY).random(),
+        hairId = if (gender == Gender.FEMALE) listOf(HairStyles.LONG, HairStyles.CURLY).random() else listOf(HairStyles.SHORT, HairStyles.BUZZ).random(),
         hairColor = Random.nextInt(HairColors.size),
         outfitId = listOf(Outfits.TEE, Outfits.SHIRT).random(),
-        accessoryId = Accessories.NONE
+        accessoryId = Accessories.NONE,
+        gender = gender
     )
 
     private fun newMember(name: String, relation: String, isOwner: Boolean = false, phone: String = "", avatar: AvatarConfig) =
@@ -95,7 +100,8 @@ class MemberRepository(
             hairId = avatar.hairId,
             hairColor = avatar.hairColor,
             outfitId = avatar.outfitId,
-            accessoryId = avatar.accessoryId
+            accessoryId = avatar.accessoryId,
+            gender = avatar.gender
         )
 }
 
@@ -104,7 +110,9 @@ fun MemberEntity.avatar(): AvatarConfig = AvatarConfig(
     hairId = hairId.ifBlank { HairStyles.SHORT },
     hairColor = hairColor,
     outfitId = outfitId.ifBlank { Outfits.TEE },
-    accessoryId = accessoryId.ifBlank { Accessories.NONE }
+    accessoryId = accessoryId.ifBlank { Accessories.NONE },
+    gender = gender,
+    mood = Mood.entries.firstOrNull { it.name == mood }
 )
 
 val MemberEntity.hasPin: Boolean get() = pinHash.isNotEmpty()

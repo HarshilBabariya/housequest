@@ -10,6 +10,7 @@ import com.homequest.app.data.local.ReminderDao
 import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.domain.Accessories
 import com.homequest.app.domain.BuiltInCategories
+import com.homequest.app.domain.Gender
 import com.homequest.app.domain.HairStyles
 import com.homequest.app.domain.Outfits
 import com.homequest.app.domain.PaymentMode
@@ -57,8 +58,8 @@ class SampleDataRepository(
     suspend fun load(ownerId: Long) {
         if (memberDao.sampleCount() > 0) return
         val random = Random(42)
-        val priya = memberDao.insert(sampleMember("Priya", "partner", "9876543210", 1, HairStyles.LONG, 0, Outfits.DRESS, Accessories.EARRINGS))
-        val arjun = memberDao.insert(sampleMember("Arjun", "roommate", "9123456780", 3, HairStyles.CURLY, 1, Outfits.HOODIE, Accessories.GLASSES))
+        val priya = memberDao.insert(sampleMember("Priya", "partner", "9876543210", 1, HairStyles.LONG, 0, Outfits.DRESS, Accessories.EARRINGS, Gender.FEMALE))
+        val arjun = memberDao.insert(sampleMember("Arjun", "roommate", "9123456780", 3, HairStyles.CURLY, 1, Outfits.HOODIE, Accessories.GLASSES, Gender.MALE))
         val groupId = groupDao.createWithMembers(GroupEntity(name = "Flat 4B", emoji = "🏠", isSample = true), listOf(ownerId, priya, arjun))
         val members = listOf(ownerId, priya, arjun)
         val today = Dates.today()
@@ -102,9 +103,9 @@ class SampleDataRepository(
         memberDao.deleteSamples()
     }
 
-    private fun sampleMember(name: String, relation: String, phone: String, skin: Int, hair: String, hairColor: Int, outfit: String, accessory: String) =
+    private fun sampleMember(name: String, relation: String, phone: String, skin: Int, hair: String, hairColor: Int, outfit: String, accessory: String, gender: Gender) =
         MemberEntity(
             name = name, relation = relation, phone = phone, skinTone = skin, hairId = hair, hairColor = hairColor,
-            outfitId = outfit, accessoryId = accessory, isSample = true
+            outfitId = outfit, accessoryId = accessory, gender = gender, isSample = true
         )
 }

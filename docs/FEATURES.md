@@ -1,7 +1,7 @@
 # HomeQuest — Features
 
 ## Look & feel
-- Adaptive launcher icon: coral-to-pink gradient, white house with a gold star coin; round, squircle and Android 13+ themed (monochrome) variants are all supported.
+- Adaptive launcher icon: coral-to-pink gradient, a large white house with pink door and windows filling the safe zone, gold star coin on the roof; round, squircle and Android 13+ themed (monochrome) variants are all supported.
 - Material 3 throughout; each of the six themes defines its own surface, card and chip colours so the whole UI (not just the accent) changes when you apply one.
 - Bottom navigation: four tabs (Home, Expenses, Groups, Me) on a rounded floating bar with a large centre **+** button that opens the add-transaction form from anywhere.
 - Every text that can overflow is clipped with an ellipsis on one line; nothing wraps into a second line unexpectedly.
@@ -17,6 +17,8 @@
 
 ## Your avatar
 - Drawn as a head-and-shoulders bust inside a circular frame everywhere it appears (header, lists, chips, picker), with soft radial shading on the face, gradient hair and clothing, blush and nose highlight.
+- Male or female (chosen at onboarding, in Family members or Edit profile, and in the studio): female avatars get lashes and fuller blush, male avatars broader shoulders and thicker brows; new members get a gender-appropriate random hairstyle.
+- The mood you pick in the studio is saved and shown on Home, Me, lists and chips; choose Auto to let budget/streak decide.
 - 9 hair styles (short, buzz, long, wavy, bob, ponytail, curly, top bun, braids, mohawk), 7 hair colours, 6 skin tones.
 - 12 outfits: casual tee, shirt, hoodie, denim jacket, sweater, blazer, kurta, sherwani, saree, dress, spacesuit, hero suit.
 - 6 accessories: bindi, earrings, glasses, cap, headphones, crown.
@@ -42,7 +44,7 @@
 - Tap any expense to edit or delete it. Every new expense earns points (see Rewards).
 
 ## Budgets & alerts
-- One overall monthly budget plus optional per-category limits, with progress bars for the current month.
+- Budgets screen: a hero card with the budget ring, spent / left this month and a "Set monthly budget" button; each category is a card with icon, spent of limit and a coloured progress bar — tap it to set or remove a limit in a sheet with quick-amount chips.
 - Push notifications when a budget crosses 80% and 100% (can be switched off in Me → Notifications).
 - Finishing a month under the overall budget earns +100 points and the Budget Boss badge.
 

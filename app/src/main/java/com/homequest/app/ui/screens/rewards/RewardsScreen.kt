@@ -213,17 +213,19 @@ private fun BadgeTile(status: BadgeStatus, modifier: Modifier = Modifier, onClic
             }
         }
         Text(stringResource(badge.nameRes), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, color = if (status.earned) scheme.onSurface else scheme.onSurfaceVariant)
-        if (status.earned) {
-            Text(stringResource(R.string.plus_pts, badge.bonusPoints), style = MaterialTheme.typography.labelSmall, color = scheme.primary)
-        } else {
-            LinearProgressIndicator(
-                progress = { status.fraction },
-                modifier = Modifier.padding(top = 6.dp, start = 10.dp, end = 10.dp).fillMaxWidth().height(4.dp),
-                color = scheme.primary,
-                trackColor = scheme.surfaceContainerHigh
-            )
-            Text("${status.progress.coerceAtMost(badge.target)}/${badge.target}", style = MaterialTheme.typography.labelSmall, color = scheme.onSurfaceVariant, modifier = Modifier.padding(top = 2.dp))
-        }
+        LinearProgressIndicator(
+            progress = { status.fraction },
+            modifier = Modifier.padding(top = 6.dp, start = 10.dp, end = 10.dp).fillMaxWidth().height(4.dp),
+            color = if (status.earned) scheme.secondary else scheme.primary,
+            trackColor = scheme.surfaceContainerHigh
+        )
+        Text(
+            if (status.earned) stringResource(R.string.plus_pts, badge.bonusPoints) else "${status.progress.coerceAtMost(badge.target)}/${badge.target}",
+            style = MaterialTheme.typography.labelSmall,
+            color = if (status.earned) scheme.primary else scheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp),
+            maxLines = 1
+        )
     }
 }
 

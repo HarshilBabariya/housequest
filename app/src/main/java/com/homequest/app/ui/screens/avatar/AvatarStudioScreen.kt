@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,7 +33,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,6 +51,7 @@ import com.homequest.app.AppContainer
 import com.homequest.app.R
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.domain.AvatarConfig
+import com.homequest.app.domain.Gender
 import com.homequest.app.domain.HairColors
 import com.homequest.app.domain.Mood
 import com.homequest.app.domain.RewardCatalog
@@ -113,7 +114,6 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
     val vm = appViewModel { AvatarStudioViewModel(it, memberId) }
     val state by vm.state.collectAsStateWithLifecycle()
     val scheme = MaterialTheme.colorScheme
-    var previewMood by remember { mutableStateOf(Mood.HAPPY) }
     var wave by remember { mutableIntStateOf(0) }
 
     Scaffold(
@@ -138,11 +138,20 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    AvatarView(state.config, size = 200.dp, animated = true, mood = previewMood, waveTrigger = wave, modifier = Modifier.clickable { wave++ }, background = scheme.surfaceContainerLowest)
-                    Text(stringResource(previewMood.labelRes), style = MaterialTheme.typography.labelLarge, color = scheme.primary, modifier = Modifier.padding(top = 10.dp))
+                    AvatarView(state.config, size = 200.dp, animated = true, mood = state.config.mood ?: Mood.HAPPY, waveTrigger = wave, modifier = Modifier.clickable { wave++ }, background = scheme.surfaceContainerLowest)
+                    Text(
+                        state.config.mood?.let { stringResource(it.labelRes) } ?: stringResource(R.string.mood_auto_hint),
+                        style = MaterialTheme.typography.labelLarge, color = scheme.primary, modifier = Modifier.padding(top = 10.dp)
+                    )
                     LazyRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item { FilterChip(selected = false, onClick = { wave++ }, label = { Text(stringResource(R.string.say_hi)) }) }
-                        items(Mood.entries) { m -> FilterChip(selected = previewMood == m, onClick = { previewMood = m }, label = { Text(m.emoji) }) }
+                        item { FilterChip(selected = state.config.mood == null, onClick = { vm.update { copy(mood = null) } }, label = { Text(stringResource(R.string.mood_auto)) }) }
+                        items(Mood.entries) { m -> FilterChip(selected = state.config.mood == m, onClick = { vm.update { copy(mood = m) } }, label = { Text(m.emoji) }) }
+                    }
+                    Row(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Gender.entries.forEach { g ->
+                            FilterChip(selected = state.config.gender == g, onClick = { vm.update { copy(gender = g) } }, label = { Text("${g.emoji} ${stringResource(g.labelRes)}") })
+                        }
                     }
                 }
             }

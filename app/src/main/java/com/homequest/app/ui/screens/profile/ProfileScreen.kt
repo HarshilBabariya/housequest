@@ -188,7 +188,7 @@ fun ProfileScreen(
             Text(stringResource(R.string.log_out_switch), maxLines = 1)
         }
         Text(
-            stringResource(R.string.about_footer, "1.3.0"),
+            stringResource(R.string.about_footer, "1.3.1"),
             style = MaterialTheme.typography.labelSmall,
             color = scheme.onSurfaceVariant,
             modifier = Modifier.padding(20.dp)

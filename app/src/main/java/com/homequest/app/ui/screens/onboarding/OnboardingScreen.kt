@@ -42,11 +42,14 @@ import com.homequest.app.R
 import com.homequest.app.domain.AppLanguage
 import com.homequest.app.domain.AvatarConfig
 import com.homequest.app.domain.Currencies
+import com.homequest.app.domain.Gender
+import com.homequest.app.domain.HairStyles
 import com.homequest.app.domain.Mood
 import com.homequest.app.ui.components.AvatarView
 import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.ui.components.PinEntry
 import com.homequest.app.ui.components.PrimaryButton
+import com.homequest.app.ui.screens.profile.GenderChips
 import com.homequest.app.ui.screens.profile.PhoneField
 import com.homequest.app.ui.screens.profile.isValidPhone
 import com.homequest.app.util.Pin
@@ -57,19 +60,20 @@ private const val STEPS = 3
 fun OnboardingScreen(
     language: String,
     onLanguage: (String) -> Unit,
-    onComplete: (name: String, phone: String, currency: String, budget: Double, pin: String?, nudgeTitle: String) -> Unit
+    onComplete: (name: String, phone: String, gender: Gender, currency: String, budget: Double, pin: String?, nudgeTitle: String) -> Unit
 ) {
     val scheme = MaterialTheme.colorScheme
     var step by remember { mutableIntStateOf(0) }
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf(Gender.MALE) }
     var currency by remember { mutableStateOf(Currencies.first()) }
     var budget by remember { mutableStateOf("") }
     var firstPin by remember { mutableStateOf<String?>(null) }
     var pinMessage by remember { mutableStateOf<Int?>(null) }
     var wave by remember { mutableIntStateOf(1) }
     val nudgeTitle = stringResource(R.string.preset_daily_nudge)
-    val finish = { pin: String? -> onComplete(name.trim(), phone, currency.symbol, budget.toDoubleOrNull() ?: 0.0, pin, nudgeTitle) }
+    val finish = { pin: String? -> onComplete(name.trim(), phone, gender, currency.symbol, budget.toDoubleOrNull() ?: 0.0, pin, nudgeTitle) }
 
     Column(
         Modifier
@@ -84,7 +88,7 @@ fun OnboardingScreen(
             }
         }
         Box(Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
-            AvatarView(AvatarConfig(), size = 132.dp, animated = true, mood = if (step == 2) Mood.SMART else Mood.EXCITED, waveTrigger = wave, background = scheme.surfaceContainerLowest)
+            AvatarView(AvatarConfig(gender = gender, hairId = if (gender == Gender.FEMALE) HairStyles.LONG else HairStyles.SHORT), size = 132.dp, animated = true, mood = if (step == 2) Mood.SMART else Mood.EXCITED, waveTrigger = wave, background = scheme.surfaceContainerLowest)
         }
         AnimatedContent(
             targetState = step,
@@ -103,6 +107,8 @@ fun OnboardingScreen(
                         }
                         HqTextField(name, { name = it }, stringResource(R.string.your_name), placeholder = stringResource(R.string.your_name_hint))
                         PhoneField(phone) { phone = it }
+                        Text(stringResource(R.string.gender), style = MaterialTheme.typography.labelLarge)
+                        GenderChips(gender) { gender = it }
                         Spacer(Modifier.height(12.dp))
                         PrimaryButton(stringResource(R.string.continue_), onClick = { step = 1; wave++ }, enabled = name.isNotBlank() && isValidPhone(phone))
                     }

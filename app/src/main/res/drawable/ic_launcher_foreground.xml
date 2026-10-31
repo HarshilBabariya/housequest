@@ -5,40 +5,59 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group android:translateY="2.5">
+    <group android:translateY="3">
         <path
-            android:fillColor="#1F000000"
-            android:pathData="M50,30 Q52,28 54,30 L75,49 Q77,51 74,52 L70,52 L70,75 Q70,79 66,79 L38,79 Q34,79 34,75 L34,52 L30,52 Q27,51 29,49 Z" />
+            android:fillColor="#29000000"
+            android:pathData="M54,26 L83,52 Q85,55 81,55 L75,55 L75,80 Q75,84 71,84 L37,84 Q33,84 33,80 L33,55 L27,55 Q23,55 25,52 Z" />
     </group>
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M50,30 Q52,28 54,30 L75,49 Q77,51 74,52 L70,52 L70,75 Q70,79 66,79 L38,79 Q34,79 34,75 L34,52 L30,52 Q27,51 29,49 Z" />
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M62,36 h3 a1,1 0 0,1 1,1 v9 h-5 v-9 a1,1 0 0,1 1,-1 Z" />
-    <path
-        android:fillColor="#FFFF6B35"
-        android:pathData="M49.5,62 h5 a2.5,2.5 0 0,1 2.5,2.5 V79 h-10 V64.5 a2.5,2.5 0 0,1 2.5,-2.5 Z" />
-    <path
-        android:fillColor="#FFFFB627"
-        android:pathData="M52,54 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-    <path
-        android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="2.5"
-        android:pathData="M77,34 m-11.5,0 a11.5,11.5 0 1,0 23,0 a11.5,11.5 0 1,0 -23,0">
+        android:pathData="M33,55 L75,55 L75,80 Q75,84 71,84 L37,84 Q33,84 33,80 Z" />
+    <path android:pathData="M54,26 L83,52 Q85,55 81,55 L27,55 Q23,55 25,52 Z">
         <aapt:attr name="android:fillColor">
             <gradient
-                android:startX="77"
-                android:startY="22.5"
-                android:endX="77"
-                android:endY="45.5"
+                android:startX="54"
+                android:startY="26"
+                android:endX="54"
+                android:endY="55"
                 android:type="linear">
-                <item android:offset="0" android:color="#FFFFE08A" />
-                <item android:offset="1" android:color="#FFFFB627" />
+                <item android:offset="0" android:color="#FFFFFFFF" />
+                <item android:offset="1" android:color="#FFFFE9E1" />
             </gradient>
         </aapt:attr>
     </path>
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M77,27.5 L78.9,31.6 L83.3,32.1 L80,35.1 L80.9,39.5 L77,37.3 L73.1,39.5 L74,35.1 L70.7,32.1 L75.1,31.6 Z" />
+        android:pathData="M66,31 h6 a1.5,1.5 0 0,1 1.5,1.5 V44 L64.5,36 V32.5 a1.5,1.5 0 0,1 1.5,-1.5 Z" />
+    <path
+        android:fillColor="#FFF0426B"
+        android:pathData="M48,64 h12 a3,3 0 0,1 3,3 V84 H45 V67 a3,3 0 0,1 3,-3 Z" />
+    <path
+        android:fillColor="#FFFFE38A"
+        android:pathData="M58,75 m-1.4,0 a1.4,1.4 0 1,0 2.8,0 a1.4,1.4 0 1,0 -2.8,0" />
+    <path
+        android:fillColor="#FFFFD2C2"
+        android:pathData="M39.5,62 h4 a1.5,1.5 0 0,1 1.5,1.5 v4 a1.5,1.5 0 0,1 -1.5,1.5 h-4 a1.5,1.5 0 0,1 -1.5,-1.5 v-4 a1.5,1.5 0 0,1 1.5,-1.5 Z M64.5,62 h4 a1.5,1.5 0 0,1 1.5,1.5 v4 a1.5,1.5 0 0,1 -1.5,1.5 h-4 a1.5,1.5 0 0,1 -1.5,-1.5 v-4 a1.5,1.5 0 0,1 1.5,-1.5 Z" />
+    <path
+        android:fillColor="#40B45309"
+        android:pathData="M80,34 m-12.5,0 a12.5,12.5 0 1,0 25,0 a12.5,12.5 0 1,0 -25,0" />
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.5"
+        android:pathData="M80,32 m-12.5,0 a12.5,12.5 0 1,0 25,0 a12.5,12.5 0 1,0 -25,0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="80"
+                android:startY="19.5"
+                android:endX="80"
+                android:endY="44.5"
+                android:type="linear">
+                <item android:offset="0" android:color="#FFFFE38A" />
+                <item android:offset="1" android:color="#FFF7B32B" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M80,24.6 L82.2,29.3 L87.3,29.9 L83.5,33.4 L84.5,38.5 L80,36 L75.5,38.5 L76.5,33.4 L72.7,29.9 L77.8,29.3 Z" />
 </vector>

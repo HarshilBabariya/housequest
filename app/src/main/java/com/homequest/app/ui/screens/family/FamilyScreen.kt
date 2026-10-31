@@ -43,6 +43,7 @@ import com.homequest.app.R
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.data.repository.hasPin
+import com.homequest.app.domain.Gender
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AvatarView
 import com.homequest.app.ui.components.HqCard
@@ -50,6 +51,7 @@ import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.ui.components.PrimaryButton
 import com.homequest.app.ui.components.relationLabel
 import com.homequest.app.ui.screens.expenses.OptionSheet
+import com.homequest.app.ui.screens.profile.GenderChips
 import com.homequest.app.ui.screens.profile.PhoneField
 import com.homequest.app.ui.screens.profile.RelationChips
 import com.homequest.app.ui.screens.profile.isValidPhone
@@ -62,9 +64,9 @@ class FamilyViewModel(private val container: AppContainer) : ViewModel() {
     val members: StateFlow<List<MemberEntity>> =
         container.memberRepository.members.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun add(name: String, relation: String, phone: String) = viewModelScope.launch { container.memberRepository.add(name, relation, phone) }
-    fun update(member: MemberEntity, name: String, relation: String, phone: String) =
-        viewModelScope.launch { container.memberRepository.updateDetails(member, name, relation, phone) }
+    fun add(name: String, relation: String, phone: String, gender: Gender) = viewModelScope.launch { container.memberRepository.add(name, relation, phone, gender) }
+    fun update(member: MemberEntity, name: String, relation: String, phone: String, gender: Gender) =
+        viewModelScope.launch { container.memberRepository.updateDetails(member, name, relation, phone, gender) }
     fun delete(member: MemberEntity) = viewModelScope.launch { container.memberRepository.delete(member) }
 }
 
@@ -117,11 +119,11 @@ fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     }
 
     if (adding) {
-        MemberSheet(title = stringResource(R.string.add_member), onDismiss = { adding = false }) { n, r, p -> vm.add(n, r, p); adding = false }
+        MemberSheet(title = stringResource(R.string.add_member), onDismiss = { adding = false }) { n, r, p, g -> vm.add(n, r, p, g); adding = false }
     }
     editing?.let { m ->
-        MemberSheet(title = stringResource(R.string.edit_member), initialName = m.name, initialRelation = m.relation, initialPhone = m.phone, onDismiss = { editing = null }) { n, r, p ->
-            vm.update(m, n, r, p); editing = null
+        MemberSheet(title = stringResource(R.string.edit_member), initialName = m.name, initialRelation = m.relation, initialPhone = m.phone, initialGender = m.gender, onDismiss = { editing = null }) { n, r, p, g ->
+            vm.update(m, n, r, p, g); editing = null
         }
     }
     deleting?.let { m ->
@@ -141,20 +143,24 @@ private fun MemberSheet(
     initialName: String = "",
     initialRelation: String = "partner",
     initialPhone: String = "",
+    initialGender: Gender = Gender.FEMALE,
     onDismiss: () -> Unit,
-    onSave: (String, String, String) -> Unit
+    onSave: (String, String, String, Gender) -> Unit
 ) {
     var name by remember { mutableStateOf(initialName) }
     var relation by remember { mutableStateOf(initialRelation) }
     var phone by remember { mutableStateOf(initialPhone) }
+    var gender by remember { mutableStateOf(initialGender) }
     OptionSheet(title, onDismiss) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             HqTextField(name, { name = it }, stringResource(R.string.name))
             PhoneField(phone) { phone = it }
+            Text(stringResource(R.string.gender), style = MaterialTheme.typography.labelLarge)
+            GenderChips(gender) { gender = it }
             Text(stringResource(R.string.relation), style = MaterialTheme.typography.labelLarge)
             RelationChips(relation, includeMe = initialRelation.equals("me", ignoreCase = true)) { relation = it }
             Text(stringResource(R.string.member_random_look), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            PrimaryButton(stringResource(R.string.save), onClick = { onSave(name, relation, phone) }, enabled = name.isNotBlank() && isValidPhone(phone))
+            PrimaryButton(stringResource(R.string.save), onClick = { onSave(name, relation, phone, gender) }, enabled = name.isNotBlank() && isValidPhone(phone))
         }
     }
 }

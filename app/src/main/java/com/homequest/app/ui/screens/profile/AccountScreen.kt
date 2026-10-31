@@ -44,6 +44,7 @@ import com.homequest.app.R
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.data.repository.hasPin
+import com.homequest.app.domain.Gender
 import com.homequest.app.domain.Relations
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AvatarView
@@ -62,8 +63,8 @@ class AccountViewModel(private val container: AppContainer) : ViewModel() {
     val member: StateFlow<MemberEntity?> =
         container.memberRepository.activeMember.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    fun save(member: MemberEntity, name: String, relation: String, phone: String) = viewModelScope.launch {
-        container.memberRepository.updateDetails(member, name, relation, phone)
+    fun save(member: MemberEntity, name: String, relation: String, phone: String, gender: Gender) = viewModelScope.launch {
+        container.memberRepository.updateDetails(member, name, relation, phone, gender)
     }
 
     fun setPin(memberId: Long, pin: String?) = viewModelScope.launch {
@@ -79,12 +80,13 @@ fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     val member by vm.member.collectAsStateWithLifecycle()
     var name by remember { mutableStateOf("") }
     var relation by remember { mutableStateOf(Relations.ME) }
+    var gender by remember { mutableStateOf(Gender.MALE) }
     var phone by remember { mutableStateOf("") }
     var loaded by remember { mutableStateOf(false) }
     var showPinSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(member?.id) {
-        member?.let { if (!loaded) { name = it.name; relation = it.relation; phone = it.phone; loaded = true } }
+        member?.let { if (!loaded) { name = it.name; relation = it.relation; phone = it.phone; gender = it.gender; loaded = true } }
     }
 
     Scaffold(
@@ -107,11 +109,13 @@ fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     HqTextField(name, { name = it }, stringResource(R.string.name))
                     PhoneField(phone) { phone = it }
+                    Text(stringResource(R.string.gender), style = MaterialTheme.typography.labelLarge)
+                    GenderChips(gender) { gender = it }
                     Text(stringResource(R.string.role_in_house), style = MaterialTheme.typography.labelLarge)
                     RelationChips(relation, includeMe = true) { relation = it }
                 }
             }
-            PrimaryButton(stringResource(R.string.save_profile), onClick = { member?.let { vm.save(it, name, relation, phone); onBack() } }, enabled = name.isNotBlank() && isValidPhone(phone) && member != null)
+            PrimaryButton(stringResource(R.string.save_profile), onClick = { member?.let { vm.save(it, name, relation, phone, gender); onBack() } }, enabled = name.isNotBlank() && isValidPhone(phone) && member != null)
 
             SectionCard(stringResource(R.string.security)) {
                 Text(
@@ -142,6 +146,15 @@ fun PhoneField(phone: String, onChange: (String) -> Unit) {
         isError = phone.isNotEmpty() && !isValidPhone(phone),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
     )
+}
+
+@Composable
+fun GenderChips(selected: Gender, onSelect: (Gender) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Gender.entries.forEach { g ->
+            FilterChip(selected = selected == g, onClick = { onSelect(g) }, label = { Text("${g.emoji} ${stringResource(g.labelRes)}") })
+        }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

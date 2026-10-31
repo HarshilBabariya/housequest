@@ -7,6 +7,7 @@ import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.data.repository.AppSettings
 import com.homequest.app.data.repository.RewardEvent
+import com.homequest.app.domain.Gender
 import com.homequest.app.domain.RepeatRule
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -83,10 +84,10 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         container.memberRepository.signOut()
     }
 
-    fun completeOnboarding(name: String, phone: String, currency: String, budget: Double, pin: String?, nudgeTitle: String) = viewModelScope.launch {
+    fun completeOnboarding(name: String, phone: String, gender: Gender, currency: String, budget: Double, pin: String?, nudgeTitle: String) = viewModelScope.launch {
         container.memberRepository.ensureOwner()
         val owner = container.memberRepository.members.first { it.isNotEmpty() }.first { it.isOwner }
-        container.memberRepository.updateDetails(owner, name, owner.relation, phone)
+        container.memberRepository.updateDetails(owner, name, owner.relation, phone, gender)
         pin?.let { container.memberRepository.setPin(owner.id, it) }
         container.memberRepository.signIn(owner.id)
         _sessionUnlocked.value = true

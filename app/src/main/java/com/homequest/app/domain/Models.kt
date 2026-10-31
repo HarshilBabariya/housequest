@@ -184,12 +184,19 @@ enum class RewardKind(@StringRes val labelRes: Int) {
     FEATURE(R.string.kind_features)
 }
 
+enum class Gender(@StringRes val labelRes: Int, val emoji: String) {
+    MALE(R.string.gender_male, "👦"),
+    FEMALE(R.string.gender_female, "👧")
+}
+
 data class AvatarConfig(
     val skinTone: Int = 0,
     val hairId: String = HairStyles.SHORT,
     val hairColor: Int = 0,
     val outfitId: String = Outfits.TEE,
-    val accessoryId: String = Accessories.NONE
+    val accessoryId: String = Accessories.NONE,
+    val gender: Gender = Gender.MALE,
+    val mood: Mood? = null
 )
 
 object HairStyles {

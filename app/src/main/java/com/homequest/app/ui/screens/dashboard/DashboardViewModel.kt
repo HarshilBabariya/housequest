@@ -8,6 +8,7 @@ import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.local.ProfileEntity
 import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.data.repository.AppSettings
+import com.homequest.app.data.repository.avatar
 import com.homequest.app.data.repository.byId
 import com.homequest.app.data.repository.resolve
 import com.homequest.app.domain.Category
@@ -52,6 +53,7 @@ data class DashboardState(
     val budgetProgress: Float get() = if (settings.monthlyBudget > 0) (monthTotal / settings.monthlyBudget).toFloat() else 0f
     val mood: Mood
         get() {
+            member?.avatar()?.mood?.let { return it }
             val today = Dates.today()
             val sinceLog = if (profile.lastLogEpochDay < 0) 0L else today.toEpochDay() - profile.lastLogEpochDay
             return moodFor(budgetProgress, settings.monthlyBudget > 0, profile.streakDays, sinceLog, LocalTime.now().hour, today.dayOfMonth)

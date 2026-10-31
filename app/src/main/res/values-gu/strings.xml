@@ -14,7 +14,6 @@
     <string name="all">બધા</string>
     <string name="manage">મેનેજ કરો</string>
     <string name="see_all">બધું જુઓ</string>
-    <string name="none">કંઈ નહીં</string>
     <string name="today">આજે</string>
     <string name="yesterday">ગઈકાલે</string>
     <string name="continue_">આગળ વધો</string>
@@ -496,12 +495,8 @@
     <string name="day_of_month">મહિનાનો દિવસ</string>
     <string name="category_optional">શ્રેણી (વૈકલ્પિક)</string>
     <string name="save_reminder">રિમાઇન્ડર સાચવો</string>
-    <string name="monthly_total">માસિક કુલ</string>
-    <string name="budget_for_month">મહિનાનું બજેટ</string>
     <string name="budget_boss_hint">મહિનો બજેટમાં પૂરો કરો અને +100 પોઇન્ટ તથા બજેટ બોસ બેજ મેળવો.</string>
     <string name="per_category">શ્રેણી પ્રમાણે</string>
-    <string name="limit">મર્યાદા</string>
-    <string name="spent_amount">%1$s ખર્ચ</string>
     <string name="spent_of">%2$sમાંથી %1$s</string>
     <string name="monthly_budget">માસિક બજેટ</string>
     <string name="insights_locked_title">એડવાન્સ્ડ ઇનસાઇટ્સ લૉક છે</string>
@@ -514,6 +509,17 @@
     <string name="up_vs_last">ગયા મહિના કરતાં %1$s%% વધુ</string>
     <string name="legend">સંકેત</string>
     <string name="share_amount">હિસ્સો</string>
+    <string name="gender">લિંગ</string>
+    <string name="gender_male">પુરુષ</string>
+    <string name="gender_female">સ્ત્રી</string>
+    <string name="mood_auto">ઓટો</string>
+    <string name="mood_auto_hint">મૂડ તમારા બજેટ અને સ્ટ્રીક પ્રમાણે બદલાય છે</string>
+    <string name="change_budget">બજેટ બદલો</string>
+    <string name="set_monthly_budget">માસિક બજેટ નક્કી કરો</string>
+    <string name="limit_for">%1$s માટે મર્યાદા</string>
+    <string name="tap_to_set_limit">મર્યાદા નક્કી કરવા ટેપ કરો</string>
+    <string name="remove_limit">મર્યાદા દૂર કરો</string>
+    <string name="amount">રકમ</string>
     <string-array name="notif_nudge_titles">
         <item>પીસ્ટ… 👀</item>
         <item>તમારા પાકીટનો ફોન આવ્યો 📞</item>
