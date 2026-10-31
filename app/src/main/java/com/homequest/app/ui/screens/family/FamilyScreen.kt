@@ -1,6 +1,7 @@
 package com.homequest.app.ui.screens.family
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -78,6 +79,7 @@ fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     var deleting by remember { mutableStateOf<MemberEntity?>(null) }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("Family members") },

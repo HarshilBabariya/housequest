@@ -1,5 +1,6 @@
 package com.homequest.app.ui.screens.expenses
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,7 @@ fun ExpensesScreen(onAddExpense: () -> Unit, onOpenExpense: (Long) -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { TopAppBar(title = { Text("Expenses") }) },
         floatingActionButton = { ExtendedFloatingActionButton(onClick = onAddExpense, icon = { Icon(Icons.Filled.Add, contentDescription = null) }, text = { Text("Add") }) }
     ) { padding ->

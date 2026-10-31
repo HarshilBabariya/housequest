@@ -1,5 +1,6 @@
 package com.homequest.app.ui.screens.profile
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -86,6 +87,7 @@ fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("Edit profile") },
@@ -96,7 +98,7 @@ fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
         Column(Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             member?.let { m ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                    AvatarView(m.avatar(), size = 120.dp, animated = true)
+                    AvatarView(m.avatar(), size = 120.dp)
                     OutlinedButton(onClick = { onOpenAvatar(m.id) }) { Text("Change look") }
                 }
             }

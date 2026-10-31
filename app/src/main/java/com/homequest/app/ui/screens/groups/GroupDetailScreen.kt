@@ -1,5 +1,6 @@
 package com.homequest.app.ui.screens.groups
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -55,6 +56,7 @@ fun GroupDetailScreen(groupId: Long, onBack: () -> Unit, onAddExpense: () -> Uni
     var editMembers by remember { mutableStateOf(false) }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(group?.let { "${it.group.emoji} ${it.group.name}" } ?: "Group") },

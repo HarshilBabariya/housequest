@@ -71,7 +71,7 @@
 
 **Levels** — XP-based (Rookie → Saver → Planner → Tracker → Strategist → Accountant → Treasurer → Guardian → Master → Legend). Level-ups trigger confetti, an in-app toast and a notification.
 
-**Badges (11)** — shown as a 3-column grid, earned first (newest at top, gradient ring, bonus points) then locked ones with a progress bar (e.g. 6/7 days). Tap any badge for an animated detail card: emblem pops in (spinning gradient ring when earned), progress, reward points, earned date, and a numbered "How to earn it" list. First step, Getting serious, Century, Week warrior, Month master, Team player, Fair share, Family first, Budget boss, Stylist, Collector.
+**Badges (11)** — one horizontally scrolling row, earned first (newest at top, gradient ring, bonus points) then locked ones with a progress bar (e.g. 6/7 days). Tap any badge for an animated detail card: emblem pops in (spinning gradient ring when earned), progress, reward points, earned date, and a numbered "How to earn it" list. First step, Getting serious, Century, Week warrior, Month master, Team player, Fair share, Family first, Budget boss, Stylist, Collector.
 
 **Shop** — spend points on:
 - 6 colour themes (Sunrise free; Ocean, Forest, Midnight, Candy, Royal). Applying a theme animates the whole UI's colours.

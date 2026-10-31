@@ -2,6 +2,7 @@ package com.homequest.app.ui.screens.groups
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -63,6 +64,7 @@ fun GroupsScreen(onOpenGroup: (Long) -> Unit) {
     var pendingDelete by remember { mutableStateOf<GroupEntity?>(null) }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { TopAppBar(title = { Text("Groups") }) },
         floatingActionButton = { ExtendedFloatingActionButton(onClick = { showCreate = true }, icon = { Icon(Icons.Filled.Add, contentDescription = null) }, text = { Text("New group") }) }
     ) { padding ->

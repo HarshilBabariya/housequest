@@ -15,11 +15,10 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -72,7 +72,7 @@ import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RewardsScreen(onOpenAvatar: (Long) -> Unit) {
     val vm = appViewModel { RewardsViewModel(it) }
@@ -87,6 +87,7 @@ fun RewardsScreen(onOpenAvatar: (Long) -> Unit) {
     selectedBadge?.let { BadgeDetailSheet(it, onDismiss = { selectedBadge = null }) }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { TopAppBar(title = { Text("Rewards") }) },
         snackbarHost = { SnackbarHost(snackbar) }
     ) { padding ->
@@ -113,13 +114,8 @@ fun RewardsScreen(onOpenAvatar: (Long) -> Unit) {
             item {
                 val earnedCount = state.badges.count { it.earned }
                 SectionHeader("Badges · $earnedCount/${state.badges.size}")
-                FlowRow(
-                    Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
-                    maxItemsInEachRow = 3,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    state.badges.forEach { status -> BadgeTile(status, Modifier.weight(1f)) { selectedBadge = status } }
+                LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    items(state.badges, key = { it.badge.id }) { status -> BadgeTile(status, Modifier.width(118.dp)) { selectedBadge = status } }
                 }
             }
             item {

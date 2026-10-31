@@ -3,6 +3,7 @@ package com.homequest.app.ui.screens.avatar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -114,6 +115,7 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
     var wave by remember { mutableIntStateOf(0) }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(if (state.memberName.isBlank()) "Avatar studio" else "${state.memberName}'s avatar") },

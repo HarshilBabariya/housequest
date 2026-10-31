@@ -85,7 +85,7 @@ fun ProfileScreen(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Box(Modifier.background(scheme.surfaceContainerLowest, CircleShape).padding(10.dp)) {
-                    member?.let { AvatarView(it.avatar(), size = 120.dp, animated = true) }
+                    member?.let { AvatarView(it.avatar(), size = 120.dp) }
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(member?.name.orEmpty(), style = MaterialTheme.typography.headlineMedium)
@@ -172,12 +172,12 @@ fun ProfileScreen(
             }
         }
         Text(
-            "HomeQuest 1.2.2 · everyone in the household shares one ledger and one points pool; each member has their own avatar, phone and PIN.",
+            "HomeQuest 1.2.3 · everyone in the household shares one ledger and one points pool; each member has their own avatar, phone and PIN.",
             style = MaterialTheme.typography.labelSmall,
             color = scheme.onSurfaceVariant,
             modifier = Modifier.padding(20.dp)
         )
-        Spacer(Modifier.height(80.dp))
+        Spacer(Modifier.height(16.dp))
     }
 
     if (setupPin) {

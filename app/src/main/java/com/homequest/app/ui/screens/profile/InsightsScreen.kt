@@ -1,5 +1,6 @@
 package com.homequest.app.ui.screens.profile
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -82,6 +83,7 @@ fun InsightsScreen(onBack: () -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("Insights") },
