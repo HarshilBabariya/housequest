@@ -8,6 +8,7 @@ import com.homequest.app.data.local.ProfileEntity
 import com.homequest.app.domain.BadgeStatus
 import com.homequest.app.domain.LevelInfo
 import com.homequest.app.domain.Levels
+import com.homequest.app.domain.PointPack
 import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.domain.RewardItem
 import com.homequest.app.domain.RewardKind
@@ -20,7 +21,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class RedeemMessage(val item: RewardItem, val missing: Int)
+sealed interface RewardsMessage {
+    data class Redeem(val item: RewardItem, val missing: Int) : RewardsMessage
+    data class Purchase(val pack: PointPack) : RewardsMessage
+    data object PaymentFailed : RewardsMessage
+    data object NoUpiApp : RewardsMessage
+}
 
 data class RewardsState(
     val profile: ProfileEntity = ProfileEntity(),
@@ -32,7 +38,7 @@ data class RewardsState(
     val activeThemeId: String = "",
     val ledger: List<PointsLedgerEntity> = emptyList(),
     val ownerId: Long = 0,
-    val lastMessage: RedeemMessage? = null
+    val lastMessage: RewardsMessage? = null
 )
 
 fun Flow<List<BadgeStatus>>.sortedForDisplay(): Flow<List<BadgeStatus>> = map { list ->
@@ -41,7 +47,7 @@ fun Flow<List<BadgeStatus>>.sortedForDisplay(): Flow<List<BadgeStatus>> = map { 
 
 class RewardsViewModel(private val container: AppContainer) : ViewModel() {
     private val kind = MutableStateFlow(RewardKind.THEME)
-    private val message = MutableStateFlow<RedeemMessage?>(null)
+    private val message = MutableStateFlow<RewardsMessage?>(null)
     private val gamification = container.gamificationRepository
 
     private val meta = combine(kind, message, container.memberRepository.activeMember, container.settingsRepository.settings) { k, m, owner, s ->
@@ -75,12 +81,20 @@ class RewardsViewModel(private val container: AppContainer) : ViewModel() {
 
     fun redeem(item: RewardItem) = viewModelScope.launch {
         val ok = gamification.redeem(item)
-        message.value = RedeemMessage(item, if (ok) 0 else item.cost - state.value.profile.points)
+        message.value = RewardsMessage.Redeem(item, if (ok) 0 else item.cost - state.value.profile.points)
         if (ok && item.kind == RewardKind.THEME) container.settingsRepository.setTheme(item.id)
         if (ok) container.badgeTracker.refresh()
     }
 
+    fun creditPurchase(pack: PointPack) = viewModelScope.launch {
+        gamification.creditPurchase(pack)
+        message.value = RewardsMessage.Purchase(pack)
+        container.badgeTracker.refresh()
+    }
+
+    fun notify(value: RewardsMessage) { message.value = value }
+
     fun applyTheme(themeId: String) = viewModelScope.launch { container.settingsRepository.setTheme(themeId) }
 
-    private data class Meta(val kind: RewardKind, val message: RedeemMessage?, val ownerId: Long, val themeId: String)
+    private data class Meta(val kind: RewardKind, val message: RewardsMessage?, val ownerId: Long, val themeId: String)
 }

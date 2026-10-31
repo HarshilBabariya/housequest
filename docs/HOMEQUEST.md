@@ -96,7 +96,7 @@ Badge list: First step (1 expense), Getting serious (10), Century (100), Half a 
 
 The Rewards hero card has a slow light sweep and a bobbing star; shop rows animate when the filter changes.
 
-**Shop** — spend points on 6 colour themes, avatar outfits, hair styles and accessories, and two features (Advanced Insights, CSV export). Points history is listed at the bottom of Rewards. Rewards opens from the Home pill or Me → Rewards.
+**Shop** — spend points on 6 colour themes, avatar outfits, hair styles and accessories, and two features (Advanced Insights, CSV export). **Top up with UPI (trial)** — three point packs (₹49 → 500, ₹99 → 1,200, ₹199 → 3,000) under the shop. Tapping one opens the system chooser with a `upi://pay` deep link to the configured UPI id (no SDK, no backend). If the UPI app returns `Status=SUCCESS` the points are credited at once; `FAILURE` shows an error; anything else (most apps return nothing useful) asks "Did the payment go through?" and credits on the user's word. Bought points go through the normal ledger (`purchase:<pack>`) and count toward levels. Points history is listed at the bottom of Rewards. Rewards opens from the Home pill or Me → Rewards.
 
 ### Reminders & bills
 - Repeat Once / Daily / Weekly (weekday) / Monthly (day of month) / Yearly (month + day); quick presets for rent, EMI, electricity, insurance, school fees and a daily nudge.
@@ -219,12 +219,13 @@ All user-facing text is in `res/values/strings.xml` (English, the source of trut
 - Local-only; no sync, auth or multi-device sharing (group sharing is via text summary). Giving a member access from another phone needs a backend (e.g. Firebase phone auth + Firestore) — a separate project.
 - Expenses store a single currency symbol globally; no FX.
 - Voice parsing is keyword based; amounts spoken as words ("two hundred") are not recognised.
-- Points/features cannot be bought with real money; a UPI deep link (`upi://pay?pa=<id>&pn=<name>&am=<amount>`) would open any UPI app without a library, but the app has no way to confirm the payment succeeded — that needs a payment gateway (Razorpay, Cashfree, PhonePe PG) with server-side verification.
+- UPI top-up is trust-based: `util/Upi.kt` builds the deep link (`Upi.ID`, amount, note) and parses the optional `response` extra, but there is no way to prove a payment happened without a payment gateway (Razorpay, Cashfree, PhonePe PG) and server-side verification. Treat it as a demo, not a store. The manifest declares a `<queries>` entry for the `upi` scheme so the chooser can see UPI apps on Android 11+.
 - No unit tests yet; `SplitCalculator`, `Levels` and `GamificationRepository` are the first candidates.
 
 ## 5. Release history
 | Version | Date | Notes |
 |---|---|---|
+| 1.4.1 | 2026-11-01 | UPI top-up trial on Rewards: point packs open any UPI app via deep link, credited on SUCCESS or user confirmation; `purchase` ledger reason |
 | 1.4.0 | 2026-10-31 | 33 badges (easy + hard, worth more than the whole shop) with a snapshot-based engine that awards retroactively (DB v5), Badges page + animated Rewards; add/remove member asks whether to re-split past group expenses; Paid by and payment mode inline in the add form; form sheets no longer close on scroll; month/week figures roll over at midnight; launch/logout flicker removed; launcher icon fits the safe zone; budget amounts centred beside the chevron |
 | 1.3.2 | 2026-10-31 | Sample-data switch removed; docs consolidated into docs/HOMEQUEST.md |
 | 1.3.1 | 2026-10-31 | Fix: add/voice screens crashed (ActivityResult launcher could not find the Activity through the localised context); new launcher icon; equal badge tile heights; male/female option per member (DB v4) with gender-aware avatar; mood chosen in the studio is saved and shown everywhere (Auto = budget-driven); budgets redesigned with a hero ring and tap-to-edit limit sheets |

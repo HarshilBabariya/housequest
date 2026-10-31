@@ -649,6 +649,20 @@
     <string name="badges_easy">Easy · %1$d</string>
     <string name="badges_hard">Hard · %1$d</string>
     <string name="badge_points_total">%1$d pts</string>
+    <string name="topup_title">Top up with UPI</string>
+    <string name="topup_sub">Trial: pay with any UPI app. Payments can\'t be verified automatically yet, so points are added on your confirmation.</string>
+    <string name="pack_points">%1$d pts</string>
+    <string name="pack_price">₹%1$d</string>
+    <string name="upi_to">Pays to %1$s</string>
+    <string name="upi_note">HomeQuest points</string>
+    <string name="upi_confirm_q">Did the payment go through?</string>
+    <string name="upi_confirm_body">Confirm only if your UPI app shows the payment as successful.</string>
+    <string name="upi_paid">Yes, I paid</string>
+    <string name="upi_not_paid">No</string>
+    <string name="upi_failed">Payment didn\'t go through</string>
+    <string name="upi_no_app">No UPI app found on this phone</string>
+    <string name="purchase_msg">+%1$d points added. Thank you!</string>
+    <string name="reason_purchase">Bought points (₹%1$d)</string>
     <string-array name="notif_nudge_titles">
         <item>Psst… 👀</item>
         <item>Your wallet called 📞</item>

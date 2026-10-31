@@ -43,6 +43,7 @@ import com.homequest.app.R
 import com.homequest.app.data.repository.RewardEvent
 import com.homequest.app.domain.BadgeCatalog
 import com.homequest.app.domain.LedgerReasons
+import com.homequest.app.domain.PointPacks
 import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.util.money
 import kotlin.math.cos
@@ -142,6 +143,7 @@ fun reasonLabel(reason: String): String {
         LedgerReasons.BUDGET -> stringResource(R.string.reason_budget, arg)
         LedgerReasons.BADGE -> stringResource(R.string.reason_badge, BadgeCatalog.find(arg)?.let { stringResource(it.nameRes) } ?: arg)
         LedgerReasons.UNLOCK -> stringResource(R.string.reason_unlock, RewardCatalog.find(arg)?.let { stringResource(it.nameRes) } ?: arg)
+        LedgerReasons.PURCHASE -> stringResource(R.string.reason_purchase, PointPacks.find(arg)?.rupees ?: 0)
         else -> reason
     }
 }

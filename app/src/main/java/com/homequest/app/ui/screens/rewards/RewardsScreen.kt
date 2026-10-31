@@ -1,5 +1,8 @@
 package com.homequest.app.ui.screens.rewards
 
+import android.content.ActivityNotFoundException
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -31,6 +34,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -42,6 +46,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,13 +69,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homequest.app.R
 import com.homequest.app.domain.BadgeStatus
+import com.homequest.app.domain.PointPack
+import com.homequest.app.domain.PointPacks
 import com.homequest.app.domain.RewardItem
 import com.homequest.app.domain.RewardKind
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AnimatedCount
+import com.homequest.app.ui.components.HqCard
 import com.homequest.app.ui.components.SectionHeader
 import com.homequest.app.ui.components.reasonLabel
 import com.homequest.app.ui.theme.Palettes
+import com.homequest.app.util.Upi
+import com.homequest.app.util.UpiResult
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,17 +90,43 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges
     val state by vm.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var selectedBadge by remember { mutableStateOf<BadgeStatus?>(null) }
-    val message = state.lastMessage
-    val messageText = message?.let {
-        val name = stringResource(it.item.nameRes)
-        if (it.missing <= 0) stringResource(R.string.unlocked_msg, it.item.emoji, name) else stringResource(R.string.need_more_points, it.missing, name)
+    val messageText = when (val m = state.lastMessage) {
+        is RewardsMessage.Redeem -> {
+            val name = stringResource(m.item.nameRes)
+            if (m.missing <= 0) stringResource(R.string.unlocked_msg, m.item.emoji, name) else stringResource(R.string.need_more_points, m.missing, name)
+        }
+        is RewardsMessage.Purchase -> stringResource(R.string.purchase_msg, m.pack.points)
+        RewardsMessage.PaymentFailed -> stringResource(R.string.upi_failed)
+        RewardsMessage.NoUpiApp -> stringResource(R.string.upi_no_app)
+        null -> null
     }
+    var paying by remember { mutableStateOf<PointPack?>(null) }
+    var confirming by remember { mutableStateOf<PointPack?>(null) }
+    val payLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val pack = paying ?: return@rememberLauncherForActivityResult
+        paying = null
+        when (Upi.result(result.data)) {
+            UpiResult.SUCCESS -> vm.creditPurchase(pack)
+            UpiResult.FAILED -> vm.notify(RewardsMessage.PaymentFailed)
+            UpiResult.UNKNOWN -> confirming = pack
+        }
+    }
+    val packNote = stringResource(R.string.upi_note)
 
     LaunchedEffect(messageText) {
         messageText?.let { snackbar.showSnackbar(it); vm.clearMessage() }
     }
 
     selectedBadge?.let { BadgeDetailSheet(it, onDismiss = { selectedBadge = null }) }
+    confirming?.let { pack ->
+        AlertDialog(
+            onDismissRequest = { confirming = null },
+            title = { Text(stringResource(R.string.upi_confirm_q)) },
+            text = { Text(stringResource(R.string.upi_confirm_body)) },
+            confirmButton = { TextButton(onClick = { vm.creditPurchase(pack); confirming = null }) { Text(stringResource(R.string.upi_paid)) } },
+            dismissButton = { TextButton(onClick = { confirming = null }) { Text(stringResource(R.string.upi_not_paid)) } }
+        )
+    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -167,6 +203,26 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges
                     }
                 )
             }
+            item {
+                SectionHeader(stringResource(R.string.topup_title))
+                HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
+                    Text(stringResource(R.string.topup_sub), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        PointPacks.packs.forEach { pack ->
+                            PackTile(pack, Modifier.weight(1f)) {
+                                paying = pack
+                                try {
+                                    payLauncher.launch(Upi.payIntent(pack.rupees, packNote))
+                                } catch (e: ActivityNotFoundException) {
+                                    paying = null
+                                    vm.notify(RewardsMessage.NoUpiApp)
+                                }
+                            }
+                        }
+                    }
+                    Text(stringResource(R.string.upi_to, Upi.ID), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 10.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
             item { SectionHeader(stringResource(R.string.points_history)) }
             items(state.ledger, key = { "led_${it.id}" }) { entry ->
                 Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) {
@@ -179,6 +235,22 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PackTile(pack: PointPack, modifier: Modifier, onClick: () -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    Column(
+        modifier
+            .background(scheme.primaryContainer.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+            .border(1.dp, scheme.primary.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(stringResource(R.string.pack_points, pack.points), style = MaterialTheme.typography.titleMedium, color = scheme.primary, maxLines = 1)
+        Text(stringResource(R.string.pack_price, pack.rupees), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 2.dp), maxLines = 1)
     }
 }
 

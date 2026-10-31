@@ -14,6 +14,13 @@ data class RewardItem(
     val isFree: Boolean get() = cost == 0
 }
 
+data class PointPack(val id: String, val rupees: Int, val points: Int)
+
+object PointPacks {
+    val packs = listOf(PointPack("pack_s", 49, 500), PointPack("pack_m", 99, 1200), PointPack("pack_l", 199, 3000))
+    fun find(id: String): PointPack? = packs.firstOrNull { it.id == id }
+}
+
 object RewardCatalog {
     val items: List<RewardItem> = listOf(
         RewardItem(ThemeIds.SUNRISE, RewardKind.THEME, R.string.rw_sunrise, R.string.rw_sunrise_d, 0, "🌅"),

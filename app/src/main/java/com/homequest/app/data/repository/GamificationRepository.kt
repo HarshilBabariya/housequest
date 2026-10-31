@@ -10,6 +10,7 @@ import com.homequest.app.domain.BadgeCatalog
 import com.homequest.app.domain.BadgeSnapshot
 import com.homequest.app.domain.LedgerReasons
 import com.homequest.app.domain.Levels
+import com.homequest.app.domain.PointPack
 import com.homequest.app.domain.PointsRules
 import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.domain.RewardItem
@@ -78,6 +79,8 @@ class GamificationRepository(private val dao: GamificationDao) {
     suspend fun recordSettlement() = award(PointsRules.SETTLE_UP, LedgerReasons.SETTLE)
 
     suspend fun recordMemberAdded() = award(PointsRules.ADD_MEMBER, LedgerReasons.MEMBER)
+
+    suspend fun creditPurchase(pack: PointPack) = award(pack.points, LedgerReasons.encode(LedgerReasons.PURCHASE, pack.id))
 
     suspend fun recordMonthUnderBudget(monthKey: String) {
         val profile = dao.profile() ?: ProfileEntity()

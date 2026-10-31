@@ -65,7 +65,7 @@ data class DashboardState(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DashboardViewModel(container: AppContainer) : ViewModel() {
+class DashboardViewModel(private val container: AppContainer) : ViewModel() {
     private val expenses = container.expenseRepository
     private val groups = container.groupRepository
     private val spend = Dates.days().flatMapLatest { today -> spendOn(today) }

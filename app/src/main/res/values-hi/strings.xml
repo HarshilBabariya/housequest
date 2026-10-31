@@ -649,6 +649,20 @@
     <string name="badges_easy">आसान · %1$d</string>
     <string name="badges_hard">कठिन · %1$d</string>
     <string name="badge_points_total">%1$d पॉइंट</string>
+    <string name="topup_title">UPI से पॉइंट भरें</string>
+    <string name="topup_sub">ट्रायल: किसी भी UPI ऐप से भुगतान करें। भुगतान अभी अपने-आप सत्यापित नहीं होता, इसलिए पॉइंट आपकी पुष्टि पर जुड़ते हैं।</string>
+    <string name="pack_points">%1$d पॉइंट</string>
+    <string name="pack_price">₹%1$d</string>
+    <string name="upi_to">भुगतान %1$s को</string>
+    <string name="upi_note">HomeQuest पॉइंट</string>
+    <string name="upi_confirm_q">क्या भुगतान हो गया?</string>
+    <string name="upi_confirm_body">तभी पुष्टि करें जब आपका UPI ऐप भुगतान सफल दिखाए।</string>
+    <string name="upi_paid">हाँ, भुगतान किया</string>
+    <string name="upi_not_paid">नहीं</string>
+    <string name="upi_failed">भुगतान नहीं हो पाया</string>
+    <string name="upi_no_app">इस फ़ोन पर कोई UPI ऐप नहीं मिला</string>
+    <string name="purchase_msg">+%1$d पॉइंट जुड़ गए। धन्यवाद!</string>
+    <string name="reason_purchase">पॉइंट खरीदे (₹%1$d)</string>
     <string-array name="notif_nudge_titles">
         <item>पीएसटी… 👀</item>
         <item>आपके बटुए का फ़ोन आया 📞</item>

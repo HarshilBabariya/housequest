@@ -26,6 +26,7 @@ object LedgerReasons {
     const val BUDGET = "budget"
     const val BADGE = "badge"
     const val UNLOCK = "unlock"
+    const val PURCHASE = "purchase"
 
     fun encode(kind: String, arg: String = ""): String = if (arg.isEmpty()) kind else "$kind:$arg"
     fun kind(reason: String): String = reason.substringBefore(':')

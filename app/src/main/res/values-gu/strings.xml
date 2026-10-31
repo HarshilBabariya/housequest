@@ -649,6 +649,20 @@
     <string name="badges_easy">સરળ · %1$d</string>
     <string name="badges_hard">અઘરા · %1$d</string>
     <string name="badge_points_total">%1$d પૉઇન્ટ</string>
+    <string name="topup_title">UPIથી પૉઇન્ટ ભરો</string>
+    <string name="topup_sub">ટ્રાયલ: કોઈ પણ UPI ઍપથી ચૂકવો. ચુકવણી હજી આપમેળે ચકાસાતી નથી, એટલે પૉઇન્ટ તમારી ખાતરી પર ઉમેરાય છે.</string>
+    <string name="pack_points">%1$d પૉઇન્ટ</string>
+    <string name="pack_price">₹%1$d</string>
+    <string name="upi_to">ચુકવણી %1$sને</string>
+    <string name="upi_note">HomeQuest પૉઇન્ટ</string>
+    <string name="upi_confirm_q">શું ચુકવણી થઈ ગઈ?</string>
+    <string name="upi_confirm_body">તમારી UPI ઍપ ચુકવણી સફળ બતાવે તો જ ખાતરી કરો.</string>
+    <string name="upi_paid">હા, ચૂકવ્યું</string>
+    <string name="upi_not_paid">ના</string>
+    <string name="upi_failed">ચુકવણી થઈ શકી નહીં</string>
+    <string name="upi_no_app">આ ફોનમાં કોઈ UPI ઍપ મળી નહીં</string>
+    <string name="purchase_msg">+%1$d પૉઇન્ટ ઉમેરાયા. આભાર!</string>
+    <string name="reason_purchase">પૉઇન્ટ ખરીદ્યા (₹%1$d)</string>
     <string-array name="notif_nudge_titles">
         <item>પીસ્ટ… 👀</item>
         <item>તમારા પાકીટનો ફોન આવ્યો 📞</item>
