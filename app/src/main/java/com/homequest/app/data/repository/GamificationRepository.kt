@@ -7,12 +7,12 @@ import com.homequest.app.data.local.ProfileEntity
 import com.homequest.app.data.local.UnlockEntity
 import com.homequest.app.domain.Badge
 import com.homequest.app.domain.BadgeCatalog
+import com.homequest.app.domain.BadgeSnapshot
 import com.homequest.app.domain.LedgerReasons
 import com.homequest.app.domain.Levels
 import com.homequest.app.domain.PointsRules
 import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.domain.RewardItem
-import com.homequest.app.domain.RewardKind
 import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -53,7 +53,7 @@ class GamificationRepository(private val dao: GamificationDao) {
         if (levelAfter.level > levelBefore.level) _events.tryEmit(RewardEvent.LevelUp(levelAfter.level, levelAfter.titleRes))
     }
 
-    suspend fun recordExpenseLogged(today: LocalDate, totalExpenses: Int) {
+    suspend fun recordExpenseLogged(today: LocalDate) {
         val profile = dao.profile() ?: ProfileEntity()
         val todayDay = today.toEpochDay()
         var points = PointsRules.LOG_EXPENSE
@@ -66,34 +66,24 @@ class GamificationRepository(private val dao: GamificationDao) {
             if (streak > 1) _events.tryEmit(RewardEvent.StreakExtended(streak))
         }
         award(points, LedgerReasons.LOG_EXPENSE)
-        if (totalExpenses >= 1) grantBadge(BadgeCatalog.FIRST_STEP)
-        if (totalExpenses >= 10) grantBadge(BadgeCatalog.TEN_LOGGED)
-        if (totalExpenses >= 100) grantBadge(BadgeCatalog.CENTURY)
-        if (streak >= 7) grantBadge(BadgeCatalog.WEEK_WARRIOR)
-        if (streak >= 30) grantBadge(BadgeCatalog.MONTH_MASTER)
     }
 
-    suspend fun recordGroupCreated() {
-        award(PointsRules.CREATE_GROUP, LedgerReasons.GROUP)
-        grantBadge(BadgeCatalog.TEAM_PLAYER)
+    suspend fun recordVoiceLog() {
+        val profile = dao.profile() ?: ProfileEntity()
+        dao.upsertProfile(profile.copy(voiceLogs = profile.voiceLogs + 1))
     }
 
-    suspend fun recordSettlement() {
-        award(PointsRules.SETTLE_UP, LedgerReasons.SETTLE)
-        grantBadge(BadgeCatalog.FAIR_SHARE)
-    }
+    suspend fun recordGroupCreated() = award(PointsRules.CREATE_GROUP, LedgerReasons.GROUP)
 
-    suspend fun recordMemberAdded(memberCount: Int) {
-        award(PointsRules.ADD_MEMBER, LedgerReasons.MEMBER)
-        if (memberCount >= 3) grantBadge(BadgeCatalog.FAMILY_FIRST)
-    }
+    suspend fun recordSettlement() = award(PointsRules.SETTLE_UP, LedgerReasons.SETTLE)
+
+    suspend fun recordMemberAdded() = award(PointsRules.ADD_MEMBER, LedgerReasons.MEMBER)
 
     suspend fun recordMonthUnderBudget(monthKey: String) {
         val profile = dao.profile() ?: ProfileEntity()
         if (profile.lastBudgetCheckMonth == monthKey) return
         dao.upsertProfile(profile.copy(lastBudgetCheckMonth = monthKey))
         award(PointsRules.MONTH_UNDER_BUDGET, LedgerReasons.encode(LedgerReasons.BUDGET, monthKey))
-        grantBadge(BadgeCatalog.BUDGET_BOSS)
     }
 
     suspend fun markBudgetMonthChecked(monthKey: String) {
@@ -108,16 +98,15 @@ class GamificationRepository(private val dao: GamificationDao) {
         dao.upsertProfile(profile.copy(points = profile.points - item.cost))
         dao.insertLedger(PointsLedgerEntity(delta = -item.cost, reason = LedgerReasons.encode(LedgerReasons.UNLOCK, item.id)))
         dao.insertUnlocks(listOf(UnlockEntity(item.id)))
-        if (item.kind == RewardKind.OUTFIT) grantBadge(BadgeCatalog.STYLIST)
-        if (dao.paidUnlockCount(RewardCatalog.defaults()) >= 5) grantBadge(BadgeCatalog.COLLECTOR)
         return true
     }
 
-    private suspend fun grantBadge(badgeId: String) {
-        if (dao.hasBadge(badgeId)) return
-        val badge = BadgeCatalog.find(badgeId) ?: return
-        dao.insertBadge(EarnedBadgeEntity(badgeId))
-        award(badge.bonusPoints, LedgerReasons.encode(LedgerReasons.BADGE, badge.id))
-        _events.tryEmit(RewardEvent.BadgeEarned(badge))
+    suspend fun checkBadges(snapshot: BadgeSnapshot) {
+        BadgeCatalog.badges.forEach { badge ->
+            if (BadgeCatalog.progress(badge.id, snapshot) >= badge.target && dao.insertBadge(EarnedBadgeEntity(badge.id)) != -1L) {
+                award(badge.bonusPoints, LedgerReasons.encode(LedgerReasons.BADGE, badge.id))
+                _events.tryEmit(RewardEvent.BadgeEarned(badge))
+            }
+        }
     }
 }

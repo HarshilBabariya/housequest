@@ -57,6 +57,7 @@ import com.homequest.app.ui.screens.profile.BudgetsScreen
 import com.homequest.app.ui.screens.profile.InsightsScreen
 import com.homequest.app.ui.screens.profile.ProfileScreen
 import com.homequest.app.ui.screens.reminders.RemindersScreen
+import com.homequest.app.ui.screens.rewards.BadgesScreen
 import com.homequest.app.ui.screens.rewards.RewardsScreen
 
 @Composable
@@ -110,8 +111,9 @@ fun HomeQuestNavHost(onSignOut: () -> Unit) {
                 GroupsScreen(onOpenGroup = { navController.navigate(Routes.groupDetail(it)) })
             }
             composable(Routes.REWARDS) {
-                RewardsScreen(onBack = { navController.popBackStack() }, onOpenAvatar = { navController.navigate(Routes.avatar(it)) })
+                RewardsScreen(onBack = { navController.popBackStack() }, onOpenAvatar = { navController.navigate(Routes.avatar(it)) }, onOpenBadges = { navController.navigate(Routes.BADGES) })
             }
+            composable(Routes.BADGES) { BadgesScreen(onBack = { navController.popBackStack() }) }
             composable(Routes.PROFILE) {
                 ProfileScreen(
                     onSignOut = onSignOut,

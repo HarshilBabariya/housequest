@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,10 +34,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
@@ -49,6 +51,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -92,7 +95,7 @@ import java.time.ZoneOffset
 import java.util.Locale
 import kotlin.math.abs
 
-private enum class Sheet { CATEGORY, PAYMENT, PAID_BY, GROUP }
+private enum class Sheet { CATEGORY, GROUP }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,12 +107,13 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
     var showDatePicker by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     var sheet by remember { mutableStateOf<Sheet?>(null) }
+    var voiceMessage by remember { mutableStateOf<String?>(null) }
     val voiceUnavailable = stringResource(R.string.voice_unavailable)
     val voicePrompt = stringResource(R.string.voice_prompt)
     val locale = Locale.getDefault().let { if (it.country.isEmpty()) "${it.language}-IN" else it.toLanguageTag() }
 
     val voiceLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { vm.applyVoice(it) }
+        result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { voiceMessage = null; vm.applyVoice(it) }
     }
     val startVoice = {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
@@ -119,7 +123,7 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
         try {
             voiceLauncher.launch(intent)
         } catch (e: ActivityNotFoundException) {
-            vm.update { copy(heardText = voiceUnavailable) }
+            voiceMessage = voiceUnavailable
         }
     }
     LaunchedEffect(Unit) { if (startWithVoice && expenseId == 0L) startVoice() }
@@ -155,7 +159,7 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
                 Icon(Icons.Filled.Mic, contentDescription = null, tint = scheme.tertiary)
                 Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
                     Text(stringResource(R.string.voice_title), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(form.heardText?.let { "“$it”" } ?: stringResource(R.string.voice_subtitle), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(voiceMessage ?: form.heardText?.let { "“$it”" } ?: stringResource(R.string.voice_subtitle), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
             }
@@ -184,6 +188,31 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
 
             HqTextField(form.title, { v -> vm.update { copy(title = v) } }, stringResource(R.string.what_for), placeholder = stringResource(R.string.what_for_hint))
 
+            HqCard {
+                Text(stringResource(R.string.paid_by), style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant)
+                LazyRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(state.members, key = { it.id }) { m -> MemberChip(m, selected = form.paidByMemberId == m.id) { vm.update { copy(paidByMemberId = m.id) } } }
+                }
+                Text(stringResource(R.string.payment_mode), style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant, modifier = Modifier.padding(top = 14.dp))
+                Row(Modifier.padding(top = 8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PaymentMode.entries.forEach { mode ->
+                        val selected = form.paymentMode == mode
+                        Column(
+                            Modifier
+                                .weight(1f)
+                                .background(if (selected) scheme.primaryContainer else scheme.surfaceContainerHigh, RoundedCornerShape(14.dp))
+                                .border(1.5.dp, if (selected) scheme.primary else Color.Transparent, RoundedCornerShape(14.dp))
+                                .clickable { vm.update { copy(paymentMode = mode) } }
+                                .padding(vertical = 10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(mode.icon, contentDescription = null, tint = if (selected) scheme.primary else scheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
+                            Text(stringResource(mode.labelRes), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp), color = if (selected) scheme.onPrimaryContainer else scheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+
             val today = LocalDate.now()
             HqCard(padding = 0) {
                 PickerRow(
@@ -197,13 +226,6 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
                     onClick = { showDatePicker = true }
                 )
                 PickerRow(icon = state.category.icon, tint = state.category.color, label = stringResource(R.string.category), value = state.category.label(), onClick = { sheet = Sheet.CATEGORY })
-                PickerRow(icon = form.paymentMode.icon, label = stringResource(R.string.payment_mode), value = stringResource(form.paymentMode.labelRes), onClick = { sheet = Sheet.PAYMENT })
-                PickerRow(
-                    icon = Icons.Filled.Person,
-                    label = stringResource(R.string.paid_by),
-                    value = state.members.firstOrNull { it.id == form.paidByMemberId }?.name ?: "—",
-                    onClick = { sheet = Sheet.PAID_BY }
-                )
                 PickerRow(
                     icon = Icons.Filled.Groups,
                     label = stringResource(R.string.split_with_group),
@@ -270,21 +292,6 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
             CategoryGrid(state.categories, form.categoryId) { vm.update { copy(categoryId = it) }; sheet = null }
             TextButton(onClick = { sheet = null; onOpenCategories() }, modifier = Modifier.padding(top = 8.dp)) { Text(stringResource(R.string.manage_categories)) }
         }
-        Sheet.PAYMENT -> OptionSheet(stringResource(R.string.payment_mode), onDismiss = { sheet = null }) {
-            PaymentMode.entries.forEach { mode ->
-                Row(
-                    Modifier.fillMaxWidth().clickable { vm.update { copy(paymentMode = mode) }; sheet = null }.padding(vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(mode.icon, contentDescription = null, tint = if (mode == form.paymentMode) scheme.primary else scheme.onSurfaceVariant)
-                    Text(stringResource(mode.labelRes), Modifier.weight(1f).padding(start = 14.dp), style = MaterialTheme.typography.bodyLarge)
-                    if (mode == form.paymentMode) Text("✓", color = scheme.primary, style = MaterialTheme.typography.titleMedium)
-                }
-            }
-        }
-        Sheet.PAID_BY -> OptionSheet(stringResource(R.string.paid_by), onDismiss = { sheet = null }) {
-            MemberFlow(state.members, form.paidByMemberId) { vm.update { copy(paidByMemberId = it) }; sheet = null }
-        }
         Sheet.GROUP -> OptionSheet(stringResource(R.string.split_with_group), onDismiss = { sheet = null }) {
             MemberFlowChips {
                 FilterChip(selected = form.groupId == null, onClick = { vm.selectGroup(null); sheet = null }, label = { Text(stringResource(R.string.not_shared)) })
@@ -324,10 +331,14 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OptionSheet(title: String, onDismiss: () -> Unit, content: @Composable () -> Unit) {
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+fun OptionSheet(title: String, onDismiss: () -> Unit, dismissByDrag: Boolean = true, content: @Composable () -> Unit) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true, confirmValueChange = { dismissByDrag || it != SheetValue.Hidden })
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 28.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 12.dp))
+            Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (!dismissByDrag) IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel)) }
+            }
             content()
         }
     }
@@ -337,11 +348,6 @@ fun OptionSheet(title: String, onDismiss: () -> Unit, content: @Composable () ->
 @Composable
 fun MemberFlowChips(content: @Composable () -> Unit) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
-}
-
-@Composable
-fun MemberFlow(members: List<MemberEntity>, selectedId: Long, onSelect: (Long) -> Unit) {
-    MemberFlowChips { members.forEach { m -> MemberChip(m, selected = m.id == selectedId) { onSelect(m.id) } } }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

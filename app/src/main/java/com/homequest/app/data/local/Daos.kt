@@ -88,11 +88,8 @@ interface ExpenseDao {
     )
     fun observeMonthCategoryTotals(fromDay: Long): Flow<List<MonthCategoryTotal>>
 
-    @Query("SELECT COUNT(*) FROM expenses")
-    suspend fun count(): Int
-
-    @Query("SELECT COUNT(*) FROM expenses WHERE epochDay = :epochDay")
-    suspend fun countOnDay(epochDay: Long): Int
+    @Query("SELECT * FROM expenses")
+    suspend fun all(): List<ExpenseEntity>
 
     @Query("SELECT * FROM expense_splits WHERE expenseId IN (SELECT id FROM expenses WHERE groupId = :groupId)")
     fun observeSplitsForGroup(groupId: Long): Flow<List<ExpenseSplitEntity>>
@@ -150,6 +147,12 @@ interface GroupDao {
     @Query("SELECT * FROM settlements")
     fun observeAllSettlements(): Flow<List<SettlementEntity>>
 
+    @Query("SELECT COUNT(*) FROM `groups`")
+    suspend fun count(): Int
+
+    @Query("SELECT COUNT(*) FROM settlements")
+    suspend fun settlementCount(): Int
+
     @Insert
     suspend fun insert(group: GroupEntity): Long
 
@@ -186,6 +189,9 @@ interface ReminderDao {
 
     @Query("SELECT * FROM reminders WHERE enabled = 1")
     suspend fun allEnabled(): List<ReminderEntity>
+
+    @Query("SELECT COUNT(*) FROM reminders")
+    suspend fun count(): Int
 
     @Query("SELECT * FROM reminders WHERE id = :id")
     suspend fun byId(id: Long): ReminderEntity?
@@ -229,8 +235,14 @@ interface GamificationDao {
     @Query("SELECT * FROM unlocks")
     fun observeUnlocks(): Flow<List<UnlockEntity>>
 
-    @Query("SELECT COUNT(*) FROM unlocks WHERE itemId NOT IN (:freeIds)")
-    suspend fun paidUnlockCount(freeIds: List<String>): Int
+    @Query("SELECT itemId FROM unlocks")
+    suspend fun unlockedIds(): List<String>
+
+    @Query("SELECT COUNT(*) FROM points_ledger WHERE reason LIKE 'budget:%'")
+    suspend fun budgetMonths(): Int
+
+    @Query("SELECT COUNT(*) FROM points_ledger WHERE reason LIKE 'budget:%'")
+    fun observeBudgetMonths(): Flow<Int>
 
     @Query("SELECT EXISTS(SELECT 1 FROM unlocks WHERE itemId = :itemId)")
     suspend fun isUnlocked(itemId: String): Boolean
@@ -241,11 +253,8 @@ interface GamificationDao {
     @Query("SELECT * FROM earned_badges ORDER BY earnedAt DESC")
     fun observeBadges(): Flow<List<EarnedBadgeEntity>>
 
-    @Query("SELECT EXISTS(SELECT 1 FROM earned_badges WHERE badgeId = :badgeId)")
-    suspend fun hasBadge(badgeId: String): Boolean
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertBadge(badge: EarnedBadgeEntity)
+    suspend fun insertBadge(badge: EarnedBadgeEntity): Long
 
     @Query("SELECT * FROM points_ledger ORDER BY at DESC LIMIT :limit")
     fun observeLedger(limit: Int): Flow<List<PointsLedgerEntity>>

@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.Flow
 
 class ReminderRepository(
     private val dao: ReminderDao,
-    private val scheduler: ReminderScheduler
+    private val scheduler: ReminderScheduler,
+    private val badges: BadgeTracker
 ) {
     val reminders: Flow<List<ReminderEntity>> = dao.observeAll()
 
@@ -18,6 +19,7 @@ class ReminderRepository(
         val titled = reminder.copy(title = reminder.title.titleCased())
         val saved = if (titled.id == 0L) titled.copy(id = dao.insert(titled)) else { dao.update(titled); titled }
         scheduler.schedule(saved)
+        badges.refresh()
     }
 
     suspend fun rescheduleAll() = dao.allEnabled().forEach { scheduler.schedule(it) }

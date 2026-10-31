@@ -68,6 +68,8 @@ object RewardCatalog {
     fun find(id: String): RewardItem? = byId[id]
 }
 
+enum class BadgeTier { EASY, HARD }
+
 data class Badge(
     val id: String,
     @StringRes val nameRes: Int,
@@ -76,48 +78,171 @@ data class Badge(
     val bonusPoints: Int,
     val target: Int,
     @StringRes val unitRes: Int,
+    val tier: BadgeTier,
     val howTo: List<Int>
 )
+
+data class BadgeSnapshot(
+    val expenses: Int = 0,
+    val distinctCategories: Int = 0,
+    val paymentModes: Int = 0,
+    val maxExpense: Double = 0.0,
+    val smallExpenses: Int = 0,
+    val notedExpenses: Int = 0,
+    val earlyLogs: Int = 0,
+    val lateLogs: Int = 0,
+    val voiceLogs: Int = 0,
+    val streak: Int = 0,
+    val groups: Int = 0,
+    val settlements: Int = 0,
+    val membersBesidesYou: Int = 0,
+    val reminders: Int = 0,
+    val customCategories: Int = 0,
+    val paidUnlocks: Int = 0,
+    val outfitUnlocks: Int = 0,
+    val accessoryUnlocks: Int = 0,
+    val themeUnlocks: Int = 0,
+    val monthsUnderBudget: Int = 0,
+    val level: Int = 1,
+    val languageChanged: Boolean = false
+)
+
+data class BadgeStatus(val badge: Badge, val earnedAt: Long?, val progress: Int) {
+    val earned: Boolean get() = earnedAt != null
+    val fraction: Float get() = if (earned) 1f else (progress.toFloat() / badge.target).coerceIn(0f, 1f)
+}
 
 object BadgeCatalog {
     const val FIRST_STEP = "badge_first_step"
     const val TEN_LOGGED = "badge_ten_logged"
     const val CENTURY = "badge_century"
+    const val HALF_K = "badge_half_k"
     const val WEEK_WARRIOR = "badge_week_warrior"
     const val MONTH_MASTER = "badge_month_master"
+    const val STREAK_60 = "badge_streak_60"
+    const val STREAK_100 = "badge_streak_100"
+    const val EARLY_BIRD = "badge_early_bird"
+    const val NIGHT_OWL = "badge_night_owl"
+    const val VOICE_FIRST = "badge_voice"
+    const val NOTE_TAKER = "badge_notes"
+    const val EXPLORER = "badge_explorer"
+    const val CUSTOM_CAT = "badge_custom_cat"
+    const val PAYMENT_PRO = "badge_payment_pro"
+    const val BIG_SPENDER = "badge_big_spender"
+    const val PENNY = "badge_penny"
     const val TEAM_PLAYER = "badge_team_player"
+    const val GROUP_GURU = "badge_group_guru"
     const val FAIR_SHARE = "badge_fair_share"
+    const val SETTLER = "badge_settler"
     const val FAMILY_FIRST = "badge_family_first"
+    const val FULL_HOUSE = "badge_full_house"
+    const val BILL_PLANNER = "badge_bill_planner"
     const val BUDGET_BOSS = "badge_budget_boss"
+    const val BUDGET_HATTRICK = "badge_budget_hattrick"
     const val STYLIST = "badge_stylist"
+    const val ACCESSORIZED = "badge_accessorized"
+    const val NEW_LOOK = "badge_new_look"
     const val COLLECTOR = "badge_collector"
+    const val POLYGLOT = "badge_polyglot"
+    const val LEVEL_5 = "badge_level_5"
+    const val LEVEL_10 = "badge_level_10"
 
     val badges: List<Badge> = listOf(
-        Badge(FIRST_STEP, R.string.b_first_step, R.string.b_first_step_d, "🥇", 20, 1, R.string.unit_expense,
+        Badge(FIRST_STEP, R.string.b_first_step, R.string.b_first_step_d, "🥇", 20, 1, R.string.unit_expense, BadgeTier.EASY,
             listOf(R.string.b_first_step_1, R.string.b_first_step_2, R.string.b_first_step_3)),
-        Badge(TEN_LOGGED, R.string.b_ten, R.string.b_ten_d, "🔟", 40, 10, R.string.unit_expenses,
-            listOf(R.string.b_ten_1, R.string.b_ten_2, R.string.b_ten_3)),
-        Badge(CENTURY, R.string.b_century, R.string.b_century_d, "💯", 150, 100, R.string.unit_expenses,
+        Badge(TEN_LOGGED, R.string.b_ten_logged, R.string.b_ten_logged_d, "🔟", 40, 10, R.string.unit_expenses, BadgeTier.EASY,
+            listOf(R.string.b_ten_logged_1, R.string.b_ten_logged_2, R.string.b_ten_logged_3)),
+        Badge(CENTURY, R.string.b_century, R.string.b_century_d, "💯", 150, 100, R.string.unit_expenses, BadgeTier.HARD,
             listOf(R.string.b_century_1, R.string.b_century_2, R.string.b_century_3)),
-        Badge(WEEK_WARRIOR, R.string.b_week, R.string.b_week_d, "🔥", 60, 7, R.string.unit_days,
-            listOf(R.string.b_week_1, R.string.b_week_2, R.string.b_week_3)),
-        Badge(MONTH_MASTER, R.string.b_month, R.string.b_month_d, "🏆", 250, 30, R.string.unit_days,
-            listOf(R.string.b_month_1, R.string.b_month_2, R.string.b_month_3)),
-        Badge(TEAM_PLAYER, R.string.b_team, R.string.b_team_d, "🤝", 30, 1, R.string.unit_group,
-            listOf(R.string.b_team_1, R.string.b_team_2, R.string.b_team_3)),
-        Badge(FAIR_SHARE, R.string.b_fair, R.string.b_fair_d, "⚖️", 40, 1, R.string.unit_settlement,
-            listOf(R.string.b_fair_1, R.string.b_fair_2, R.string.b_fair_3)),
-        Badge(FAMILY_FIRST, R.string.b_family, R.string.b_family_d, "👨‍👩‍👧", 50, 3, R.string.unit_members,
-            listOf(R.string.b_family_1, R.string.b_family_2, R.string.b_family_3)),
-        Badge(BUDGET_BOSS, R.string.b_budget, R.string.b_budget_d, "🎯", 200, 1, R.string.unit_month,
-            listOf(R.string.b_budget_1, R.string.b_budget_2, R.string.b_budget_3)),
-        Badge(STYLIST, R.string.b_stylist, R.string.b_stylist_d, "🧵", 30, 1, R.string.unit_outfit,
+        Badge(HALF_K, R.string.b_half_k, R.string.b_half_k_d, "🚀", 500, 500, R.string.unit_expenses, BadgeTier.HARD,
+            listOf(R.string.b_half_k_1, R.string.b_half_k_2, R.string.b_half_k_3)),
+        Badge(WEEK_WARRIOR, R.string.b_week_warrior, R.string.b_week_warrior_d, "🔥", 60, 7, R.string.unit_days, BadgeTier.EASY,
+            listOf(R.string.b_week_warrior_1, R.string.b_week_warrior_2, R.string.b_week_warrior_3)),
+        Badge(MONTH_MASTER, R.string.b_month_master, R.string.b_month_master_d, "🏆", 250, 30, R.string.unit_days, BadgeTier.HARD,
+            listOf(R.string.b_month_master_1, R.string.b_month_master_2, R.string.b_month_master_3)),
+        Badge(STREAK_60, R.string.b_streak_60, R.string.b_streak_60_d, "⚡", 400, 60, R.string.unit_days, BadgeTier.HARD,
+            listOf(R.string.b_streak_60_1, R.string.b_streak_60_2, R.string.b_streak_60_3)),
+        Badge(STREAK_100, R.string.b_streak_100, R.string.b_streak_100_d, "🐉", 1000, 100, R.string.unit_days, BadgeTier.HARD,
+            listOf(R.string.b_streak_100_1, R.string.b_streak_100_2, R.string.b_streak_100_3)),
+        Badge(EARLY_BIRD, R.string.b_early_bird, R.string.b_early_bird_d, "🌅", 30, 1, R.string.unit_expense, BadgeTier.EASY,
+            listOf(R.string.b_early_bird_1, R.string.b_early_bird_2, R.string.b_early_bird_3)),
+        Badge(NIGHT_OWL, R.string.b_night_owl, R.string.b_night_owl_d, "🦉", 30, 1, R.string.unit_expense, BadgeTier.EASY,
+            listOf(R.string.b_night_owl_1, R.string.b_night_owl_2, R.string.b_night_owl_3)),
+        Badge(VOICE_FIRST, R.string.b_voice, R.string.b_voice_d, "🎙️", 40, 1, R.string.unit_expense, BadgeTier.EASY,
+            listOf(R.string.b_voice_1, R.string.b_voice_2, R.string.b_voice_3)),
+        Badge(NOTE_TAKER, R.string.b_notes, R.string.b_notes_d, "📝", 60, 10, R.string.unit_expenses, BadgeTier.EASY,
+            listOf(R.string.b_notes_1, R.string.b_notes_2, R.string.b_notes_3)),
+        Badge(EXPLORER, R.string.b_explorer, R.string.b_explorer_d, "🧭", 60, 5, R.string.unit_categories, BadgeTier.EASY,
+            listOf(R.string.b_explorer_1, R.string.b_explorer_2, R.string.b_explorer_3)),
+        Badge(CUSTOM_CAT, R.string.b_custom_cat, R.string.b_custom_cat_d, "🏷️", 50, 1, R.string.unit_category, BadgeTier.EASY,
+            listOf(R.string.b_custom_cat_1, R.string.b_custom_cat_2, R.string.b_custom_cat_3)),
+        Badge(PAYMENT_PRO, R.string.b_payment_pro, R.string.b_payment_pro_d, "💳", 80, 4, R.string.unit_modes, BadgeTier.EASY,
+            listOf(R.string.b_payment_pro_1, R.string.b_payment_pro_2, R.string.b_payment_pro_3)),
+        Badge(BIG_SPENDER, R.string.b_big_spender, R.string.b_big_spender_d, "💎", 100, 1, R.string.unit_expense, BadgeTier.EASY,
+            listOf(R.string.b_big_spender_1, R.string.b_big_spender_2, R.string.b_big_spender_3)),
+        Badge(PENNY, R.string.b_penny, R.string.b_penny_d, "🪙", 80, 20, R.string.unit_expenses, BadgeTier.EASY,
+            listOf(R.string.b_penny_1, R.string.b_penny_2, R.string.b_penny_3)),
+        Badge(TEAM_PLAYER, R.string.b_team_player, R.string.b_team_player_d, "🤝", 30, 1, R.string.unit_group, BadgeTier.EASY,
+            listOf(R.string.b_team_player_1, R.string.b_team_player_2, R.string.b_team_player_3)),
+        Badge(GROUP_GURU, R.string.b_group_guru, R.string.b_group_guru_d, "🧑‍🤝‍🧑", 100, 3, R.string.unit_groups, BadgeTier.HARD,
+            listOf(R.string.b_group_guru_1, R.string.b_group_guru_2, R.string.b_group_guru_3)),
+        Badge(FAIR_SHARE, R.string.b_fair_share, R.string.b_fair_share_d, "⚖️", 40, 1, R.string.unit_settlement, BadgeTier.EASY,
+            listOf(R.string.b_fair_share_1, R.string.b_fair_share_2, R.string.b_fair_share_3)),
+        Badge(SETTLER, R.string.b_settler, R.string.b_settler_d, "🏦", 300, 10, R.string.unit_settlements, BadgeTier.HARD,
+            listOf(R.string.b_settler_1, R.string.b_settler_2, R.string.b_settler_3)),
+        Badge(FAMILY_FIRST, R.string.b_family_first, R.string.b_family_first_d, "👨‍👩‍👧", 50, 3, R.string.unit_members, BadgeTier.EASY,
+            listOf(R.string.b_family_first_1, R.string.b_family_first_2, R.string.b_family_first_3)),
+        Badge(FULL_HOUSE, R.string.b_full_house, R.string.b_full_house_d, "🏠", 150, 5, R.string.unit_members, BadgeTier.HARD,
+            listOf(R.string.b_full_house_1, R.string.b_full_house_2, R.string.b_full_house_3)),
+        Badge(BILL_PLANNER, R.string.b_bill_planner, R.string.b_bill_planner_d, "📅", 100, 5, R.string.unit_reminders, BadgeTier.EASY,
+            listOf(R.string.b_bill_planner_1, R.string.b_bill_planner_2, R.string.b_bill_planner_3)),
+        Badge(BUDGET_BOSS, R.string.b_budget_boss, R.string.b_budget_boss_d, "🎯", 200, 1, R.string.unit_month, BadgeTier.HARD,
+            listOf(R.string.b_budget_boss_1, R.string.b_budget_boss_2, R.string.b_budget_boss_3)),
+        Badge(BUDGET_HATTRICK, R.string.b_budget_hattrick, R.string.b_budget_hattrick_d, "🥉", 600, 3, R.string.unit_months, BadgeTier.HARD,
+            listOf(R.string.b_budget_hattrick_1, R.string.b_budget_hattrick_2, R.string.b_budget_hattrick_3)),
+        Badge(STYLIST, R.string.b_stylist, R.string.b_stylist_d, "🧵", 30, 1, R.string.unit_outfit, BadgeTier.EASY,
             listOf(R.string.b_stylist_1, R.string.b_stylist_2, R.string.b_stylist_3)),
-        Badge(COLLECTOR, R.string.b_collector, R.string.b_collector_d, "🗂️", 80, 5, R.string.unit_rewards,
-            listOf(R.string.b_collector_1, R.string.b_collector_2, R.string.b_collector_3))
+        Badge(ACCESSORIZED, R.string.b_accessorized, R.string.b_accessorized_d, "💍", 120, 3, R.string.unit_accessories, BadgeTier.HARD,
+            listOf(R.string.b_accessorized_1, R.string.b_accessorized_2, R.string.b_accessorized_3)),
+        Badge(NEW_LOOK, R.string.b_new_look, R.string.b_new_look_d, "🎨", 50, 1, R.string.unit_theme, BadgeTier.EASY,
+            listOf(R.string.b_new_look_1, R.string.b_new_look_2, R.string.b_new_look_3)),
+        Badge(COLLECTOR, R.string.b_collector, R.string.b_collector_d, "🗂️", 80, 5, R.string.unit_rewards, BadgeTier.HARD,
+            listOf(R.string.b_collector_1, R.string.b_collector_2, R.string.b_collector_3)),
+        Badge(POLYGLOT, R.string.b_polyglot, R.string.b_polyglot_d, "🗣️", 30, 1, R.string.unit_language, BadgeTier.EASY,
+            listOf(R.string.b_polyglot_1, R.string.b_polyglot_2, R.string.b_polyglot_3)),
+        Badge(LEVEL_5, R.string.b_level_5, R.string.b_level_5_d, "🎖️", 300, 5, R.string.unit_level, BadgeTier.HARD,
+            listOf(R.string.b_level_5_1, R.string.b_level_5_2, R.string.b_level_5_3)),
+        Badge(LEVEL_10, R.string.b_level_10, R.string.b_level_10_d, "👑", 1000, 10, R.string.unit_level, BadgeTier.HARD,
+            listOf(R.string.b_level_10_1, R.string.b_level_10_2, R.string.b_level_10_3))
     )
 
     private val byId = badges.associateBy { it.id }
 
     fun find(id: String): Badge? = byId[id]
+
+    fun progress(id: String, s: BadgeSnapshot): Int = when (id) {
+        FIRST_STEP, TEN_LOGGED, CENTURY, HALF_K -> s.expenses
+        WEEK_WARRIOR, MONTH_MASTER, STREAK_60, STREAK_100 -> s.streak
+        EARLY_BIRD -> s.earlyLogs
+        NIGHT_OWL -> s.lateLogs
+        VOICE_FIRST -> s.voiceLogs
+        NOTE_TAKER -> s.notedExpenses
+        EXPLORER -> s.distinctCategories
+        CUSTOM_CAT -> s.customCategories
+        PAYMENT_PRO -> s.paymentModes
+        BIG_SPENDER -> if (s.maxExpense >= 10_000) 1 else 0
+        PENNY -> s.smallExpenses
+        TEAM_PLAYER, GROUP_GURU -> s.groups
+        FAIR_SHARE, SETTLER -> s.settlements
+        FAMILY_FIRST, FULL_HOUSE -> s.membersBesidesYou
+        BILL_PLANNER -> s.reminders
+        BUDGET_BOSS, BUDGET_HATTRICK -> s.monthsUnderBudget
+        STYLIST -> s.outfitUnlocks
+        ACCESSORIZED -> s.accessoryUnlocks
+        NEW_LOOK -> s.themeUnlocks
+        COLLECTOR -> s.paidUnlocks
+        POLYGLOT -> if (s.languageChanged) 1 else 0
+        LEVEL_5, LEVEL_10 -> s.level
+        else -> 0
+    }
 }

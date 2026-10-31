@@ -117,7 +117,7 @@ fun CreateGroupSheet(members: List<MemberEntity>, onDismiss: () -> Unit, onCreat
     var name by remember { mutableStateOf("") }
     var emoji by remember { mutableStateOf(groupEmojis.first()) }
     var selected by remember { mutableStateOf(members.map { it.id }.toSet()) }
-    OptionSheet(stringResource(R.string.new_group), onDismiss) {
+    OptionSheet(stringResource(R.string.new_group), onDismiss, dismissByDrag = false) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             HqTextField(name, { name = it }, stringResource(R.string.group_name), placeholder = stringResource(R.string.group_name_hint))
             Text(stringResource(R.string.icon), style = MaterialTheme.typography.labelLarge)

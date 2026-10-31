@@ -44,6 +44,7 @@ A gamified household-expense manager for Android, built for Harshil (GitHub `Har
 
 ### Home dashboard
 - Header: your animated avatar (tap for Me), name, a level · points · streak pill (tap for Rewards), a microphone button for voice entry, and the XP bar.
+- All month/week figures follow the real calendar: the app re-evaluates "this month" at midnight (see `Dates.days()` in the handoff), so a month boundary never shows last month's totals.
 - Cash-flow card: budget ring, spent this month, amount left / over.
 - Stat tiles: Today (tap to add), vs last month, Group balance (tap to open Groups), Top category.
 - 7-day bar chart, category donut, "Who paid this month", "Upcoming bills" (next three) and recent transactions with "See all".
@@ -51,7 +52,8 @@ A gamified household-expense manager for Android, built for Harshil (GitHub `Har
 
 ### Expenses & the add-transaction form
 - The list opens with This month / vs last month tiles, a search field and category chips; entries are grouped by day with subtotals and show category · payer · payment mode.
-- Add transaction (centre **+** or Today tile): a "Say it or type it" voice banner, an amount hero, a title field, then a list of picker rows — Date (with date picker), Category, Payment mode, Paid by, Split with a group — each opening a bottom sheet; a note under "Other details". Group splits (equal or custom) appear inline when a group is chosen.
+- Add transaction (centre **+** or Today tile): a "Say it or type it" voice banner, an amount hero, a title field, a Date row (date picker) and Category row (sheet), then an inline card with **Paid by** member chips and the four **payment-mode** tiles — no sheet needed for either; a "Split with a group" row (sheet) and a note under "Other details". Group splits (equal or custom) appear inline when a group is chosen.
+- Form sheets (new reminder, category, group, member, budget limit) close only with the X button or a tap outside — dragging while scrolling their content no longer dismisses them.
 - **Payment modes**: Cash, UPI, Card, Bank transfer — stored per expense and included in the CSV export.
 - **Voice entry**: tap the banner or the Home microphone, say e.g. "250 groceries by UPI" or "paid 120 for pani puri cash"; the amount, category (built-in keywords in English/Hindi/Gujarati words such as sabzi, kiraya, dawa, plus your custom category names), payment mode and title are filled in for you to review and save. Uses the phone's speech recogniser in the app language.
 - **Custom categories** (Expenses → tune icon, or Me → Categories): add your own with a name, one of 26 icons and 15 colours; built-in categories can be recoloured/re-iconed; deleting a custom category moves its expenses to Other.
@@ -59,7 +61,7 @@ A gamified household-expense manager for Android, built for Harshil (GitHub `Har
 - Tap any expense to edit or delete it. Every new expense earns points (see Rewards).
 
 ### Budgets & alerts
-- Budgets screen: a hero card with the budget ring, spent / left this month and a "Set monthly budget" button; each category is a card with icon, spent of limit and a coloured progress bar — tap it to set or remove a limit in a sheet with quick-amount chips.
+- Budgets screen: a hero card with the budget ring, spent / left this month and a "Set monthly budget" button; each category is a card with icon, name and progress bar on the left and the spent amount (with "of limit") centred next to the chevron — tap it to set or remove a limit in a sheet with quick-amount chips.
 - Push notifications when a budget crosses 80% and 100% (can be switched off in Me → Notifications).
 - Finishing a month under the overall budget earns +100 points and the Budget Boss badge.
 
@@ -71,7 +73,8 @@ A gamified household-expense manager for Android, built for Harshil (GitHub `Har
 
 ### Family members
 - Add partner, kids, parents, roommates or friends with a relation label; each has their own avatar (tap to open the studio for them).
-- Removing a member cleans up their expenses and splits.
+- Male/female per member; new members join as "from now on" or can be added to every existing group with past equal splits recomputed to include them (a choice sheet appears when groups exist).
+- Removing a member who is part of shared expenses asks whether to re-split those past expenses between the remaining members or keep the old records; their own expenses and splits are then removed.
 
 ### Avatar studio
 - Skin tone (6) and hair colour (7) swatches, always free.
@@ -87,7 +90,11 @@ A gamified household-expense manager for Android, built for Harshil (GitHub `Har
 
 **Levels** — XP-based (Rookie → Saver → Planner → Tracker → Strategist → Accountant → Treasurer → Guardian → Master → Legend). Level-ups trigger confetti, an in-app toast and a notification.
 
-**Badges (11)** — one horizontally scrolling row, earned first then locked ones with a progress bar. Tap any badge for an animated detail card with a numbered "How to earn it" list.
+**Badges (33, easy and hard)** — bonus points total 6,130, more than the whole shop (≈6,650 pts) once logging points are added. Rewards shows the first eight (earned first, then closest to completion) in a row with staggered pop-in and a pulsing emblem on earned ones; "See all" opens the Badges page: a 3-column grid grouped into Earned / Easy / Hard with the points available in each group. Tap any badge for an animated detail card with a numbered "How to earn it" list.
+
+Badge list: First step (1 expense), Getting serious (10), Century (100), Half a thousand (500), Week warrior / Month master / Iron streak / Legendary streak (7/30/60/100-day streaks), Early bird (log before 9 AM), Night owl (after 10 PM), Say it out loud (voice entry), Note taker (10 notes), Explorer (5 categories), Make it yours (custom category), Payment pro (all 4 modes), Big spender (one expense ≥ 10,000), Penny counter (20 under 100), Team player / Group guru (1/3 groups), Fair share / Settler (1/10 settlements), Family first / Full house (3/5 members), Bill planner (5 reminders), Budget boss / Budget hat-trick (1/3 months under budget), Stylist (outfit), Accessorized (3 accessories), New look (theme), Collector (5 paid unlocks), Polyglot (language switch), Rising star / Legend (level 5/10).
+
+The Rewards hero card has a slow light sweep and a bobbing star; shop rows animate when the filter changes.
 
 **Shop** — spend points on 6 colour themes, avatar outfits, hair styles and accessories, and two features (Advanced Insights, CSV export). Points history is listed at the bottom of Rewards. Rewards opens from the Home pill or Me → Rewards.
 
@@ -129,14 +136,14 @@ HomeQuestApp          Application: builds AppContainer, creates notification cha
 AppContainer          wires DB, repositories, notification helpers; bootstrap() seeds profile/owner, closes previous budget month
 MainActivity          edge-to-edge host; localised context, theme, confetti, reward toast, notification permission
 data/local            Entities.kt, Daos.kt, HomeQuestDatabase.kt
-data/repository       Expense, Member, Group, Reminder, Gamification, Settings, Category repositories
-domain                Models (Category, PaymentMode, Mood, AppLanguage, Relations, ids), Catalogs (rewards, badges — string resource ids), Gamification (points, levels, ledger reason codes, split maths)
+data/repository       Expense, Member, Group, Reminder, Gamification, Settings, Category repositories; BadgeTracker (badge progress snapshot + live statuses)
+domain                Models (Category, PaymentMode, Mood, Gender, AppLanguage, Relations, ids), Catalogs (rewards; BadgeCatalog with BadgeSnapshot/BadgeStatus/BadgeTier and progress rules), Gamification (points, levels, ledger reason codes, split maths)
 notifications         NotificationHelper (localised, randomised copy), BudgetMonitor, ReminderScheduler (AlarmManager), ReminderReceiver + BootReceiver
 util                  Dates, Sharing (localised summary, CSV), Pin, Text (titleCased), LocaleHelper, VoiceParser
 ui/theme              Palettes (6 themes → light/dark ColorScheme), Theme (animated colour switch)
 ui/components         Charts, Celebrations (counters, confetti, toast, ledger reason labels), AvatarView (Canvas avatar), ExpenseRow, Common (category/relation labels), DesignSystem (cards, fields, PickerRow, TimeWheel, PIN)
 ui/navigation         Routes, HomeQuestNavHost (custom bottom bar with centre FAB + graph)
-ui/screens/*          one package per feature, each with its screen and view model
+ui/screens/*          one package per feature, each with its screen and view model (rewards/ also holds BadgeComponents — tile + detail sheet shared by Rewards and the Badges page)
 ```
 
 ### Data model
@@ -147,7 +154,7 @@ ui/screens/*          one package per feature, each with its screen and view mod
 - `expense_splits` — per-member share; present only for group expenses. Deleted with the expense.
 - `groups`, `group_members` (junction), `settlements` — balances are computed in `GroupRepository.balances()` from expenses + splits + settlements; `SplitCalculator.settlements()` produces the minimal transfer list.
 - `reminders` — `repeat` ONCE/DAILY/WEEKLY/MONTHLY/YEARLY with `weekday`, `dayOfMonth`, `month`, optional `amount` and `category`; `ReminderEntity.nextOccurrence()` (in `ReminderScheduler.kt`) computes the next fire time and clamps day-of-month to the month length.
-- `budgets` (per category id; the overall monthly budget lives in DataStore), `profile` (single row: points, lifetime XP, streak, last log day, last budget month checked), `unlocks`, `earned_badges`, `points_ledger` (`reason` is a code from `LedgerReasons`, e.g. `badge:badge_century`, rendered by `reasonLabel()` in the current language).
+- `budgets` (per category id; the overall monthly budget lives in DataStore), `profile` (single row: points, lifetime XP, streak, last log day, last budget month checked, `voiceLogs`), `unlocks`, `earned_badges`, `points_ledger` (`reason` is a code from `LedgerReasons`, e.g. `badge:badge_century`, rendered by `reasonLabel()` in the current language).
 - `members`, `expenses`, `groups` and `reminders` still carry an `isSample` column (always 0). It was used by the sample-data switch removed in 1.3.2; it stays because SQLite on minSdk 26 cannot `DROP COLUMN` and recreating four tables with foreign keys is not worth the migration risk. Nothing reads or writes it.
 
 Month/category aggregation for Insights uses `strftime('%Y-%m', epochDay * 86400, 'unixepoch')`.
@@ -156,6 +163,7 @@ Month/category aggregation for Insights uses `strftime('%Y-%m', epochDay * 86400
 - v1 → v2 (`MIGRATION_1_2`): adds `members.phone`, `members.pinHash`, `reminders.dayOfMonth/month/amount/category`.
 - v2 → v3 (`MIGRATION_2_3`): creates `categories`, adds `expenses.paymentMode` (default `CASH`) and `isSample` to `expenses`, `members`, `groups`, `reminders` (unused since 1.3.2, see above). The `groups` table name is quoted with backticks in every `@Query` because `GROUPS` became a SQLite keyword in 3.25.
 - v3 → v4 (`MIGRATION_3_4`): adds `members.gender` (MALE/FEMALE, default MALE) and `members.mood` (empty = automatic).
+- v4 → v5 (`MIGRATION_4_5`): adds `profile.voiceLogs` (count of expenses saved from voice entry, for the voice badge).
 - Add further migrations to `HomeQuestDatabase.build()`; never bump the version without one.
 
 ### Avatar & moods
@@ -168,6 +176,8 @@ All numeric rules live in `domain/Gamification.kt` (`PointsRules`, `Levels`) and
 - Level = `floor(sqrt(lifetimeXP / 100)) + 1`; thresholds `(level-1)² · 100 → level² · 100`.
 - Month-under-budget award is evaluated once per month in `BudgetMonitor.closePreviousMonthIfNeeded()` on app start, guarded by `profile.lastBudgetCheckMonth`.
 - Free catalog items are inserted into `unlocks` at bootstrap, so "unlocked" is the single source of truth for both themes and avatar parts.
+- **Badges** are not granted from individual `record…()` calls. `BadgeCatalog.progress(id, snapshot)` maps every badge to a number from a `BadgeSnapshot` (expense counts, hours of day, notes, voice logs, streak, groups, settlements, members, reminders, custom categories, paid unlocks by kind, months under budget, level, language). `BadgeTracker.refresh()` builds the snapshot from the DAOs and calls `GamificationRepository.checkBadges()`, which grants every badge whose progress reached its target (one ledger line + event each). Repositories call `badges.refresh()` after anything that can move a counter (expense, group, settlement, member, reminder, category, unlock, language) and `AppContainer.bootstrap()` runs it on start, so badges added in an update are awarded retroactively. `BadgeTracker.statuses` is the live `Flow<List<BadgeStatus>>` behind Rewards and the Badges page; `sortedForDisplay()` orders earned first, then by completion.
+- **Re-splitting**: `GroupRepository.addMemberToAllGroups(memberId, resplitPast)` and `resplitWithout(memberId)` recompute `SplitCalculator.equalShares` for every EQUAL-split group expense (custom splits are left untouched) through `ExpenseDao.upsertWithSplits`, so balances update consistently.
 
 ### Notifications
 - Channels: `reminders` (high), `budget` (high), `rewards` (default).
@@ -180,14 +190,14 @@ All numeric rules live in `domain/Gamification.kt` (`PointsRules`, `Levels`) and
 `ui/components/DesignSystem.kt` holds the shared building blocks: `HqCard` (22dp radius, `surfaceContainerLowest`, hairline border), `SectionCard`, `StatTile`, `PickerRow` (icon tile + label/value + chevron, the row style of the add-transaction form), `HqTextField` (label above the box, soft filled container, border only on focus/error, sentence capitalisation by default), `PrimaryButton`, `TimeWheel` (three snap-scrolling `LazyColumn` wheels with a highlighted centre row and fade overlays; the centre item is derived from `layoutInfo`), and the PIN components (`PinDots`, `PinPad`, `PinEntry`, `PinSetupSheet`). `OptionSheet`, `CategoryGrid`, `MemberChip` and `MemberFlow` live in `AddExpenseScreen.kt` and are reused by the group, family, reminder and category sheets. All `Text` that can grow is given `maxLines` + `TextOverflow.Ellipsis`. New screens should compose these rather than raw Material `Card`/`OutlinedTextField`.
 
 ### Session & navigation
-`MainActivity` switches between `OnboardingScreen`, `LockScreen` and `HomeQuestNavHost` via `MainViewModel.gate()`. The `NavHostController` is created inside `HomeQuestNavHost`, so each unlock gets a fresh controller — reusing one across the lock screen caused the "ViewModelStore should be set before setGraph" crash seen in 1.1. Sign-out goes through `MainViewModel.signOut()` (clears `sessionUnlocked` and `activeMemberId`).
+`MainActivity` switches between `OnboardingScreen`, `LockScreen` and `HomeQuestNavHost` via `MainViewModel.gate()`. `MainViewModel.settings` is `null` until DataStore has loaded and `MainActivity` renders nothing until then, with a `Crossfade` between gates — rendering the default settings first flashed Onboarding/Lock for a frame on launch and sign-out (1.3.x flicker). The `NavHostController` is created inside `HomeQuestNavHost`, so each unlock gets a fresh controller — reusing one across the lock screen caused the "ViewModelStore should be set before setGraph" crash seen in 1.1. Sign-out goes through `MainViewModel.signOut()` (clears `sessionUnlocked` and `activeMemberId`).
 
 `LockScreen` only preselects a member when `preselectedId` matches one (app-lock re-prompt); after sign-out `activeMemberId` is 0 so the picker is always shown — auto-selecting a lone PIN-less profile was what made Log out appear to do nothing in 1.2.
 
 Bottom tabs (`HqBottomBar`): Home, Expenses, Groups, Me plus a centre FAB that opens `Routes.addExpense()`; Rewards is a normal pushed route reachable from the Home pill and Me. The Home tab calls `popBackStack(Routes.DASHBOARD, inclusive = false)` instead of `navigate` — Dashboard is the graph's start destination and re-navigating to it with `restoreState` could leave the tab unresponsive after visiting other tabs. The other tabs `navigate` with `popUpTo(Routes.DASHBOARD) { saveState = true }`. Only the outer `Scaffold` in `HomeQuestNavHost` handles system insets; every screen-level `Scaffold` passes `contentWindowInsets = WindowInsets(0, 0, 0, 0)`, otherwise the navigation-bar inset is applied twice and a blank band appears above the bottom bar.
 
 ### Launcher icon
-`res/mipmap-anydpi-v26/ic_launcher.xml` (and `_round`) is an adaptive icon: `drawable/ic_launcher_background.xml` (gradient + soft circles), `drawable/ic_launcher_foreground.xml` (house, door, window, star coin, all inside the 66dp safe zone) and `drawable/ic_launcher_monochrome.xml` for themed icons. `drawable/ic_notification.xml` is the matching white-house silhouette used for all notifications. Source SVG of the design is reproduced in the foreground drawable paths.
+`res/mipmap-anydpi-v26/ic_launcher.xml` (and `_round`) is an adaptive icon: `drawable/ic_launcher_background.xml` (gradient + soft circles), `drawable/ic_launcher_foreground.xml` (house, door, window, star coin, drawn small enough to sit inside the 33-radius safe circle so no launcher mask clips it — 1.4.0 shrank it after the 1.3.1 version was cut at the edges) and `drawable/ic_launcher_monochrome.xml` for themed icons. `drawable/ic_notification.xml` is the matching white-house silhouette used for all notifications. Source SVG of the design is reproduced in the foreground drawable paths.
 
 ### Theming
 `Palettes.forId(themeId)` returns a `Palette`; `Theme.kt` builds light/dark `ColorScheme`s and animates primary/secondary/tertiary/background/surface/containers when the theme id changes so unlocking a theme visibly morphs the UI.
@@ -201,18 +211,22 @@ All user-facing text is in `res/values/strings.xml` (English, the source of trut
 ### Adding things
 - **New built-in category**: add a constant and `Seed` to `BuiltInCategories` (plus `cat_*` strings in all three languages); `ensureDefaults()` inserts it on next start. Custom categories need no code.
 - **New reward**: add a `RewardItem` to `RewardCatalog.items` with a constant in `Models.kt`. Outfits/hair/accessories also need a drawing branch in `AvatarView.kt`; themes need a `Palette`.
-- **New badge**: add to `BadgeCatalog.badges` (with `target`, `unit` and `howTo` steps), call `grantBadge(id)` from the relevant `GamificationRepository.record…()` method, and map its live progress in `RewardsViewModel` (the `when (b.id)` block that builds `BadgeStatus`).
+- **New badge**: add a constant and `Badge` to `BadgeCatalog.badges` (tier, `target`, `unitRes`, `howTo` steps; strings `b_<id>`, `b_<id>_d`, `b_<id>_1..3` in all three languages) and a branch in `BadgeCatalog.progress()`. If it needs a new counter, add it to `BadgeSnapshot` and `BadgeTracker.build()`. Nothing else changes — it is awarded on the next `refresh()`.
+- **Anything that depends on "today"**: collect `Dates.days()` and `flatMapLatest` over it (see `DashboardViewModel`, `ExpensesViewModel`, `BudgetsViewModel`, `InsightsViewModel`) instead of capturing `LocalDate.now()` in a constructor — that is what showed October totals under "Spent in November" at midnight.
 - **New screen**: add a route in `Routes`, a `composable` in `HomeQuestNavHost`, and a `ui/screens/<feature>` package.
 
 ### Known limits / next steps
 - Local-only; no sync, auth or multi-device sharing (group sharing is via text summary). Giving a member access from another phone needs a backend (e.g. Firebase phone auth + Firestore) — a separate project.
 - Expenses store a single currency symbol globally; no FX.
 - Voice parsing is keyword based; amounts spoken as words ("two hundred") are not recognised.
+- Points/features cannot be bought with real money; a UPI deep link (`upi://pay?pa=<id>&pn=<name>&am=<amount>`) would open any UPI app without a library, but the app has no way to confirm the payment succeeded — that needs a payment gateway (Razorpay, Cashfree, PhonePe PG) with server-side verification.
 - No unit tests yet; `SplitCalculator`, `Levels` and `GamificationRepository` are the first candidates.
 
 ## 5. Release history
 | Version | Date | Notes |
 |---|---|---|
+| 1.4.0 | 2026-10-31 | 33 badges (easy + hard, worth more than the whole shop) with a snapshot-based engine that awards retroactively (DB v5), Badges page + animated Rewards; add/remove member asks whether to re-split past group expenses; Paid by and payment mode inline in the add form; form sheets no longer close on scroll; month/week figures roll over at midnight; launch/logout flicker removed; launcher icon fits the safe zone; budget amounts centred beside the chevron |
+| 1.3.2 | 2026-10-31 | Sample-data switch removed; docs consolidated into docs/HOMEQUEST.md |
 | 1.3.1 | 2026-10-31 | Fix: add/voice screens crashed (ActivityResult launcher could not find the Activity through the localised context); new launcher icon; equal badge tile heights; male/female option per member (DB v4) with gender-aware avatar; mood chosen in the studio is saved and shown everywhere (Auto = budget-driven); budgets redesigned with a hero ring and tap-to-edit limit sheets |
 | 1.3.0 | 2026-10-31 | Custom categories + payment modes (DB v3), redesigned add-transaction form with voice entry, bottom bar with centre +, 10-mood avatar in a circle frame with softer shading, exact-alarm notifications with playful localised copy, time wheel, sample-data switch, Hindi/Gujarati, currencies trimmed to INR/USD/EUR, text ellipsis everywhere; fixes: logout, group crash (duplicate list keys), PIN screen overflow, avatar shaking |
 | 1.2.3 | 2026-10-31 | Bottom nav restyled (flat surface, divider, tinted indicator), Home tab pops back to the dashboard so it always responds, inner screens no longer double-count system insets (gap above the nav bar removed), badges in one horizontal scrolling row, static avatar on Profile/Edit profile |

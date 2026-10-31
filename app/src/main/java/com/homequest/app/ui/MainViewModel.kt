@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 enum class Gate { ONBOARDING, LOCKED, OPEN }
 
 class MainViewModel(private val container: AppContainer) : ViewModel() {
-    val settings: StateFlow<AppSettings> =
-        container.settingsRepository.settings.stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
+    val settings: StateFlow<AppSettings?> =
+        container.settingsRepository.settings.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val members: StateFlow<List<MemberEntity>> =
         container.memberRepository.members.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -65,7 +65,7 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
 
     fun dismissToast() { _toast.value = null }
 
-    fun setLanguage(tag: String) = viewModelScope.launch { container.settingsRepository.setLanguage(tag) }
+    fun setLanguage(tag: String) = viewModelScope.launch { container.settingsRepository.setLanguage(tag); container.badgeTracker.refresh() }
 
     fun unlock(member: MemberEntity, pin: String) = viewModelScope.launch {
         if (container.memberRepository.verifyPin(member.id, pin)) {

@@ -146,7 +146,8 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
                     splitType = f.splitType,
                     splitMemberIds = f.splitMemberIds.toList(),
                     customShares = f.customShares.mapValues { it.value.toDoubleOrNull() ?: 0.0 },
-                    note = f.note
+                    note = f.note,
+                    byVoice = f.heardText != null
                 )
             )
             onDone()

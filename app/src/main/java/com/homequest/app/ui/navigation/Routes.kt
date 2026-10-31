@@ -18,6 +18,7 @@ object Routes {
     const val EXPENSES = "expenses"
     const val GROUPS = "groups"
     const val REWARDS = "rewards"
+    const val BADGES = "badges"
     const val PROFILE = "profile"
     const val FAMILY = "family"
     const val ACCOUNT = "account"

@@ -1,19 +1,26 @@
 package com.homequest.app.data.repository
 
+import com.homequest.app.data.local.ExpenseDao
 import com.homequest.app.data.local.ExpenseSplitEntity
 import com.homequest.app.data.local.ExpenseWithPayer
 import com.homequest.app.data.local.GroupDao
 import com.homequest.app.data.local.GroupEntity
+import com.homequest.app.data.local.GroupMemberCrossRef
 import com.homequest.app.data.local.GroupWithMembers
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.local.SettlementEntity
 import com.homequest.app.domain.MemberBalance
+import com.homequest.app.domain.SplitCalculator
+import com.homequest.app.domain.SplitType
 import com.homequest.app.util.titleCased
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class GroupRepository(
     private val dao: GroupDao,
-    private val gamification: GamificationRepository
+    private val expenseDao: ExpenseDao,
+    private val gamification: GamificationRepository,
+    private val badges: BadgeTracker
 ) {
     val groups: Flow<List<GroupWithMembers>> = dao.observeAll()
 
@@ -24,16 +31,34 @@ class GroupRepository(
     suspend fun create(name: String, emoji: String, memberIds: List<Long>): Long {
         val id = dao.createWithMembers(GroupEntity(name = name.titleCased(), emoji = emoji), memberIds)
         gamification.recordGroupCreated()
+        badges.refresh()
         return id
     }
 
     suspend fun updateMembers(groupId: Long, memberIds: List<Long>) = dao.replaceMembers(groupId, memberIds)
+
+    suspend fun addMemberToAllGroups(memberId: Long, resplitPast: Boolean) {
+        val groups = dao.observeAll().first()
+        groups.forEach { g -> dao.insertMembers(listOf(GroupMemberCrossRef(g.group.id, memberId))) }
+        if (resplitPast) resplitEqualExpenses { current -> current + memberId }
+    }
+
+    suspend fun resplitWithout(memberId: Long) = resplitEqualExpenses { current -> current - memberId }
+
+    private suspend fun resplitEqualExpenses(members: (Set<Long>) -> Set<Long>) {
+        expenseDao.all().filter { it.groupId != null && it.splitType == SplitType.EQUAL }.forEach { expense ->
+            val current = expenseDao.splitsFor(expense.id).map { it.memberId }.toSet()
+            val next = members(current)
+            if (next != current && next.isNotEmpty()) expenseDao.upsertWithSplits(expense, SplitCalculator.equalShares(expense.amount, next.toList().sorted()))
+        }
+    }
 
     suspend fun delete(group: GroupEntity) = dao.delete(group)
 
     suspend fun settle(groupId: Long, fromId: Long, toId: Long, amount: Double) {
         dao.insertSettlement(SettlementEntity(groupId = groupId, fromMemberId = fromId, toMemberId = toId, amount = amount))
         gamification.recordSettlement()
+        badges.refresh()
     }
 
     fun balances(

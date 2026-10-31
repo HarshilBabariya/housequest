@@ -100,7 +100,7 @@ class AvatarStudioViewModel(private val container: AppContainer, private val mem
 
     fun update(transform: AvatarConfig.() -> AvatarConfig) { draft.value = (draft.value ?: saved).transform() }
 
-    fun unlock(item: RewardItem) = viewModelScope.launch { container.gamificationRepository.redeem(item) }
+    fun unlock(item: RewardItem) = viewModelScope.launch { if (container.gamificationRepository.redeem(item)) container.badgeTracker.refresh() }
 
     fun save(onDone: () -> Unit) = viewModelScope.launch {
         draft.value?.let { container.memberRepository.updateAvatar(memberId, it); saved = it }

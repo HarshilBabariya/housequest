@@ -30,14 +30,16 @@ data class ExpenseDraft(
     val splitType: SplitType = SplitType.NONE,
     val splitMemberIds: List<Long> = emptyList(),
     val customShares: Map<Long, Double> = emptyMap(),
-    val note: String = ""
+    val note: String = "",
+    val byVoice: Boolean = false
 )
 
 class ExpenseRepository(
     private val dao: ExpenseDao,
     private val budgetDao: BudgetDao,
     private val gamification: GamificationRepository,
-    private val budgetMonitor: BudgetMonitor
+    private val budgetMonitor: BudgetMonitor,
+    private val badges: BadgeTracker
 ) {
     val all: Flow<List<ExpenseWithPayer>> = dao.observeAll()
     val budgets: Flow<List<BudgetEntity>> = budgetDao.observeAll()
@@ -53,7 +55,6 @@ class ExpenseRepository(
     suspend fun byId(id: Long): ExpenseEntity? = dao.byId(id)
     suspend fun splitsFor(expenseId: Long): List<ExpenseSplitEntity> = dao.splitsFor(expenseId)
     suspend fun allForExport(): List<ExpenseWithPayer> = dao.allForExport()
-    suspend fun loggedToday(): Boolean = dao.countOnDay(Dates.today().toEpochDay()) > 0
 
     suspend fun save(draft: ExpenseDraft): Long {
         val isNew = draft.id == 0L
@@ -76,9 +77,11 @@ class ExpenseRepository(
         }
         val id = dao.upsertWithSplits(entity, shares)
         if (isNew) {
-            gamification.recordExpenseLogged(Dates.today(), dao.count())
+            gamification.recordExpenseLogged(Dates.today())
+            if (draft.byVoice) gamification.recordVoiceLog()
             budgetMonitor.afterExpenseAdded(draft.categoryId, draft.amount)
         }
+        badges.refresh()
         return id
     }
 

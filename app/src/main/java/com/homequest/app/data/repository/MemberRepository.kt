@@ -20,7 +20,8 @@ import kotlinx.coroutines.flow.combine
 class MemberRepository(
     private val dao: MemberDao,
     private val settings: SettingsRepository,
-    private val gamification: GamificationRepository
+    private val gamification: GamificationRepository,
+    private val badges: BadgeTracker
 ) {
     val members: Flow<List<MemberEntity>> = dao.observeAll()
 
@@ -39,7 +40,8 @@ class MemberRepository(
 
     suspend fun add(name: String, relation: String, phone: String, gender: Gender): Long {
         val id = dao.insert(newMember(name, relation, phone = phone, avatar = randomAvatar(gender)))
-        gamification.recordMemberAdded(dao.count() - 1)
+        gamification.recordMemberAdded()
+        badges.refresh()
         return id
     }
 

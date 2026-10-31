@@ -2,6 +2,7 @@ package com.homequest.app
 
 import android.content.Context
 import com.homequest.app.data.local.HomeQuestDatabase
+import com.homequest.app.data.repository.BadgeTracker
 import com.homequest.app.data.repository.CategoryRepository
 import com.homequest.app.data.repository.ExpenseRepository
 import com.homequest.app.data.repository.GamificationRepository
@@ -20,18 +21,20 @@ class AppContainer(context: Context) {
     val notificationHelper = NotificationHelper(context)
     val reminderScheduler = ReminderScheduler(context)
     val gamificationRepository = GamificationRepository(db.gamificationDao())
-    val categoryRepository = CategoryRepository(db.categoryDao(), db.expenseDao(), db.budgetDao())
+    val badgeTracker = BadgeTracker(db.expenseDao(), db.groupDao(), db.memberDao(), db.reminderDao(), db.categoryDao(), db.gamificationDao(), settingsRepository, gamificationRepository)
+    val categoryRepository = CategoryRepository(db.categoryDao(), db.expenseDao(), db.budgetDao(), badgeTracker)
     val budgetMonitor = BudgetMonitor(context, db.expenseDao(), db.budgetDao(), db.categoryDao(), settingsRepository, gamificationRepository, notificationHelper)
-    val memberRepository = MemberRepository(db.memberDao(), settingsRepository, gamificationRepository)
-    val expenseRepository = ExpenseRepository(db.expenseDao(), db.budgetDao(), gamificationRepository, budgetMonitor)
-    val groupRepository = GroupRepository(db.groupDao(), gamificationRepository)
-    val reminderRepository = ReminderRepository(db.reminderDao(), reminderScheduler)
+    val memberRepository = MemberRepository(db.memberDao(), settingsRepository, gamificationRepository, badgeTracker)
+    val expenseRepository = ExpenseRepository(db.expenseDao(), db.budgetDao(), gamificationRepository, budgetMonitor, badgeTracker)
+    val groupRepository = GroupRepository(db.groupDao(), db.expenseDao(), gamificationRepository, badgeTracker)
+    val reminderRepository = ReminderRepository(db.reminderDao(), reminderScheduler, badgeTracker)
 
     suspend fun bootstrap() {
         gamificationRepository.ensureInitialised()
         categoryRepository.ensureDefaults()
         memberRepository.ensureOwner()
         budgetMonitor.closePreviousMonthIfNeeded()
+        badgeTracker.refresh()
         reminderRepository.rescheduleAll()
     }
 }

@@ -44,9 +44,11 @@ import com.homequest.app.util.money
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 
 data class InsightsState(
@@ -60,10 +62,11 @@ data class InsightsState(
     val topCategory: Category? get() = series.maxByOrNull { it.value.sum() }?.key
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class InsightsViewModel(container: AppContainer) : ViewModel() {
-    private val monthKeys = (5 downTo 0).map { YearMonth.now().minusMonths(it.toLong()) }
-
-    val state: StateFlow<InsightsState> = combine(
+    val state: StateFlow<InsightsState> = Dates.days().flatMapLatest { today ->
+        val monthKeys = (5 downTo 0).map { YearMonth.from(today).minusMonths(it.toLong()) }
+        combine(
         container.gamificationRepository.unlockedIds,
         container.settingsRepository.settings,
         container.expenseRepository.monthCategoryTotals(monthKeys.first().atDay(1).toEpochDay()),
@@ -81,6 +84,7 @@ class InsightsViewModel(container: AppContainer) : ViewModel() {
             series = series,
             monthTotals = keys.indices.map { i -> series.values.sumOf { it[i] } }
         )
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InsightsState())
 }
 

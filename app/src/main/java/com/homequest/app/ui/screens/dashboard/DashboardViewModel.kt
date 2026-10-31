@@ -25,15 +25,19 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 
 data class PayerShare(val member: MemberEntity, val total: Double)
 
 data class DashboardState(
     val settings: AppSettings = AppSettings(),
+    val today: LocalDate = Dates.today(),
     val profile: ProfileEntity = ProfileEntity(),
     val level: LevelInfo = Levels.fromLifetimePoints(0),
     val member: MemberEntity? = null,
@@ -54,44 +58,49 @@ data class DashboardState(
     val mood: Mood
         get() {
             member?.avatar()?.mood?.let { return it }
-            val today = Dates.today()
             val sinceLog = if (profile.lastLogEpochDay < 0) 0L else today.toEpochDay() - profile.lastLogEpochDay
             return moodFor(budgetProgress, settings.monthlyBudget > 0, profile.streakDays, sinceLog, LocalTime.now().hour, today.dayOfMonth)
         }
     val monthChangePercent: Double? get() = if (lastMonthTotal > 0) (monthTotal - lastMonthTotal) / lastMonthTotal * 100 else null
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class DashboardViewModel(container: AppContainer) : ViewModel() {
     private val expenses = container.expenseRepository
     private val groups = container.groupRepository
-    private val monthRange = Dates.monthRange(YearMonth.now())
-    private val lastMonthRange = Dates.monthRange(YearMonth.now().minusMonths(1))
-    private val weekRange = Dates.last7Days()
+    private val spend = Dates.days().flatMapLatest { today -> spendOn(today) }
 
-    private val spend = combine(
-        expenses.categoryTotals(monthRange),
-        expenses.dayTotals(weekRange),
-        expenses.all,
-        container.memberRepository.members,
-        container.categoryRepository.categories
-    ) { categories, days, all, members, catalog ->
-        val byDay = days.associate { it.epochDay to it.total }
-        val dayKeys = weekRange.toList()
-        val today = Dates.today().toEpochDay()
-        val thisMonth = all.filter { it.expense.epochDay in monthRange }
-        val paid = thisMonth.groupBy { it.expense.paidByMemberId }.mapValues { (_, list) -> list.sumOf { it.expense.amount } }
-        val map = catalog.byId()
-        SpendSlice(
-            todayTotal = byDay[today] ?: 0.0,
-            monthTotal = thisMonth.sumOf { it.expense.amount },
-            lastMonthTotal = all.filter { it.expense.epochDay in lastMonthRange }.sumOf { it.expense.amount },
-            categories = categories.map { CategoryAmount(map.resolve(it.category), it.total) },
-            categoryMap = map,
-            weekValues = dayKeys.map { byDay[it] ?: 0.0 },
-            weekLabels = dayKeys.map { LocalDate.ofEpochDay(it).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()) },
-            recent = all.take(5),
-            payers = members.mapNotNull { m -> paid[m.id]?.let { PayerShare(m, it) } }.sortedByDescending { it.total }
-        )
+    private fun spendOn(date: LocalDate): Flow<SpendSlice> {
+        val month = YearMonth.from(date)
+        val monthRange = Dates.monthRange(month)
+        val lastMonthRange = Dates.monthRange(month.minusMonths(1))
+        val weekRange = Dates.last7Days(date)
+        return combine(
+            expenses.categoryTotals(monthRange),
+            expenses.dayTotals(weekRange),
+            expenses.all,
+            container.memberRepository.members,
+            container.categoryRepository.categories
+        ) { categories, days, all, members, catalog ->
+            val byDay = days.associate { it.epochDay to it.total }
+            val dayKeys = weekRange.toList()
+            val today = date.toEpochDay()
+            val thisMonth = all.filter { it.expense.epochDay in monthRange }
+            val paid = thisMonth.groupBy { it.expense.paidByMemberId }.mapValues { (_, list) -> list.sumOf { it.expense.amount } }
+            val map = catalog.byId()
+            SpendSlice(
+                today = date,
+                todayTotal = byDay[today] ?: 0.0,
+                monthTotal = thisMonth.sumOf { it.expense.amount },
+                lastMonthTotal = all.filter { it.expense.epochDay in lastMonthRange }.sumOf { it.expense.amount },
+                categories = categories.map { CategoryAmount(map.resolve(it.category), it.total) },
+                categoryMap = map,
+                weekValues = dayKeys.map { byDay[it] ?: 0.0 },
+                weekLabels = dayKeys.map { LocalDate.ofEpochDay(it).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()) },
+                recent = all.take(5),
+                payers = members.mapNotNull { m -> paid[m.id]?.let { PayerShare(m, it) } }.sortedByDescending { it.total }
+            )
+        }
     }
 
     private val social = combine(
@@ -115,6 +124,7 @@ class DashboardViewModel(container: AppContainer) : ViewModel() {
     ) { settings, profile, unlocked, slice, social ->
         DashboardState(
             settings = settings,
+            today = slice.today,
             profile = profile,
             level = Levels.fromLifetimePoints(profile.lifetimePoints),
             member = social.member,
@@ -134,6 +144,7 @@ class DashboardViewModel(container: AppContainer) : ViewModel() {
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
 
     private data class SpendSlice(
+        val today: LocalDate,
         val todayTotal: Double,
         val monthTotal: Double,
         val lastMonthTotal: Double,

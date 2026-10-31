@@ -137,7 +137,7 @@ private fun CategoryEditor(category: Category?, onDismiss: () -> Unit, onDelete:
     var name by remember { mutableStateOf(builtInName ?: category?.customName.orEmpty()) }
     var icon by remember { mutableStateOf(category?.iconKey ?: CategoryIcons.keys.first()) }
     var color by remember { mutableStateOf(category?.color ?: CategoryColors.first()) }
-    OptionSheet(stringResource(if (category == null) R.string.new_category else R.string.edit_category), onDismiss) {
+    OptionSheet(stringResource(if (category == null) R.string.new_category else R.string.edit_category), onDismiss, dismissByDrag = false) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(56.dp).background(color, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {

@@ -15,12 +15,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -57,24 +57,37 @@ import com.homequest.app.ui.screens.profile.RelationChips
 import com.homequest.app.ui.screens.profile.isValidPhone
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class FamilyViewModel(private val container: AppContainer) : ViewModel() {
-    val members: StateFlow<List<MemberEntity>> =
-        container.memberRepository.members.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+enum class JoinGroups { NONE, FROM_NOW, RESPLIT_PAST }
 
-    fun add(name: String, relation: String, phone: String, gender: Gender) = viewModelScope.launch { container.memberRepository.add(name, relation, phone, gender) }
+data class FamilyState(val members: List<MemberEntity> = emptyList(), val hasGroups: Boolean = false)
+
+class FamilyViewModel(private val container: AppContainer) : ViewModel() {
+    val state: StateFlow<FamilyState> = combine(container.memberRepository.members, container.groupRepository.groups) { members, groups ->
+        FamilyState(members, groups.isNotEmpty())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FamilyState())
+
+    fun add(name: String, relation: String, phone: String, gender: Gender, join: JoinGroups) = viewModelScope.launch {
+        val id = container.memberRepository.add(name, relation, phone, gender)
+        if (join != JoinGroups.NONE) container.groupRepository.addMemberToAllGroups(id, resplitPast = join == JoinGroups.RESPLIT_PAST)
+    }
     fun update(member: MemberEntity, name: String, relation: String, phone: String, gender: Gender) =
         viewModelScope.launch { container.memberRepository.updateDetails(member, name, relation, phone, gender) }
-    fun delete(member: MemberEntity) = viewModelScope.launch { container.memberRepository.delete(member) }
+    fun delete(member: MemberEntity, resplit: Boolean) = viewModelScope.launch {
+        if (resplit) container.groupRepository.resplitWithout(member.id)
+        container.memberRepository.delete(member)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     val vm = appViewModel { FamilyViewModel(it) }
-    val members by vm.members.collectAsStateWithLifecycle()
+    val state by vm.state.collectAsStateWithLifecycle()
+    var pendingAdd by remember { mutableStateOf<PendingMember?>(null) }
     var editing by remember { mutableStateOf<MemberEntity?>(null) }
     var adding by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf<MemberEntity?>(null) }
@@ -96,7 +109,7 @@ fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
                 Text(stringResource(R.string.family_intro), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(stringResource(R.string.family_local_only), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(top = 6.dp, bottom = 4.dp))
             }
-            items(members, key = { it.id }) { m ->
+            items(state.members, key = { it.id }) { m ->
                 HqCard(Modifier.fillMaxWidth(), padding = 12) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AvatarView(m.avatar(), size = 64.dp, modifier = Modifier.clickable { onOpenAvatar(m.id) })
@@ -119,7 +132,23 @@ fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     }
 
     if (adding) {
-        MemberSheet(title = stringResource(R.string.add_member), onDismiss = { adding = false }) { n, r, p, g -> vm.add(n, r, p, g); adding = false }
+        MemberSheet(title = stringResource(R.string.add_member), onDismiss = { adding = false }) { n, r, p, g ->
+            adding = false
+            if (state.hasGroups) pendingAdd = PendingMember(n, r, p, g) else vm.add(n, r, p, g, JoinGroups.NONE)
+        }
+    }
+    pendingAdd?.let { m ->
+        ChoiceSheet(
+            title = stringResource(R.string.join_groups_q, m.name),
+            body = stringResource(R.string.join_groups_body),
+            primary = stringResource(R.string.join_resplit),
+            secondary = stringResource(R.string.join_from_now),
+            tertiary = stringResource(R.string.join_not_now),
+            onDismiss = { vm.add(m.name, m.relation, m.phone, m.gender, JoinGroups.NONE); pendingAdd = null }
+        ) { choice ->
+            vm.add(m.name, m.relation, m.phone, m.gender, when (choice) { 0 -> JoinGroups.RESPLIT_PAST; 1 -> JoinGroups.FROM_NOW; else -> JoinGroups.NONE })
+            pendingAdd = null
+        }
     }
     editing?.let { m ->
         MemberSheet(title = stringResource(R.string.edit_member), initialName = m.name, initialRelation = m.relation, initialPhone = m.phone, initialGender = m.gender, onDismiss = { editing = null }) { n, r, p, g ->
@@ -127,13 +156,31 @@ fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
         }
     }
     deleting?.let { m ->
-        AlertDialog(
-            onDismissRequest = { deleting = null },
-            title = { Text(stringResource(R.string.remove_member_q, m.name)) },
-            text = { Text(stringResource(R.string.remove_member_body)) },
-            confirmButton = { TextButton(onClick = { vm.delete(m); deleting = null }) { Text(stringResource(R.string.remove)) } },
-            dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(R.string.cancel)) } }
-        )
+        ChoiceSheet(
+            title = stringResource(R.string.remove_member_q, m.name),
+            body = stringResource(R.string.remove_member_body),
+            primary = stringResource(R.string.remove_resplit),
+            secondary = stringResource(R.string.remove_keep),
+            tertiary = stringResource(R.string.cancel),
+            onDismiss = { deleting = null }
+        ) { choice ->
+            if (choice < 2) vm.delete(m, resplit = choice == 0)
+            deleting = null
+        }
+    }
+}
+
+private data class PendingMember(val name: String, val relation: String, val phone: String, val gender: Gender)
+
+@Composable
+private fun ChoiceSheet(title: String, body: String, primary: String, secondary: String, tertiary: String, onDismiss: () -> Unit, onChoice: (Int) -> Unit) {
+    OptionSheet(title, onDismiss, dismissByDrag = false) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            PrimaryButton(primary, onClick = { onChoice(0) })
+            OutlinedButton(onClick = { onChoice(1) }, modifier = Modifier.fillMaxWidth()) { Text(secondary, maxLines = 1) }
+            TextButton(onClick = { onChoice(2) }, modifier = Modifier.fillMaxWidth()) { Text(tertiary) }
+        }
     }
 }
 
@@ -151,7 +198,7 @@ private fun MemberSheet(
     var relation by remember { mutableStateOf(initialRelation) }
     var phone by remember { mutableStateOf(initialPhone) }
     var gender by remember { mutableStateOf(initialGender) }
-    OptionSheet(title, onDismiss) {
+    OptionSheet(title, onDismiss, dismissByDrag = false) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             HqTextField(name, { name = it }, stringResource(R.string.name))
             PhoneField(phone) { phone = it }

@@ -159,11 +159,7 @@ val Currencies = listOf(Currency("INR", "₹"), Currency("USD", "$"), Currency("
 enum class AppLanguage(val tag: String, val nativeName: String) {
     ENGLISH("en", "English"),
     HINDI("hi", "हिन्दी"),
-    GUJARATI("gu", "ગુજરાતી");
-
-    companion object {
-        fun fromTag(tag: String): AppLanguage = entries.firstOrNull { it.tag == tag } ?: ENGLISH
-    }
+    GUJARATI("gu", "ગુજરાતી")
 }
 
 object Relations {

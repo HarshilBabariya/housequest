@@ -1,9 +1,14 @@
 package com.homequest.app.util
 
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 object Dates {
     private val monthKeyFormat = DateTimeFormatter.ofPattern("yyyy-MM")
@@ -12,6 +17,14 @@ object Dates {
     private val monthTitle get() = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
 
     fun today(): LocalDate = LocalDate.now()
+
+    fun days(): Flow<LocalDate> = flow {
+        while (true) {
+            val now = LocalDateTime.now()
+            emit(now.toLocalDate())
+            delay(Duration.between(now, now.toLocalDate().plusDays(1).atStartOfDay()).toMillis() + 1_000)
+        }
+    }
 
     fun monthKey(date: LocalDate): String = date.format(monthKeyFormat)
 

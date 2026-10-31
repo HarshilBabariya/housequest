@@ -51,7 +51,7 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
 
     fun setDarkMode(mode: DarkMode) = viewModelScope.launch { settings.setDarkMode(mode) }
     fun setCurrency(symbol: String) = viewModelScope.launch { settings.setCurrency(symbol) }
-    fun setLanguage(tag: String) = viewModelScope.launch { settings.setLanguage(tag) }
+    fun setLanguage(tag: String) = viewModelScope.launch { settings.setLanguage(tag); container.badgeTracker.refresh() }
     fun setBudgetAlerts(enabled: Boolean) = viewModelScope.launch { settings.setBudgetAlerts(enabled) }
     fun setReminderNotifications(enabled: Boolean) = viewModelScope.launch { settings.setReminderNotifications(enabled) }
     fun setRewardNotifications(enabled: Boolean) = viewModelScope.launch { settings.setRewardNotifications(enabled) }

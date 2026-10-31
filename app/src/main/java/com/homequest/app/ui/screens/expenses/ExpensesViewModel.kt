@@ -32,15 +32,15 @@ class ExpensesViewModel(container: AppContainer) : ViewModel() {
         container.expenseRepository.all,
         container.categoryRepository.categories,
         container.settingsRepository.settings,
-        query,
-        categoryId
-    ) { all, categories, settings, q, cat ->
+        combine(query, categoryId) { q, c -> q to c },
+        Dates.days()
+    ) { all, categories, settings, (q, cat), today ->
         val filtered = all.filter { e ->
             (cat == null || e.expense.category == cat) &&
                 (q.isBlank() || e.expense.title.contains(q, ignoreCase = true) || e.expense.note.contains(q, ignoreCase = true))
         }
-        val thisMonth = Dates.monthRange(YearMonth.now())
-        val lastMonth = Dates.monthRange(YearMonth.now().minusMonths(1))
+        val thisMonth = Dates.monthRange(YearMonth.from(today))
+        val lastMonth = Dates.monthRange(YearMonth.from(today).minusMonths(1))
         ExpensesState(
             symbol = settings.currencySymbol,
             query = q,

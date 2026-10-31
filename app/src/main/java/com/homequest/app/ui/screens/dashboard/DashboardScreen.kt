@@ -100,7 +100,7 @@ fun DashboardScreen(
                             Text(if (state.settings.monthlyBudget > 0) "${(state.budgetProgress * 100).toInt()}%" else "—", style = MaterialTheme.typography.titleMedium)
                         }
                         Column(Modifier.padding(start = 20.dp).weight(1f)) {
-                            Text(stringResource(R.string.spent_in, Dates.monthLabel(YearMonth.now())), style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(stringResource(R.string.spent_in, Dates.monthLabel(YearMonth.from(state.today))), style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             AnimatedMoney(state.monthTotal, symbol, MaterialTheme.typography.headlineMedium)
                             Text(
                                 if (state.settings.monthlyBudget > 0) {
@@ -120,7 +120,7 @@ fun DashboardScreen(
             item {
                 val change = state.monthChangePercent
                 Row(Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatTile(stringResource(R.string.today), state.todayTotal.money(symbol), Modifier.weight(1f), hint = Dates.shortLabel(Dates.today().toEpochDay()), emoji = "☀️", onClick = onAddExpense)
+                    StatTile(stringResource(R.string.today), state.todayTotal.money(symbol), Modifier.weight(1f), hint = Dates.shortLabel(state.today.toEpochDay()), emoji = "☀️", onClick = onAddExpense)
                     StatTile(
                         stringResource(R.string.vs_last_month),
                         change?.let { "${if (it >= 0) "+" else ""}${"%.0f".format(it)}%" } ?: "—",

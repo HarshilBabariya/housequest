@@ -57,14 +57,17 @@ import com.homequest.app.ui.screens.expenses.OptionSheet
 import com.homequest.app.util.Dates
 import com.homequest.app.util.money
 import java.time.YearMonth
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class BudgetsState(
     val symbol: String = "₹",
+    val month: YearMonth = YearMonth.now(),
     val monthlyBudget: Double = 0.0,
     val monthTotal: Double = 0.0,
     val categories: List<Category> = emptyList(),
@@ -72,24 +75,27 @@ data class BudgetsState(
     val spent: Map<String, Double> = emptyMap()
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class BudgetsViewModel(private val container: AppContainer) : ViewModel() {
-    private val range = Dates.monthRange(YearMonth.now())
-
-    val state: StateFlow<BudgetsState> = combine(
-        container.settingsRepository.settings,
-        container.expenseRepository.total(range),
-        container.expenseRepository.budgets,
-        container.expenseRepository.categoryTotals(range),
-        container.categoryRepository.categories
-    ) { settings, total, budgets, totals, categories ->
-        BudgetsState(
-            symbol = settings.currencySymbol,
-            monthlyBudget = settings.monthlyBudget,
-            monthTotal = total,
-            categories = categories,
-            limits = budgets.associate { it.category to it.monthlyLimit },
-            spent = totals.associate { it.category to it.total }
-        )
+    val state: StateFlow<BudgetsState> = Dates.days().flatMapLatest { today ->
+        val range = Dates.monthRange(YearMonth.from(today))
+        combine(
+            container.settingsRepository.settings,
+            container.expenseRepository.total(range),
+            container.expenseRepository.budgets,
+            container.expenseRepository.categoryTotals(range),
+            container.categoryRepository.categories
+        ) { settings, total, budgets, totals, categories ->
+            BudgetsState(
+                symbol = settings.currencySymbol,
+                month = YearMonth.from(today),
+                monthlyBudget = settings.monthlyBudget,
+                monthTotal = total,
+                categories = categories,
+                limits = budgets.associate { it.category to it.monthlyLimit },
+                spent = totals.associate { it.category to it.total }
+            )
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), BudgetsState())
 
     fun setMonthly(amount: Double) = viewModelScope.launch { container.settingsRepository.setMonthlyBudget(amount) }
@@ -126,7 +132,7 @@ fun BudgetsScreen(onBack: () -> Unit) {
                             Text(if (state.monthlyBudget > 0) "${(progress * 100).toInt()}%" else "—", style = MaterialTheme.typography.titleMedium)
                         }
                         Column(Modifier.weight(1f).padding(start = 18.dp)) {
-                            Text(stringResource(R.string.spent_in, Dates.monthLabel(YearMonth.now())), style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(stringResource(R.string.spent_in, Dates.monthLabel(state.month)), style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Text(state.monthTotal.money(state.symbol), style = MaterialTheme.typography.headlineMedium, maxLines = 1)
                             Text(
                                 when {
@@ -157,15 +163,7 @@ fun BudgetsScreen(onBack: () -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         CategoryIcon(c, 44)
                         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(c.label(), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(
-                                    if (limit > 0) stringResource(R.string.spent_of, spent.money(state.symbol), limit.money(state.symbol)) else spent.money(state.symbol),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = if (fraction > 1f) scheme.error else scheme.onSurfaceVariant,
-                                    maxLines = 1
-                                )
-                            }
+                            Text(c.label(), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             if (limit > 0) {
                                 LinearProgressIndicator(
                                     progress = { fraction.coerceIn(0f, 1f) },
@@ -176,6 +174,10 @@ fun BudgetsScreen(onBack: () -> Unit) {
                             } else {
                                 Text(stringResource(R.string.tap_to_set_limit), style = MaterialTheme.typography.labelSmall, color = scheme.primary, modifier = Modifier.padding(top = 4.dp))
                             }
+                        }
+                        Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = 4.dp)) {
+                            Text(spent.money(state.symbol), style = MaterialTheme.typography.titleSmall, color = if (fraction > 1f) scheme.error else scheme.onSurface, maxLines = 1)
+                            if (limit > 0) Text(stringResource(R.string.of_limit, limit.money(state.symbol)), style = MaterialTheme.typography.labelSmall, color = scheme.onSurfaceVariant, maxLines = 1)
                         }
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
                     }
@@ -210,7 +212,7 @@ fun BudgetsScreen(onBack: () -> Unit) {
 private fun AmountSheet(title: String, initial: Double, symbol: String, onDismiss: () -> Unit, onClear: (() -> Unit)?, onSave: (Double) -> Unit) {
     var text by remember { mutableStateOf(if (initial > 0) (if (initial % 1.0 == 0.0) initial.toLong().toString() else initial.toString()) else "") }
     val value = text.toDoubleOrNull() ?: 0.0
-    OptionSheet(title, onDismiss) {
+    OptionSheet(title, onDismiss, dismissByDrag = false) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             HqTextField(
                 text, { v -> text = v.filter { it.isDigit() || it == '.' }.take(10) }, stringResource(R.string.amount),

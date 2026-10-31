@@ -15,7 +15,8 @@ import kotlinx.coroutines.flow.map
 class CategoryRepository(
     private val dao: CategoryDao,
     private val expenseDao: ExpenseDao,
-    private val budgetDao: BudgetDao
+    private val budgetDao: BudgetDao,
+    private val badges: BadgeTracker
 ) {
     val categories: Flow<List<Category>> = dao.observeAll().map { list -> list.map { it.toDomain() } }
 
@@ -28,6 +29,7 @@ class CategoryRepository(
     suspend fun add(name: String, iconKey: String, color: Color): String {
         val id = "custom_${System.currentTimeMillis()}"
         dao.upsert(CategoryEntity(id, name.titleCased(), iconKey, color.toArgb().toLong(), dao.maxSortOrder() + 1, builtIn = false))
+        badges.refresh()
         return id
     }
 

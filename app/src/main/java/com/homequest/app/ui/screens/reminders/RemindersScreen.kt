@@ -208,7 +208,7 @@ private fun AddReminderSheet(symbol: String, categories: List<Category>, onDismi
     var minute by remember { mutableIntStateOf(0) }
     val presetTitles = presets.map { stringResource(it.titleRes) }
 
-    OptionSheet(stringResource(R.string.new_reminder), onDismiss) {
+    OptionSheet(stringResource(R.string.new_reminder), onDismiss, dismissByDrag = false) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(presets.indices.toList()) { i ->

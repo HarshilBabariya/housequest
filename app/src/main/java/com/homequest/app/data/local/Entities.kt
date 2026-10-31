@@ -145,7 +145,8 @@ data class ProfileEntity(
     val lifetimePoints: Int = 0,
     val streakDays: Int = 0,
     val lastLogEpochDay: Long = -1,
-    val lastBudgetCheckMonth: String = ""
+    val lastBudgetCheckMonth: String = "",
+    val voiceLogs: Int = 0
 )
 
 @Entity(tableName = "unlocks")

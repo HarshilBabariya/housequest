@@ -1,17 +1,12 @@
 package com.homequest.app.ui.screens.rewards
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,15 +17,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,15 +37,12 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,16 +51,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homequest.app.R
+import com.homequest.app.domain.BadgeStatus
 import com.homequest.app.domain.RewardItem
 import com.homequest.app.domain.RewardKind
 import com.homequest.app.ui.appViewModel
@@ -75,14 +71,11 @@ import com.homequest.app.ui.components.AnimatedCount
 import com.homequest.app.ui.components.SectionHeader
 import com.homequest.app.ui.components.reasonLabel
 import com.homequest.app.ui.theme.Palettes
-import com.homequest.app.util.Dates
-import java.time.Instant
-import java.time.ZoneId
-import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
+fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges: () -> Unit) {
     val vm = appViewModel { RewardsViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -112,11 +105,18 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 32.dp)) {
             item {
                 val scheme = MaterialTheme.colorScheme
+                val shimmer by rememberInfiniteTransition(label = "hero").animateFloat(-1f, 2f, infiniteRepeatable(tween(2600, easing = LinearEasing)), label = "sweep")
                 Box(
                     Modifier
                         .padding(20.dp)
                         .fillMaxWidth()
-                        .background(Brush.linearGradient(listOf(scheme.primary, scheme.tertiary)), RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Brush.linearGradient(listOf(scheme.primary, scheme.tertiary)))
+                        .drawWithContent {
+                            drawContent()
+                            val x = size.width * shimmer
+                            drawRect(Brush.linearGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.22f), Color.Transparent), start = Offset(x - 160f, 0f), end = Offset(x + 160f, size.height)))
+                        }
                         .padding(20.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -131,15 +131,16 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
-                        Text("⭐", fontSize = 56.sp)
+                        val bob by rememberInfiniteTransition(label = "star").animateFloat(-6f, 6f, infiniteRepeatable(tween(1600), RepeatMode.Reverse), label = "bob")
+                        Text("⭐", fontSize = 56.sp, modifier = Modifier.offset { IntOffset(0, bob.roundToInt()) })
                     }
                 }
             }
             item {
                 val earnedCount = state.badges.count { it.earned }
-                SectionHeader(stringResource(R.string.badges_count, earnedCount, state.badges.size))
+                SectionHeader(stringResource(R.string.badges_count, earnedCount, state.badges.size), action = stringResource(R.string.see_all), onAction = onOpenBadges)
                 LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(state.badges, key = { it.badge.id }) { status -> BadgeTile(status, Modifier.width(118.dp)) { selectedBadge = status } }
+                    itemsIndexed(state.badges.take(8), key = { _, s -> s.badge.id }) { i, status -> BadgeTile(status, i, Modifier.width(118.dp)) { selectedBadge = status } }
                 }
             }
             item {
@@ -151,6 +152,7 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
             }
             items(state.items, key = { it.id }) { item ->
                 RewardRow(
+                    modifier = Modifier.animateItem(),
                     item = item,
                     unlocked = item.id in state.unlocked,
                     active = item.kind == RewardKind.THEME && item.id == state.activeThemeId,
@@ -181,115 +183,10 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
 }
 
 @Composable
-private fun BadgeTile(status: BadgeStatus, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    val badge = status.badge
-    Column(
-        modifier
-            .background(scheme.surfaceContainerLowest, RoundedCornerShape(18.dp))
-            .border(1.dp, if (status.earned) scheme.primary.copy(alpha = 0.35f) else scheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Box(
-                Modifier
-                    .size(54.dp)
-                    .background(
-                        if (status.earned) Brush.linearGradient(listOf(scheme.primary, scheme.secondary)) else Brush.linearGradient(listOf(scheme.surfaceContainerHigh, scheme.surfaceContainerHigh)),
-                        CircleShape
-                    )
-                    .padding(3.dp)
-                    .background(scheme.surfaceContainerLowest, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(badge.emoji, fontSize = 24.sp, modifier = Modifier.alpha(if (status.earned) 1f else 0.35f))
-            }
-            if (!status.earned) {
-                Box(Modifier.align(Alignment.BottomEnd).size(20.dp).background(scheme.surfaceContainerHigh, CircleShape).border(1.dp, scheme.surfaceContainerLowest, CircleShape), contentAlignment = Alignment.Center) {
-                    Text("🔒", fontSize = 10.sp)
-                }
-            }
-        }
-        Text(stringResource(badge.nameRes), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, color = if (status.earned) scheme.onSurface else scheme.onSurfaceVariant)
-        LinearProgressIndicator(
-            progress = { status.fraction },
-            modifier = Modifier.padding(top = 6.dp, start = 10.dp, end = 10.dp).fillMaxWidth().height(4.dp),
-            color = if (status.earned) scheme.secondary else scheme.primary,
-            trackColor = scheme.surfaceContainerHigh
-        )
-        Text(
-            if (status.earned) stringResource(R.string.plus_pts, badge.bonusPoints) else "${status.progress.coerceAtMost(badge.target)}/${badge.target}",
-            style = MaterialTheme.typography.labelSmall,
-            color = if (status.earned) scheme.primary else scheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 2.dp),
-            maxLines = 1
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun BadgeDetailSheet(status: BadgeStatus, onDismiss: () -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    val badge = status.badge
-    val pop = remember { Animatable(0f) }
-    LaunchedEffect(badge.id) { pop.snapTo(0f); pop.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) }
-    val spin by rememberInfiniteTransition(label = "ring").animateFloat(0f, 360f, infiniteRepeatable(tween(4000, easing = LinearEasing)), label = "spin")
-    var revealed by remember(badge.id) { mutableStateOf(0) }
-    LaunchedEffect(badge.id) { badge.howTo.indices.forEach { delay(140); revealed = it + 1 } }
-
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(Modifier.size(132.dp).scale(0.6f + 0.4f * pop.value), contentAlignment = Alignment.Center) {
-                if (status.earned) {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .rotate(spin)
-                            .background(Brush.sweepGradient(listOf(scheme.primary, scheme.secondary, scheme.tertiary, scheme.primary)), CircleShape)
-                    )
-                } else {
-                    Box(Modifier.fillMaxSize().background(scheme.surfaceContainerHigh, CircleShape))
-                }
-                Box(Modifier.size(116.dp).background(scheme.surfaceContainerLowest, CircleShape), contentAlignment = Alignment.Center) {
-                    Text(badge.emoji, fontSize = 56.sp, modifier = Modifier.alpha(if (status.earned) 1f else 0.45f))
-                }
-            }
-            Text(stringResource(badge.nameRes), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 14.dp))
-            Text(stringResource(badge.descriptionRes), style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant)
-            Text(
-                if (status.earned) stringResource(R.string.earned_on, Dates.longLabel(Instant.ofEpochMilli(status.earnedAt!!).atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay()), badge.bonusPoints)
-                else stringResource(R.string.reward_points, badge.bonusPoints),
-                style = MaterialTheme.typography.labelLarge,
-                color = scheme.primary,
-                modifier = Modifier.padding(top = 6.dp)
-            )
-            if (!status.earned) {
-                LinearProgressIndicator(progress = { status.fraction }, modifier = Modifier.fillMaxWidth().height(8.dp).padding(top = 2.dp), color = scheme.primary, trackColor = scheme.surfaceContainerHigh)
-                Text(stringResource(R.string.progress_of, status.progress.coerceAtMost(badge.target), badge.target, stringResource(badge.unitRes)), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp))
-            }
-            Text(stringResource(R.string.how_to_earn), style = MaterialTheme.typography.titleSmall, color = scheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 6.dp))
-            badge.howTo.forEachIndexed { i, stepRes ->
-                AnimatedVisibility(visible = i < revealed, enter = fadeIn() + slideInHorizontally { it / 4 }) {
-                    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(28.dp).background(if (status.earned) scheme.primaryContainer else scheme.surfaceContainerHigh, CircleShape), contentAlignment = Alignment.Center) {
-                            Text(if (status.earned) "✓" else "${i + 1}", style = MaterialTheme.typography.labelLarge, color = if (status.earned) scheme.onPrimaryContainer else scheme.onSurfaceVariant)
-                        }
-                        Text(stringResource(stepRes), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 12.dp))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RewardRow(item: RewardItem, unlocked: Boolean, active: Boolean, affordable: Boolean, onRedeem: () -> Unit, onUse: () -> Unit) {
+private fun RewardRow(modifier: Modifier, item: RewardItem, unlocked: Boolean, active: Boolean, affordable: Boolean, onRedeem: () -> Unit, onUse: () -> Unit) {
     val border by animateColorAsState(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, label = "border")
     Row(
-        Modifier
+        modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 6.dp)
             .border(2.dp, border, RoundedCornerShape(18.dp))
