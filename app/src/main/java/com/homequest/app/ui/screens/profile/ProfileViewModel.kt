@@ -7,6 +7,7 @@ import com.homequest.app.AppContainer
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.AppSettings
 import com.homequest.app.data.repository.DarkMode
+import com.homequest.app.data.repository.byId
 import com.homequest.app.domain.Features
 import com.homequest.app.domain.LevelInfo
 import com.homequest.app.domain.Levels
@@ -24,13 +25,14 @@ data class ProfileState(
     val points: Int = 0,
     val streak: Int = 0,
     val memberCount: Int = 0,
-    val exportUnlocked: Boolean = false
+    val exportUnlocked: Boolean = false,
+    val sampleLoaded: Boolean = false
 )
 
 class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     private val settings = container.settingsRepository
 
-    val state: StateFlow<ProfileState> = combine(
+    private val base = combine(
         container.memberRepository.members,
         container.memberRepository.activeMember,
         settings.settings,
@@ -46,10 +48,14 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
             memberCount = members.size,
             exportUnlocked = Features.EXPORT_CSV in unlocked
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileState())
+    }
+
+    val state: StateFlow<ProfileState> = combine(base, container.sampleDataRepository.loaded) { s, sample -> s.copy(sampleLoaded = sample) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileState())
 
     fun setDarkMode(mode: DarkMode) = viewModelScope.launch { settings.setDarkMode(mode) }
     fun setCurrency(symbol: String) = viewModelScope.launch { settings.setCurrency(symbol) }
+    fun setLanguage(tag: String) = viewModelScope.launch { settings.setLanguage(tag) }
     fun setBudgetAlerts(enabled: Boolean) = viewModelScope.launch { settings.setBudgetAlerts(enabled) }
     fun setReminderNotifications(enabled: Boolean) = viewModelScope.launch { settings.setReminderNotifications(enabled) }
     fun setRewardNotifications(enabled: Boolean) = viewModelScope.launch { settings.setRewardNotifications(enabled) }
@@ -59,7 +65,12 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
         settings.setAppLock(true)
     }
 
+    fun toggleSampleData() = viewModelScope.launch {
+        if (state.value.sampleLoaded) container.sampleDataRepository.clear()
+        else container.sampleDataRepository.load(container.memberRepository.activeMemberId())
+    }
+
     fun exportCsv(context: Context) = viewModelScope.launch {
-        Sharing.exportCsv(context, container.expenseRepository.allForExport())
+        Sharing.exportCsv(context, container.expenseRepository.allForExport(), container.categoryRepository.all().byId())
     }
 }

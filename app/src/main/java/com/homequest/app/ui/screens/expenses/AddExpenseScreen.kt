@@ -1,10 +1,14 @@
 package com.homequest.app.ui.screens.expenses
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +16,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -25,7 +30,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
@@ -35,6 +45,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -43,59 +54,88 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.homequest.app.R
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.avatar
-import com.homequest.app.domain.ExpenseCategory
+import com.homequest.app.domain.Category
+import com.homequest.app.domain.PaymentMode
 import com.homequest.app.domain.SplitCalculator
 import com.homequest.app.domain.SplitType
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AvatarView
+import com.homequest.app.ui.components.HqCard
 import com.homequest.app.ui.components.HqTextField
+import com.homequest.app.ui.components.PickerRow
 import com.homequest.app.ui.components.PrimaryButton
-import com.homequest.app.ui.components.SectionCard
+import com.homequest.app.ui.components.label
 import com.homequest.app.util.Dates
 import com.homequest.app.util.money
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.util.Locale
 import kotlin.math.abs
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+private enum class Sheet { CATEGORY, PAYMENT, PAID_BY, GROUP }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddExpenseScreen(expenseId: Long, groupId: Long, onDone: () -> Unit) {
+fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, onDone: () -> Unit, onOpenCategories: () -> Unit) {
     val vm = appViewModel { AddExpenseViewModel(it, expenseId, groupId) }
     val state by vm.state.collectAsStateWithLifecycle()
     val form = state.form
     val scheme = MaterialTheme.colorScheme
     var showDatePicker by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
+    var sheet by remember { mutableStateOf<Sheet?>(null) }
+    val voiceUnavailable = stringResource(R.string.voice_unavailable)
+    val voicePrompt = stringResource(R.string.voice_prompt)
+    val locale = Locale.getDefault().let { if (it.country.isEmpty()) "${it.language}-IN" else it.toLanguageTag() }
+
+    val voiceLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { vm.applyVoice(it) }
+    }
+    val startVoice = {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+            .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            .putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale)
+            .putExtra(RecognizerIntent.EXTRA_PROMPT, voicePrompt)
+        try {
+            voiceLauncher.launch(intent)
+        } catch (e: ActivityNotFoundException) {
+            vm.update { copy(heardText = voiceUnavailable) }
+        }
+    }
+    LaunchedEffect(Unit) { if (startWithVoice && expenseId == 0L) startVoice() }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
-                title = { Text(if (form.isEdit) "Edit expense" else "New expense") },
-                navigationIcon = { IconButton(onClick = onDone) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
-                actions = { if (form.isEdit) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Filled.Delete, contentDescription = "Delete") } }
+                title = { Text(stringResource(if (form.isEdit) R.string.edit_expense else R.string.add_transaction), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                navigationIcon = { IconButton(onClick = onDone) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } },
+                actions = { if (form.isEdit) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete)) } }
             )
         },
         bottomBar = {
             Box(Modifier.background(scheme.background).padding(20.dp)) {
-                PrimaryButton(if (form.isEdit) "Save changes" else "Add expense", onClick = { vm.save(onDone) }, enabled = form.isValid && form.loaded)
+                PrimaryButton(stringResource(if (form.isEdit) R.string.save_changes else R.string.save_expense), onClick = { vm.save(onDone) }, enabled = form.isValid && form.loaded)
             }
         }
     ) { padding ->
@@ -103,27 +143,38 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, onDone: () -> Unit) {
             Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Column(
+            Row(
                 Modifier
                     .fillMaxWidth()
-                    .background(Brush.linearGradient(listOf(scheme.primary, scheme.secondary)), RoundedCornerShape(22.dp))
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .background(scheme.tertiaryContainer.copy(alpha = 0.55f), RoundedCornerShape(18.dp))
+                    .border(1.dp, scheme.tertiary.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
+                    .clickable(onClick = startVoice)
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Amount", style = MaterialTheme.typography.labelLarge, color = scheme.onPrimary.copy(alpha = 0.85f))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(state.symbol, style = MaterialTheme.typography.headlineMedium, color = scheme.onPrimary.copy(alpha = 0.85f))
-                    Spacer(Modifier.width(6.dp))
+                Icon(Icons.Filled.Mic, contentDescription = null, tint = scheme.tertiary)
+                Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+                    Text(stringResource(R.string.voice_title), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(form.heardText?.let { "“$it”" } ?: stringResource(R.string.voice_subtitle), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
+            }
+
+            HqCard(padding = 0) {
+                Row(Modifier.padding(horizontal = 20.dp, vertical = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(state.symbol, style = MaterialTheme.typography.headlineMedium, color = scheme.primary)
+                    Spacer(Modifier.width(10.dp))
                     BasicTextField(
                         value = form.amountText,
                         onValueChange = { v -> vm.update { copy(amountText = v.filter { it.isDigit() || it == '.' }.take(10)) } },
-                        textStyle = MaterialTheme.typography.displayMedium.copy(color = scheme.onPrimary, textAlign = TextAlign.Start),
+                        textStyle = MaterialTheme.typography.displayMedium.copy(color = scheme.onSurface),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        cursorBrush = SolidColor(scheme.onPrimary),
+                        cursorBrush = SolidColor(scheme.primary),
+                        modifier = Modifier.weight(1f),
                         decorationBox = { inner ->
                             Box(contentAlignment = Alignment.CenterStart) {
-                                if (form.amountText.isEmpty()) Text("0", style = MaterialTheme.typography.displayMedium, color = scheme.onPrimary.copy(alpha = 0.4f))
+                                if (form.amountText.isEmpty()) Text("0", style = MaterialTheme.typography.displayMedium, color = scheme.onSurfaceVariant.copy(alpha = 0.35f))
                                 inner()
                             }
                         }
@@ -131,69 +182,43 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, onDone: () -> Unit) {
                 }
             }
 
-            SectionCard("Details") {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HqTextField(form.title, { v -> vm.update { copy(title = v) } }, "What was it for?", placeholder = "e.g. Weekly groceries")
-                    HqTextField(form.note, { v -> vm.update { copy(note = v) } }, "Note (optional)", singleLine = false, minLines = 2)
-                }
+            HqTextField(form.title, { v -> vm.update { copy(title = v) } }, stringResource(R.string.what_for), placeholder = stringResource(R.string.what_for_hint))
+
+            val today = LocalDate.now()
+            HqCard(padding = 0) {
+                PickerRow(
+                    icon = Icons.Filled.CalendarToday,
+                    label = stringResource(R.string.date),
+                    value = when (form.date) {
+                        today -> stringResource(R.string.today_with_date, Dates.longLabel(form.date.toEpochDay()))
+                        today.minusDays(1) -> stringResource(R.string.yesterday_with_date, Dates.longLabel(form.date.toEpochDay()))
+                        else -> Dates.longLabel(form.date.toEpochDay())
+                    },
+                    onClick = { showDatePicker = true }
+                )
+                PickerRow(icon = state.category.icon, tint = state.category.color, label = stringResource(R.string.category), value = state.category.label(), onClick = { sheet = Sheet.CATEGORY })
+                PickerRow(icon = form.paymentMode.icon, label = stringResource(R.string.payment_mode), value = stringResource(form.paymentMode.labelRes), onClick = { sheet = Sheet.PAYMENT })
+                PickerRow(
+                    icon = Icons.Filled.Person,
+                    label = stringResource(R.string.paid_by),
+                    value = state.members.firstOrNull { it.id == form.paidByMemberId }?.name ?: "—",
+                    onClick = { sheet = Sheet.PAID_BY }
+                )
+                PickerRow(
+                    icon = Icons.Filled.Groups,
+                    label = stringResource(R.string.split_with_group),
+                    value = state.groups.firstOrNull { it.group.id == form.groupId }?.let { "${it.group.emoji} ${it.group.name}" } ?: stringResource(R.string.not_shared),
+                    onClick = { sheet = Sheet.GROUP },
+                    last = true
+                )
             }
 
-            SectionCard("Category") {
-                FlowRow(maxItemsInEachRow = 5, horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ExpenseCategory.entries.forEach { c ->
-                        val selected = form.category == c
-                        Column(
-                            Modifier
-                                .weight(1f)
-                                .clickable { vm.update { copy(category = c) } },
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(
-                                Modifier
-                                    .size(48.dp)
-                                    .background(if (selected) c.color else c.color.copy(alpha = 0.14f), RoundedCornerShape(16.dp))
-                                    .border(2.dp, if (selected) c.color else Color.Transparent, RoundedCornerShape(16.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(c.icon, contentDescription = c.label, tint = if (selected) Color.White else c.color)
-                            }
-                            Text(c.label, style = MaterialTheme.typography.labelSmall, maxLines = 1, modifier = Modifier.padding(top = 4.dp), color = if (selected) scheme.onSurface else scheme.onSurfaceVariant)
-                        }
-                    }
-                }
-            }
-
-            SectionCard("Paid by") {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    state.members.forEach { m -> MemberChip(m, selected = form.paidByMemberId == m.id) { vm.update { copy(paidByMemberId = m.id) } } }
-                }
-            }
-
-            SectionCard("When") {
-                val today = LocalDate.now()
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = form.date == today, onClick = { vm.update { copy(date = today) } }, label = { Text("Today") })
-                    FilterChip(selected = form.date == today.minusDays(1), onClick = { vm.update { copy(date = today.minusDays(1)) } }, label = { Text("Yesterday") })
-                    FilterChip(
-                        selected = form.date != today && form.date != today.minusDays(1),
-                        onClick = { showDatePicker = true },
-                        label = { Text(if (form.date != today && form.date != today.minusDays(1)) Dates.longLabel(form.date.toEpochDay()) else "Pick a date") }
-                    )
-                }
-            }
-
-            SectionCard("Split with a group") {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = form.groupId == null, onClick = { vm.selectGroup(null) }, label = { Text("Not shared") })
-                    state.groups.forEach { g ->
-                        FilterChip(selected = form.groupId == g.group.id, onClick = { vm.selectGroup(g) }, label = { Text("${g.group.emoji} ${g.group.name}") })
-                    }
-                }
-                AnimatedVisibility(visible = form.groupId != null) {
-                    Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            AnimatedVisibility(visible = form.groupId != null) {
+                HqCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                            listOf(SplitType.EQUAL to "Equally", SplitType.CUSTOM to "Custom amounts").forEachIndexed { i, (type, label) ->
-                                SegmentedButton(selected = form.splitType == type, onClick = { vm.update { copy(splitType = type) } }, shape = SegmentedButtonDefaults.itemShape(i, 2)) { Text(label) }
+                            listOf(SplitType.EQUAL to R.string.split_equally, SplitType.CUSTOM to R.string.split_custom).forEachIndexed { i, (type, labelRes) ->
+                                SegmentedButton(selected = form.splitType == type, onClick = { vm.update { copy(splitType = type) } }, shape = SegmentedButtonDefaults.itemShape(i, 2)) { Text(stringResource(labelRes), maxLines = 1) }
                             }
                         }
                         val amount = form.amount ?: 0.0
@@ -203,15 +228,15 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, onDone: () -> Unit) {
                                 if (form.splitType == SplitType.EQUAL) {
                                     Checkbox(checked = m.id in form.splitMemberIds, onCheckedChange = { vm.toggleSplitMember(m.id) })
                                     AvatarView(m.avatar(), size = 28.dp)
-                                    Text(m.name, Modifier.weight(1f).padding(start = 8.dp))
+                                    Text(m.name, Modifier.weight(1f).padding(start = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     Text((equal[m.id] ?: 0.0).money(state.symbol), style = MaterialTheme.typography.titleSmall)
                                 } else {
                                     AvatarView(m.avatar(), size = 28.dp)
-                                    Text(m.name, Modifier.weight(1f).padding(start = 8.dp))
+                                    Text(m.name, Modifier.weight(1f).padding(start = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     HqTextField(
                                         form.customShares[m.id].orEmpty(),
                                         { vm.setCustomShare(m.id, it.filter { ch -> ch.isDigit() || ch == '.' }) },
-                                        "Share", prefix = state.symbol,
+                                        stringResource(R.string.share_amount), prefix = state.symbol,
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                         modifier = Modifier.width(140.dp)
                                     )
@@ -221,7 +246,11 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, onDone: () -> Unit) {
                         if (form.splitType == SplitType.CUSTOM) {
                             val diff = amount - form.customTotal
                             Text(
-                                if (abs(diff) < 0.01) "Shares add up ✔" else "${abs(diff).money(state.symbol)} ${if (diff > 0) "left to assign" else "over"}",
+                                when {
+                                    abs(diff) < 0.01 -> stringResource(R.string.shares_ok)
+                                    diff > 0 -> stringResource(R.string.shares_left, abs(diff).money(state.symbol))
+                                    else -> stringResource(R.string.shares_over, abs(diff).money(state.symbol))
+                                },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (abs(diff) < 0.01) scheme.primary else scheme.error
                             )
@@ -229,8 +258,43 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, onDone: () -> Unit) {
                     }
                 }
             }
+
+            Text(stringResource(R.string.other_details), style = MaterialTheme.typography.titleSmall, color = scheme.onSurfaceVariant)
+            HqTextField(form.note, { v -> vm.update { copy(note = v) } }, stringResource(R.string.note), placeholder = stringResource(R.string.note_hint), singleLine = false, minLines = 2)
             Spacer(Modifier.height(8.dp))
         }
+    }
+
+    when (sheet) {
+        Sheet.CATEGORY -> OptionSheet(stringResource(R.string.category), onDismiss = { sheet = null }) {
+            CategoryGrid(state.categories, form.categoryId) { vm.update { copy(categoryId = it) }; sheet = null }
+            TextButton(onClick = { sheet = null; onOpenCategories() }, modifier = Modifier.padding(top = 8.dp)) { Text(stringResource(R.string.manage_categories)) }
+        }
+        Sheet.PAYMENT -> OptionSheet(stringResource(R.string.payment_mode), onDismiss = { sheet = null }) {
+            PaymentMode.entries.forEach { mode ->
+                Row(
+                    Modifier.fillMaxWidth().clickable { vm.update { copy(paymentMode = mode) }; sheet = null }.padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(mode.icon, contentDescription = null, tint = if (mode == form.paymentMode) scheme.primary else scheme.onSurfaceVariant)
+                    Text(stringResource(mode.labelRes), Modifier.weight(1f).padding(start = 14.dp), style = MaterialTheme.typography.bodyLarge)
+                    if (mode == form.paymentMode) Text("✓", color = scheme.primary, style = MaterialTheme.typography.titleMedium)
+                }
+            }
+        }
+        Sheet.PAID_BY -> OptionSheet(stringResource(R.string.paid_by), onDismiss = { sheet = null }) {
+            MemberFlow(state.members, form.paidByMemberId) { vm.update { copy(paidByMemberId = it) }; sheet = null }
+        }
+        Sheet.GROUP -> OptionSheet(stringResource(R.string.split_with_group), onDismiss = { sheet = null }) {
+            MemberFlowChips {
+                FilterChip(selected = form.groupId == null, onClick = { vm.selectGroup(null); sheet = null }, label = { Text(stringResource(R.string.not_shared)) })
+                state.groups.forEach { g ->
+                    FilterChip(selected = form.groupId == g.group.id, onClick = { vm.selectGroup(g); sheet = null }, label = { Text("${g.group.emoji} ${g.group.name}", maxLines = 1) })
+                }
+            }
+            if (state.groups.isEmpty()) Text(stringResource(R.string.no_groups_hint), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
+        }
+        null -> Unit
     }
 
     if (showDatePicker) {
@@ -241,20 +305,63 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, onDone: () -> Unit) {
                 TextButton(onClick = {
                     pickerState.selectedDateMillis?.let { ms -> vm.update { copy(date = Instant.ofEpochMilli(ms).atZone(ZoneOffset.UTC).toLocalDate()) } }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.ok)) }
             },
-            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } }
+            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.cancel)) } }
         ) { DatePicker(state = pickerState) }
     }
 
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Delete expense?") },
-            text = { Text("This removes the expense and any splits linked to it.") },
-            confirmButton = { TextButton(onClick = { confirmDelete = false; vm.delete(onDone) }) { Text("Delete") } },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } }
+            title = { Text(stringResource(R.string.delete_expense_q)) },
+            text = { Text(stringResource(R.string.delete_expense_body)) },
+            confirmButton = { TextButton(onClick = { confirmDelete = false; vm.delete(onDone) }) { Text(stringResource(R.string.delete)) } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) } }
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OptionSheet(title: String, onDismiss: () -> Unit, content: @Composable () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 28.dp)) {
+            Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 12.dp))
+            content()
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun MemberFlowChips(content: @Composable () -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
+}
+
+@Composable
+fun MemberFlow(members: List<MemberEntity>, selectedId: Long, onSelect: (Long) -> Unit) {
+    MemberFlowChips { members.forEach { m -> MemberChip(m, selected = m.id == selectedId) { onSelect(m.id) } } }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CategoryGrid(categories: List<Category>, selectedId: String, onSelect: (String) -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    FlowRow(maxItemsInEachRow = 4, horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+        categories.forEach { c ->
+            val selected = selectedId == c.id
+            Column(Modifier.weight(1f).clickable { onSelect(c.id) }, horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    Modifier
+                        .size(52.dp)
+                        .background(if (selected) c.color else c.color.copy(alpha = 0.14f), RoundedCornerShape(16.dp))
+                        .border(2.dp, if (selected) c.color else Color.Transparent, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) { Icon(c.icon, contentDescription = null, tint = if (selected) Color.White else c.color) }
+                Text(c.label(), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp), color = if (selected) scheme.onSurface else scheme.onSurfaceVariant)
+            }
+        }
     }
 }
 
@@ -270,6 +377,6 @@ fun MemberChip(member: MemberEntity, selected: Boolean, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AvatarView(member.avatar(), size = 30.dp)
-        Text(member.name, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 6.dp), color = if (selected) scheme.onPrimaryContainer else scheme.onSurface)
+        Text(member.name, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 6.dp), color = if (selected) scheme.onPrimaryContainer else scheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

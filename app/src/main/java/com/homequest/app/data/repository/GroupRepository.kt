@@ -8,6 +8,7 @@ import com.homequest.app.data.local.GroupWithMembers
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.local.SettlementEntity
 import com.homequest.app.domain.MemberBalance
+import com.homequest.app.util.titleCased
 import kotlinx.coroutines.flow.Flow
 
 class GroupRepository(
@@ -21,7 +22,7 @@ class GroupRepository(
     val allSettlements: Flow<List<SettlementEntity>> = dao.observeAllSettlements()
 
     suspend fun create(name: String, emoji: String, memberIds: List<Long>): Long {
-        val id = dao.createWithMembers(GroupEntity(name = name.trim(), emoji = emoji), memberIds)
+        val id = dao.createWithMembers(GroupEntity(name = name.titleCased(), emoji = emoji), memberIds)
         gamification.recordGroupCreated()
         return id
     }

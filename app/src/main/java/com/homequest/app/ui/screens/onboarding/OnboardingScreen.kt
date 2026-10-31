@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,11 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -40,21 +35,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.homequest.app.R
+import com.homequest.app.domain.AppLanguage
 import com.homequest.app.domain.AvatarConfig
 import com.homequest.app.domain.Currencies
-import com.homequest.app.domain.Currency
+import com.homequest.app.domain.Mood
 import com.homequest.app.ui.components.AvatarView
 import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.ui.components.PinEntry
 import com.homequest.app.ui.components.PrimaryButton
+import com.homequest.app.ui.screens.profile.PhoneField
+import com.homequest.app.ui.screens.profile.isValidPhone
 import com.homequest.app.util.Pin
 
 private const val STEPS = 3
 
 @Composable
-fun OnboardingScreen(onComplete: (name: String, phone: String, currency: String, budget: Double, pin: String?) -> Unit) {
+fun OnboardingScreen(
+    language: String,
+    onLanguage: (String) -> Unit,
+    onComplete: (name: String, phone: String, currency: String, budget: Double, pin: String?, nudgeTitle: String) -> Unit
+) {
     val scheme = MaterialTheme.colorScheme
     var step by remember { mutableIntStateOf(0) }
     var name by remember { mutableStateOf("") }
@@ -62,10 +66,10 @@ fun OnboardingScreen(onComplete: (name: String, phone: String, currency: String,
     var currency by remember { mutableStateOf(Currencies.first()) }
     var budget by remember { mutableStateOf("") }
     var firstPin by remember { mutableStateOf<String?>(null) }
-    var pinMessage by remember { mutableStateOf<String?>(null) }
+    var pinMessage by remember { mutableStateOf<Int?>(null) }
     var wave by remember { mutableIntStateOf(1) }
-
-    val phoneValid = phone.filter(Char::isDigit).length >= 10
+    val nudgeTitle = stringResource(R.string.preset_daily_nudge)
+    val finish = { pin: String? -> onComplete(name.trim(), phone, currency.symbol, budget.toDoubleOrNull() ?: 0.0, pin, nudgeTitle) }
 
     Column(
         Modifier
@@ -76,18 +80,11 @@ fun OnboardingScreen(onComplete: (name: String, phone: String, currency: String,
     ) {
         Row(Modifier.padding(horizontal = 24.dp, vertical = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             repeat(STEPS) { i ->
-                Box(
-                    Modifier
-                        .weight(1f)
-                        .height(4.dp)
-                        .background(if (i <= step) scheme.primary else scheme.outlineVariant, RoundedCornerShape(2.dp))
-                )
+                Box(Modifier.weight(1f).height(4.dp).background(if (i <= step) scheme.primary else scheme.outlineVariant, RoundedCornerShape(2.dp)))
             }
         }
-        Box(Modifier.fillMaxWidth().padding(top = 8.dp), contentAlignment = Alignment.Center) {
-            Box(Modifier.background(scheme.surfaceContainerLowest.copy(alpha = 0.7f), CircleShape).padding(10.dp)) {
-                AvatarView(AvatarConfig(), size = 132.dp, animated = true, waveTrigger = wave)
-            }
+        Box(Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
+            AvatarView(AvatarConfig(), size = 132.dp, animated = true, mood = if (step == 2) Mood.SMART else Mood.EXCITED, waveTrigger = wave, background = scheme.surfaceContainerLowest)
         }
         AnimatedContent(
             targetState = step,
@@ -98,50 +95,49 @@ fun OnboardingScreen(onComplete: (name: String, phone: String, currency: String,
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 when (current) {
                     0 -> {
-                        Title("Welcome to HomeQuest", "Track what the house spends, split it fairly, and earn rewards for staying on budget.")
-                        HqTextField(name, { name = it }, "Your name", placeholder = "e.g. Harshil")
-                        HqTextField(
-                            phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(15) }, "Mobile number",
-                            placeholder = "10-digit number",
-                            supporting = if (phone.isNotEmpty() && !phoneValid) "Enter at least 10 digits" else "Identifies you on the member picker",
-                            isError = phone.isNotEmpty() && !phoneValid,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-                        )
+                        Title(stringResource(R.string.welcome_title), stringResource(R.string.welcome_body))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            AppLanguage.entries.forEach { lang ->
+                                FilterChip(selected = language == lang.tag, onClick = { onLanguage(lang.tag) }, label = { Text(lang.nativeName, maxLines = 1) })
+                            }
+                        }
+                        HqTextField(name, { name = it }, stringResource(R.string.your_name), placeholder = stringResource(R.string.your_name_hint))
+                        PhoneField(phone) { phone = it }
                         Spacer(Modifier.height(12.dp))
-                        PrimaryButton("Continue", onClick = { step = 1; wave++ }, enabled = name.isNotBlank() && phoneValid)
+                        PrimaryButton(stringResource(R.string.continue_), onClick = { step = 1; wave++ }, enabled = name.isNotBlank() && isValidPhone(phone))
                     }
                     1 -> {
-                        Title("Money setup", "Pick your currency and an optional monthly budget. Your avatar reacts to how close you get to it.")
-                        Text("Currency", style = MaterialTheme.typography.labelLarge)
-                        CurrencyRow(currency) { currency = it }
+                        Title(stringResource(R.string.money_setup), stringResource(R.string.money_setup_body))
+                        Text(stringResource(R.string.currency), style = MaterialTheme.typography.labelLarge)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Currencies.forEach { c -> FilterChip(selected = currency == c, onClick = { currency = c }, label = { Text("${c.symbol}  ${c.code}", maxLines = 1) }) }
+                        }
                         HqTextField(
-                            budget, { budget = it.filter(Char::isDigit) }, "Monthly budget (optional)",
+                            budget, { budget = it.filter(Char::isDigit) }, stringResource(R.string.monthly_budget_optional),
                             prefix = currency.symbol, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
                         Spacer(Modifier.height(12.dp))
-                        PrimaryButton("Continue", onClick = { step = 2; wave++ })
-                        TextButton(onClick = { step = 0 }, modifier = Modifier.fillMaxWidth()) { Text("Back") }
+                        PrimaryButton(stringResource(R.string.continue_), onClick = { step = 2; wave++ })
+                        TextButton(onClick = { step = 0 }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back)) }
                     }
                     else -> {
-                        Title("Protect your profile", "A PIN keeps your profile private when family members share this phone. You can add one later from Edit profile.")
+                        Title(stringResource(R.string.protect_title), stringResource(R.string.protect_body))
                         PinEntry(
-                            title = if (firstPin == null) "Create a 4-digit PIN" else "Confirm your PIN",
-                            subtitle = pinMessage ?: if (firstPin == null) "Numbers only" else "Enter it once more",
+                            title = stringResource(if (firstPin == null) R.string.pin_create else R.string.pin_confirm),
+                            subtitle = stringResource(pinMessage ?: if (firstPin == null) R.string.numbers_only else R.string.pin_confirm_hint),
                             error = pinMessage != null,
                             onClearError = { pinMessage = null },
                             onComplete = { entered ->
                                 when {
-                                    firstPin == null && Pin.isWeak(entered) -> pinMessage = "Too easy to guess, try another"
+                                    firstPin == null && Pin.isWeak(entered) -> pinMessage = R.string.pin_weak
                                     firstPin == null -> firstPin = entered
-                                    entered == firstPin -> onComplete(name.trim(), phone, currency.symbol, budget.toDoubleOrNull() ?: 0.0, entered)
-                                    else -> { pinMessage = "PINs didn't match, start again"; firstPin = null }
+                                    entered == firstPin -> finish(entered)
+                                    else -> { pinMessage = R.string.pin_mismatch; firstPin = null }
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        TextButton(onClick = { onComplete(name.trim(), phone, currency.symbol, budget.toDoubleOrNull() ?: 0.0, null) }, modifier = Modifier.fillMaxWidth()) {
-                            Text("Skip for now")
-                        }
+                        TextButton(onClick = { finish(null) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.skip_for_now)) }
                     }
                 }
             }
@@ -154,14 +150,5 @@ private fun Title(title: String, body: String) {
     Column {
         Text(title, style = MaterialTheme.typography.headlineMedium)
         Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp))
-    }
-}
-
-@Composable
-fun CurrencyRow(selected: Currency, onSelect: (Currency) -> Unit) {
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 8.dp)) {
-        items(Currencies, key = { it.code }) { c ->
-            FilterChip(selected = selected == c, onClick = { onSelect(c) }, label = { Text("${c.symbol}  ${c.code}") }, modifier = Modifier.width(96.dp))
-        }
     }
 }

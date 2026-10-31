@@ -7,11 +7,13 @@ import com.homequest.app.domain.AvatarConfig
 import com.homequest.app.domain.HairColors
 import com.homequest.app.domain.HairStyles
 import com.homequest.app.domain.Outfits
+import com.homequest.app.domain.Relations
 import com.homequest.app.domain.SkinTones
 import com.homequest.app.util.Pin
+import com.homequest.app.util.titleCased
+import kotlin.random.Random
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlin.random.Random
 
 class MemberRepository(
     private val dao: MemberDao,
@@ -25,7 +27,7 @@ class MemberRepository(
     }
 
     suspend fun ensureOwner() {
-        if (dao.count() == 0) dao.insert(newMember("You", "Me", isOwner = true, avatar = AvatarConfig()))
+        if (dao.count() == 0) dao.insert(newMember("You", Relations.ME, isOwner = true, avatar = AvatarConfig()))
     }
 
     suspend fun activeMemberId(): Long {
@@ -40,7 +42,7 @@ class MemberRepository(
     }
 
     suspend fun updateDetails(member: MemberEntity, name: String, relation: String, phone: String) =
-        dao.update(member.copy(name = name.trim(), relation = relation, phone = phone.trim()))
+        dao.update(member.copy(name = name.titleCased(), relation = relation, phone = phone.trim()))
 
     suspend fun updateAvatar(memberId: Long, avatar: AvatarConfig) {
         val member = dao.byId(memberId) ?: return
@@ -85,7 +87,7 @@ class MemberRepository(
 
     private fun newMember(name: String, relation: String, isOwner: Boolean = false, phone: String = "", avatar: AvatarConfig) =
         MemberEntity(
-            name = name.trim(),
+            name = name.titleCased(),
             relation = relation,
             isOwner = isOwner,
             phone = phone.trim(),

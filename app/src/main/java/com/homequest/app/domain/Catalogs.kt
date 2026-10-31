@@ -1,10 +1,13 @@
 package com.homequest.app.domain
 
+import androidx.annotation.StringRes
+import com.homequest.app.R
+
 data class RewardItem(
     val id: String,
     val kind: RewardKind,
-    val name: String,
-    val description: String,
+    @StringRes val nameRes: Int,
+    @StringRes val descriptionRes: Int,
     val cost: Int,
     val emoji: String
 ) {
@@ -13,63 +16,67 @@ data class RewardItem(
 
 object RewardCatalog {
     val items: List<RewardItem> = listOf(
-        RewardItem(ThemeIds.SUNRISE, RewardKind.THEME, "Sunrise", "Warm coral & gold", 0, "🌅"),
-        RewardItem(ThemeIds.OCEAN, RewardKind.THEME, "Ocean", "Cool teal & navy", 200, "🌊"),
-        RewardItem(ThemeIds.FOREST, RewardKind.THEME, "Forest", "Deep greens & moss", 250, "🌲"),
-        RewardItem(ThemeIds.MIDNIGHT, RewardKind.THEME, "Midnight", "Indigo neon glow", 300, "🌙"),
-        RewardItem(ThemeIds.CANDY, RewardKind.THEME, "Candy", "Pink & lavender pop", 350, "🍬"),
-        RewardItem(ThemeIds.ROYAL, RewardKind.THEME, "Royal", "Purple & gold luxe", 500, "👑"),
+        RewardItem(ThemeIds.SUNRISE, RewardKind.THEME, R.string.rw_sunrise, R.string.rw_sunrise_d, 0, "🌅"),
+        RewardItem(ThemeIds.OCEAN, RewardKind.THEME, R.string.rw_ocean, R.string.rw_ocean_d, 200, "🌊"),
+        RewardItem(ThemeIds.FOREST, RewardKind.THEME, R.string.rw_forest, R.string.rw_forest_d, 250, "🌲"),
+        RewardItem(ThemeIds.MIDNIGHT, RewardKind.THEME, R.string.rw_midnight, R.string.rw_midnight_d, 300, "🌙"),
+        RewardItem(ThemeIds.CANDY, RewardKind.THEME, R.string.rw_candy, R.string.rw_candy_d, 350, "🍬"),
+        RewardItem(ThemeIds.ROYAL, RewardKind.THEME, R.string.rw_royal, R.string.rw_royal_d, 500, "👑"),
 
-        RewardItem(Outfits.TEE, RewardKind.OUTFIT, "Casual tee", "Everyday comfort", 0, "👕"),
-        RewardItem(Outfits.SHIRT, RewardKind.OUTFIT, "Shirt", "Crisp and simple", 0, "👔"),
-        RewardItem(Outfits.HOODIE, RewardKind.OUTFIT, "Hoodie", "Cosy weekend look", 150, "🧥"),
-        RewardItem(Outfits.SWEATER, RewardKind.OUTFIT, "Sweater", "Knit for winter evenings", 150, "🧶"),
-        RewardItem(Outfits.DENIM, RewardKind.OUTFIT, "Denim jacket", "Street classic", 200, "🧢"),
-        RewardItem(Outfits.KURTA, RewardKind.OUTFIT, "Kurta", "Festive traditional wear", 250, "🪔"),
-        RewardItem(Outfits.DRESS, RewardKind.OUTFIT, "Dress", "Light and breezy", 250, "👗"),
-        RewardItem(Outfits.BLAZER, RewardKind.OUTFIT, "Blazer", "Sharp and professional", 250, "🤵"),
-        RewardItem(Outfits.SAREE, RewardKind.OUTFIT, "Saree", "Elegant with a golden pallu", 300, "🥻"),
-        RewardItem(Outfits.SHERWANI, RewardKind.OUTFIT, "Sherwani", "Wedding-ready", 300, "👘"),
-        RewardItem(Outfits.SPACESUIT, RewardKind.OUTFIT, "Spacesuit", "Budget to the moon", 400, "🚀"),
-        RewardItem(Outfits.HERO, RewardKind.OUTFIT, "Hero suit", "Savings superhero", 500, "🦸"),
+        RewardItem(Outfits.TEE, RewardKind.OUTFIT, R.string.rw_tee, R.string.rw_tee_d, 0, "👕"),
+        RewardItem(Outfits.SHIRT, RewardKind.OUTFIT, R.string.rw_shirt, R.string.rw_shirt_d, 0, "👔"),
+        RewardItem(Outfits.HOODIE, RewardKind.OUTFIT, R.string.rw_hoodie, R.string.rw_hoodie_d, 150, "🧥"),
+        RewardItem(Outfits.SWEATER, RewardKind.OUTFIT, R.string.rw_sweater, R.string.rw_sweater_d, 150, "🧶"),
+        RewardItem(Outfits.DENIM, RewardKind.OUTFIT, R.string.rw_denim, R.string.rw_denim_d, 200, "🧢"),
+        RewardItem(Outfits.KURTA, RewardKind.OUTFIT, R.string.rw_kurta, R.string.rw_kurta_d, 250, "🪔"),
+        RewardItem(Outfits.DRESS, RewardKind.OUTFIT, R.string.rw_dress, R.string.rw_dress_d, 250, "👗"),
+        RewardItem(Outfits.BLAZER, RewardKind.OUTFIT, R.string.rw_blazer, R.string.rw_blazer_d, 250, "🤵"),
+        RewardItem(Outfits.SAREE, RewardKind.OUTFIT, R.string.rw_saree, R.string.rw_saree_d, 300, "🥻"),
+        RewardItem(Outfits.SHERWANI, RewardKind.OUTFIT, R.string.rw_sherwani, R.string.rw_sherwani_d, 300, "👘"),
+        RewardItem(Outfits.SPACESUIT, RewardKind.OUTFIT, R.string.rw_spacesuit, R.string.rw_spacesuit_d, 400, "🚀"),
+        RewardItem(Outfits.HERO, RewardKind.OUTFIT, R.string.rw_hero, R.string.rw_hero_d, 500, "🦸"),
 
-        RewardItem(HairStyles.SHORT, RewardKind.HAIR, "Short", "Classic crop", 0, "💇"),
-        RewardItem(HairStyles.BUZZ, RewardKind.HAIR, "Buzz cut", "Clean and sharp", 0, "✂️"),
-        RewardItem(HairStyles.LONG, RewardKind.HAIR, "Long", "Flowing locks", 0, "💁"),
-        RewardItem(HairStyles.CURLY, RewardKind.HAIR, "Curly", "Bouncy curls", 0, "🌀"),
-        RewardItem(HairStyles.WAVY, RewardKind.HAIR, "Wavy", "Soft beach waves", 100, "🌊"),
-        RewardItem(HairStyles.BOB, RewardKind.HAIR, "Bob", "Chin-length and neat", 100, "💈"),
-        RewardItem(HairStyles.PONYTAIL, RewardKind.HAIR, "Ponytail", "Tied back and ready", 120, "🎀"),
-        RewardItem(HairStyles.BUN, RewardKind.HAIR, "Top bun", "Neat and tidy", 120, "🍡"),
-        RewardItem(HairStyles.BRAIDS, RewardKind.HAIR, "Braids", "Twin braids", 150, "🪢"),
-        RewardItem(HairStyles.MOHAWK, RewardKind.HAIR, "Mohawk", "Bold statement", 180, "🎸"),
+        RewardItem(HairStyles.SHORT, RewardKind.HAIR, R.string.rw_short, R.string.rw_short_d, 0, "💇"),
+        RewardItem(HairStyles.BUZZ, RewardKind.HAIR, R.string.rw_buzz, R.string.rw_buzz_d, 0, "✂️"),
+        RewardItem(HairStyles.LONG, RewardKind.HAIR, R.string.rw_long, R.string.rw_long_d, 0, "💁"),
+        RewardItem(HairStyles.CURLY, RewardKind.HAIR, R.string.rw_curly, R.string.rw_curly_d, 0, "🌀"),
+        RewardItem(HairStyles.WAVY, RewardKind.HAIR, R.string.rw_wavy, R.string.rw_wavy_d, 100, "🌊"),
+        RewardItem(HairStyles.BOB, RewardKind.HAIR, R.string.rw_bob, R.string.rw_bob_d, 100, "💈"),
+        RewardItem(HairStyles.PONYTAIL, RewardKind.HAIR, R.string.rw_ponytail, R.string.rw_ponytail_d, 120, "🎀"),
+        RewardItem(HairStyles.BUN, RewardKind.HAIR, R.string.rw_bun, R.string.rw_bun_d, 120, "🍡"),
+        RewardItem(HairStyles.BRAIDS, RewardKind.HAIR, R.string.rw_braids, R.string.rw_braids_d, 150, "🪢"),
+        RewardItem(HairStyles.MOHAWK, RewardKind.HAIR, R.string.rw_mohawk, R.string.rw_mohawk_d, 180, "🎸"),
 
-        RewardItem(Accessories.NONE, RewardKind.ACCESSORY, "None", "Keep it simple", 0, "✨"),
-        RewardItem(Accessories.BINDI, RewardKind.ACCESSORY, "Bindi", "A touch of tradition", 50, "🔴"),
-        RewardItem(Accessories.EARRINGS, RewardKind.ACCESSORY, "Earrings", "Golden studs", 80, "💛"),
-        RewardItem(Accessories.GLASSES, RewardKind.ACCESSORY, "Glasses", "Smart saver", 100, "👓"),
-        RewardItem(Accessories.CAP, RewardKind.ACCESSORY, "Cap", "Street style", 150, "🧢"),
-        RewardItem(Accessories.HEADPHONES, RewardKind.ACCESSORY, "Headphones", "Tune out overspending", 200, "🎧"),
-        RewardItem(Accessories.CROWN, RewardKind.ACCESSORY, "Crown", "Ruler of the budget", 400, "👑"),
+        RewardItem(Accessories.NONE, RewardKind.ACCESSORY, R.string.rw_none, R.string.rw_none_d, 0, "✨"),
+        RewardItem(Accessories.BINDI, RewardKind.ACCESSORY, R.string.rw_bindi, R.string.rw_bindi_d, 50, "🔴"),
+        RewardItem(Accessories.EARRINGS, RewardKind.ACCESSORY, R.string.rw_earrings, R.string.rw_earrings_d, 80, "💛"),
+        RewardItem(Accessories.GLASSES, RewardKind.ACCESSORY, R.string.rw_glasses, R.string.rw_glasses_d, 100, "👓"),
+        RewardItem(Accessories.CAP, RewardKind.ACCESSORY, R.string.rw_cap, R.string.rw_cap_d, 150, "🧢"),
+        RewardItem(Accessories.HEADPHONES, RewardKind.ACCESSORY, R.string.rw_headphones, R.string.rw_headphones_d, 200, "🎧"),
+        RewardItem(Accessories.CROWN, RewardKind.ACCESSORY, R.string.rw_crown, R.string.rw_crown_d, 400, "👑"),
 
-        RewardItem(Features.INSIGHTS, RewardKind.FEATURE, "Advanced insights", "Category trends over 6 months", 300, "📈"),
-        RewardItem(Features.EXPORT_CSV, RewardKind.FEATURE, "CSV export", "Share your ledger as a spreadsheet", 250, "📤")
+        RewardItem(Features.INSIGHTS, RewardKind.FEATURE, R.string.rw_insights, R.string.rw_insights_d, 300, "📈"),
+        RewardItem(Features.EXPORT_CSV, RewardKind.FEATURE, R.string.rw_export, R.string.rw_export_d, 250, "📤")
     )
+
+    private val byId = items.associateBy { it.id }
 
     fun defaults(): List<String> = items.filter { it.isFree }.map { it.id }
 
     fun ofKind(kind: RewardKind): List<RewardItem> = items.filter { it.kind == kind }
+
+    fun find(id: String): RewardItem? = byId[id]
 }
 
 data class Badge(
     val id: String,
-    val name: String,
-    val description: String,
+    @StringRes val nameRes: Int,
+    @StringRes val descriptionRes: Int,
     val emoji: String,
     val bonusPoints: Int,
     val target: Int,
-    val unit: String,
-    val howTo: List<String>
+    @StringRes val unitRes: Int,
+    val howTo: List<Int>
 )
 
 object BadgeCatalog {
@@ -86,28 +93,28 @@ object BadgeCatalog {
     const val COLLECTOR = "badge_collector"
 
     val badges: List<Badge> = listOf(
-        Badge(FIRST_STEP, "First step", "Log your first expense", "🥇", 20, 1, "expense",
-            listOf("Tap Add expense on Home", "Enter an amount and a title", "Save it — that's one logged")),
-        Badge(TEN_LOGGED, "Getting serious", "Log 10 expenses", "🔟", 40, 10, "expenses",
-            listOf("Log everyday spends as they happen", "Groceries, transport, bills all count", "Hit 10 in total, any time span")),
-        Badge(CENTURY, "Century", "Log 100 expenses", "💯", 150, 100, "expenses",
-            listOf("Keep logging consistently", "Use the daily reminder so nothing slips", "Reach 100 lifetime expenses")),
-        Badge(WEEK_WARRIOR, "Week warrior", "7-day logging streak", "🔥", 60, 7, "days",
-            listOf("Log at least one expense every day", "Missing a day resets the streak", "Reach 7 days in a row")),
-        Badge(MONTH_MASTER, "Month master", "30-day logging streak", "🏆", 250, 30, "days",
-            listOf("Keep the daily streak alive", "Set a Reminder at a time you'll remember", "Reach 30 consecutive days")),
-        Badge(TEAM_PLAYER, "Team player", "Create your first group", "🤝", 30, 1, "group",
-            listOf("Open the Groups tab", "Tap New group and pick two or more members", "Create it — the badge lands instantly")),
-        Badge(FAIR_SHARE, "Fair share", "Settle up a group balance", "⚖️", 40, 1, "settlement",
-            listOf("Add a shared expense to a group", "Open the group and look at Settle up", "Tap Mark paid once the money changes hands")),
-        Badge(FAMILY_FIRST, "Family first", "Add 3 family members", "👨‍👩‍👧", 50, 3, "members",
-            listOf("Go to Me → Family members", "Add partner, kids, parents or roommates", "Three members besides you unlocks it")),
-        Badge(BUDGET_BOSS, "Budget boss", "Finish a month under budget", "🎯", 200, 1, "month",
-            listOf("Set a monthly budget in Me → Budgets", "Keep total spending under it all month", "Awarded automatically when the month closes")),
-        Badge(STYLIST, "Stylist", "Unlock your first outfit", "🧵", 30, 1, "outfit",
-            listOf("Earn points by logging expenses", "Open Rewards → Outfits or the Avatar studio", "Unlock any paid outfit")),
-        Badge(COLLECTOR, "Collector", "Unlock 5 rewards", "🗂️", 80, 5, "rewards",
-            listOf("Spend points on themes, outfits, hair or accessories", "Free items don't count", "Five paid unlocks earns it"))
+        Badge(FIRST_STEP, R.string.b_first_step, R.string.b_first_step_d, "🥇", 20, 1, R.string.unit_expense,
+            listOf(R.string.b_first_step_1, R.string.b_first_step_2, R.string.b_first_step_3)),
+        Badge(TEN_LOGGED, R.string.b_ten, R.string.b_ten_d, "🔟", 40, 10, R.string.unit_expenses,
+            listOf(R.string.b_ten_1, R.string.b_ten_2, R.string.b_ten_3)),
+        Badge(CENTURY, R.string.b_century, R.string.b_century_d, "💯", 150, 100, R.string.unit_expenses,
+            listOf(R.string.b_century_1, R.string.b_century_2, R.string.b_century_3)),
+        Badge(WEEK_WARRIOR, R.string.b_week, R.string.b_week_d, "🔥", 60, 7, R.string.unit_days,
+            listOf(R.string.b_week_1, R.string.b_week_2, R.string.b_week_3)),
+        Badge(MONTH_MASTER, R.string.b_month, R.string.b_month_d, "🏆", 250, 30, R.string.unit_days,
+            listOf(R.string.b_month_1, R.string.b_month_2, R.string.b_month_3)),
+        Badge(TEAM_PLAYER, R.string.b_team, R.string.b_team_d, "🤝", 30, 1, R.string.unit_group,
+            listOf(R.string.b_team_1, R.string.b_team_2, R.string.b_team_3)),
+        Badge(FAIR_SHARE, R.string.b_fair, R.string.b_fair_d, "⚖️", 40, 1, R.string.unit_settlement,
+            listOf(R.string.b_fair_1, R.string.b_fair_2, R.string.b_fair_3)),
+        Badge(FAMILY_FIRST, R.string.b_family, R.string.b_family_d, "👨‍👩‍👧", 50, 3, R.string.unit_members,
+            listOf(R.string.b_family_1, R.string.b_family_2, R.string.b_family_3)),
+        Badge(BUDGET_BOSS, R.string.b_budget, R.string.b_budget_d, "🎯", 200, 1, R.string.unit_month,
+            listOf(R.string.b_budget_1, R.string.b_budget_2, R.string.b_budget_3)),
+        Badge(STYLIST, R.string.b_stylist, R.string.b_stylist_d, "🧵", 30, 1, R.string.unit_outfit,
+            listOf(R.string.b_stylist_1, R.string.b_stylist_2, R.string.b_stylist_3)),
+        Badge(COLLECTOR, R.string.b_collector, R.string.b_collector_d, "🗂️", 80, 5, R.string.unit_rewards,
+            listOf(R.string.b_collector_1, R.string.b_collector_2, R.string.b_collector_3))
     )
 
     private val byId = badges.associateBy { it.id }

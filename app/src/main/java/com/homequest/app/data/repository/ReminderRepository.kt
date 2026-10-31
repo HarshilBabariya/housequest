@@ -3,6 +3,7 @@ package com.homequest.app.data.repository
 import com.homequest.app.data.local.ReminderDao
 import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.notifications.ReminderScheduler
+import com.homequest.app.util.titleCased
 import kotlinx.coroutines.flow.Flow
 
 class ReminderRepository(
@@ -14,9 +15,12 @@ class ReminderRepository(
     suspend fun byId(id: Long): ReminderEntity? = dao.byId(id)
 
     suspend fun save(reminder: ReminderEntity) {
-        val saved = if (reminder.id == 0L) reminder.copy(id = dao.insert(reminder)) else { dao.update(reminder); reminder }
+        val titled = reminder.copy(title = reminder.title.titleCased())
+        val saved = if (titled.id == 0L) titled.copy(id = dao.insert(titled)) else { dao.update(titled); titled }
         scheduler.schedule(saved)
     }
+
+    suspend fun rescheduleAll() = dao.allEnabled().forEach { scheduler.schedule(it) }
 
     suspend fun setEnabled(reminder: ReminderEntity, enabled: Boolean) = save(reminder.copy(enabled = enabled))
 

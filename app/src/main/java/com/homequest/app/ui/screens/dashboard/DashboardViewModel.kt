@@ -3,12 +3,15 @@ package com.homequest.app.ui.screens.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.homequest.app.AppContainer
-import com.homequest.app.data.local.CategoryTotal
 import com.homequest.app.data.local.ExpenseWithPayer
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.local.ProfileEntity
 import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.data.repository.AppSettings
+import com.homequest.app.data.repository.byId
+import com.homequest.app.data.repository.resolve
+import com.homequest.app.domain.Category
+import com.homequest.app.domain.CategoryAmount
 import com.homequest.app.domain.Features
 import com.homequest.app.domain.LevelInfo
 import com.homequest.app.domain.Levels
@@ -16,12 +19,15 @@ import com.homequest.app.domain.Mood
 import com.homequest.app.notifications.nextOccurrence
 import com.homequest.app.ui.components.moodFor
 import com.homequest.app.util.Dates
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.YearMonth
+import java.time.format.TextStyle
+import java.util.Locale
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import java.time.LocalDate
-import java.time.YearMonth
 
 data class PayerShare(val member: MemberEntity, val total: Double)
 
@@ -33,7 +39,8 @@ data class DashboardState(
     val todayTotal: Double = 0.0,
     val monthTotal: Double = 0.0,
     val lastMonthTotal: Double = 0.0,
-    val categoryTotals: List<CategoryTotal> = emptyList(),
+    val categoryTotals: List<CategoryAmount> = emptyList(),
+    val categories: Map<String, Category> = emptyMap(),
     val weekValues: List<Double> = emptyList(),
     val weekLabels: List<String> = emptyList(),
     val recent: List<ExpenseWithPayer> = emptyList(),
@@ -43,7 +50,12 @@ data class DashboardState(
     val insightsUnlocked: Boolean = false
 ) {
     val budgetProgress: Float get() = if (settings.monthlyBudget > 0) (monthTotal / settings.monthlyBudget).toFloat() else 0f
-    val mood: Mood get() = moodFor(budgetProgress, settings.monthlyBudget > 0)
+    val mood: Mood
+        get() {
+            val today = Dates.today()
+            val sinceLog = if (profile.lastLogEpochDay < 0) 0L else today.toEpochDay() - profile.lastLogEpochDay
+            return moodFor(budgetProgress, settings.monthlyBudget > 0, profile.streakDays, sinceLog, LocalTime.now().hour, today.dayOfMonth)
+        }
     val monthChangePercent: Double? get() = if (lastMonthTotal > 0) (monthTotal - lastMonthTotal) / lastMonthTotal * 100 else null
 }
 
@@ -58,20 +70,23 @@ class DashboardViewModel(container: AppContainer) : ViewModel() {
         expenses.categoryTotals(monthRange),
         expenses.dayTotals(weekRange),
         expenses.all,
-        container.memberRepository.members
-    ) { categories, days, all, members ->
+        container.memberRepository.members,
+        container.categoryRepository.categories
+    ) { categories, days, all, members, catalog ->
         val byDay = days.associate { it.epochDay to it.total }
         val dayKeys = weekRange.toList()
         val today = Dates.today().toEpochDay()
         val thisMonth = all.filter { it.expense.epochDay in monthRange }
         val paid = thisMonth.groupBy { it.expense.paidByMemberId }.mapValues { (_, list) -> list.sumOf { it.expense.amount } }
+        val map = catalog.byId()
         SpendSlice(
             todayTotal = byDay[today] ?: 0.0,
             monthTotal = thisMonth.sumOf { it.expense.amount },
             lastMonthTotal = all.filter { it.expense.epochDay in lastMonthRange }.sumOf { it.expense.amount },
-            categories = categories,
+            categories = categories.map { CategoryAmount(map.resolve(it.category), it.total) },
+            categoryMap = map,
             weekValues = dayKeys.map { byDay[it] ?: 0.0 },
-            weekLabels = dayKeys.map { LocalDate.ofEpochDay(it).dayOfWeek.name.take(3).lowercase().replaceFirstChar { c -> c.uppercase() } },
+            weekLabels = dayKeys.map { LocalDate.ofEpochDay(it).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()) },
             recent = all.take(5),
             payers = members.mapNotNull { m -> paid[m.id]?.let { PayerShare(m, it) } }.sortedByDescending { it.total }
         )
@@ -105,6 +120,7 @@ class DashboardViewModel(container: AppContainer) : ViewModel() {
             monthTotal = slice.monthTotal,
             lastMonthTotal = slice.lastMonthTotal,
             categoryTotals = slice.categories,
+            categories = slice.categoryMap,
             weekValues = slice.weekValues,
             weekLabels = slice.weekLabels,
             recent = slice.recent,
@@ -119,7 +135,8 @@ class DashboardViewModel(container: AppContainer) : ViewModel() {
         val todayTotal: Double,
         val monthTotal: Double,
         val lastMonthTotal: Double,
-        val categories: List<CategoryTotal>,
+        val categories: List<CategoryAmount>,
+        val categoryMap: Map<String, Category>,
         val weekValues: List<Double>,
         val weekLabels: List<String>,
         val recent: List<ExpenseWithPayer>,

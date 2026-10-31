@@ -1,5 +1,6 @@
 package com.homequest.app.ui.components
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,10 +18,21 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.homequest.app.domain.ExpenseCategory
+import com.homequest.app.domain.Category
+import com.homequest.app.domain.Relations
+
+@Composable
+fun Category.label(): String = nameRes?.let { stringResource(it) } ?: customName
+
+fun Category.label(context: Context): String = nameRes?.let { context.getString(it) } ?: customName
+
+@Composable
+fun relationLabel(key: String): String = Relations.labelRes(key)?.let { stringResource(it) } ?: key
 
 @Composable
 fun SectionHeader(title: String, modifier: Modifier = Modifier, action: String? = null, onAction: (() -> Unit)? = null) {
@@ -29,9 +41,9 @@ fun SectionHeader(title: String, modifier: Modifier = Modifier, action: String? 
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, style = MaterialTheme.typography.titleMedium)
+        Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
         if (action != null && onAction != null) {
-            TextButton(onClick = onAction) { Text(action) }
+            TextButton(onClick = onAction) { Text(action, maxLines = 1) }
         }
     }
 }
@@ -43,7 +55,7 @@ fun EmptyState(emoji: String, title: String, body: String, modifier: Modifier = 
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(emoji, fontSize = 48.sp)
-        Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp))
+        Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp), textAlign = TextAlign.Center)
         Text(
             body,
             style = MaterialTheme.typography.bodyMedium,
@@ -55,21 +67,21 @@ fun EmptyState(emoji: String, title: String, body: String, modifier: Modifier = 
 }
 
 @Composable
-fun CategoryIcon(category: ExpenseCategory, size: Int = 40) {
+fun CategoryIcon(category: Category, size: Int = 40) {
     Box(
         modifier = Modifier.size(size.dp).background(category.color.copy(alpha = 0.16f), CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        Icon(category.icon, contentDescription = category.label, tint = category.color, modifier = Modifier.size((size * 0.55f).dp))
+        Icon(category.icon, contentDescription = category.label(), tint = category.color, modifier = Modifier.size((size * 0.55f).dp))
     }
 }
 
 @Composable
-fun CategoryChip(category: ExpenseCategory, selected: Boolean, onClick: () -> Unit) {
+fun CategoryChip(category: Category, selected: Boolean, onClick: () -> Unit) {
     FilterChip(
         selected = selected,
         onClick = onClick,
-        label = { Text(category.label) },
+        label = { Text(category.label(), maxLines = 1) },
         leadingIcon = { Icon(category.icon, contentDescription = null, tint = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else category.color, modifier = Modifier.size(18.dp)) }
     )
 }

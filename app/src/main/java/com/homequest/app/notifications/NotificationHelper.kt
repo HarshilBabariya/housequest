@@ -14,6 +14,10 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.homequest.app.MainActivity
 import com.homequest.app.R
+import com.homequest.app.data.local.ReminderEntity
+import com.homequest.app.domain.Badge
+import com.homequest.app.util.LocaleHelper
+import com.homequest.app.util.money
 
 class NotificationHelper(private val context: Context) {
 
@@ -30,9 +34,9 @@ class NotificationHelper(private val context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannels(
             listOf(
-                NotificationChannel(CHANNEL_REMINDERS, context.getString(R.string.channel_reminders), NotificationManager.IMPORTANCE_DEFAULT),
+                NotificationChannel(CHANNEL_REMINDERS, context.getString(R.string.channel_reminders), NotificationManager.IMPORTANCE_HIGH),
                 NotificationChannel(CHANNEL_BUDGET, context.getString(R.string.channel_budget), NotificationManager.IMPORTANCE_HIGH),
-                NotificationChannel(CHANNEL_REWARDS, context.getString(R.string.channel_rewards), NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CHANNEL_REWARDS, context.getString(R.string.channel_rewards), NotificationManager.IMPORTANCE_DEFAULT)
             )
         )
     }
@@ -41,12 +45,39 @@ class NotificationHelper(private val context: Context) {
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
-    fun showReminder(reminderId: Long, title: String, detail: String?) =
-        post(ID_REMINDER_BASE + reminderId.toInt(), CHANNEL_REMINDERS, title, detail ?: "Tap to log today's expenses and keep your streak alive.")
+    fun showReminder(language: String, reminder: ReminderEntity, symbol: String) {
+        val res = LocaleHelper.localized(context, language).resources
+        val amount = reminder.amount
+        val (title, body) = if (amount != null) {
+            res.getString(R.string.notif_bill_title, reminder.title) to res.pick(R.array.notif_bill_bodies).format(amount.money(symbol))
+        } else {
+            res.pick(R.array.notif_nudge_titles) to res.pick(R.array.notif_nudge_bodies).format(reminder.title)
+        }
+        post(ID_REMINDER_BASE + reminder.id.toInt(), CHANNEL_REMINDERS, title, body)
+    }
 
-    fun showBudgetAlert(title: String, body: String) = post(ID_BUDGET, CHANNEL_BUDGET, title, body)
+    fun showBudgetAlert(language: String, label: String, spent: String, limit: String, exceeded: Boolean) {
+        val res = LocaleHelper.localized(context, language).resources
+        val title = res.pick(if (exceeded) R.array.notif_budget_over_titles else R.array.notif_budget_warn_titles)
+        val body = res.getString(if (exceeded) R.string.notif_budget_over_body else R.string.notif_budget_warn_body, label, spent, limit)
+        post(ID_BUDGET, CHANNEL_BUDGET, title, body)
+    }
 
-    fun showReward(title: String, body: String) = post(ID_REWARD, CHANNEL_REWARDS, title, body)
+    fun showBadge(language: String, badge: Badge) {
+        val res = LocaleHelper.localized(context, language).resources
+        post(
+            ID_REWARD, CHANNEL_REWARDS,
+            res.getString(R.string.notif_badge_title, badge.emoji),
+            res.getString(R.string.notif_badge_body, res.getString(badge.nameRes), badge.bonusPoints)
+        )
+    }
+
+    fun showLevelUp(language: String, level: Int, titleRes: Int) {
+        val res = LocaleHelper.localized(context, language).resources
+        post(ID_REWARD, CHANNEL_REWARDS, res.getString(R.string.notif_level_title, level), res.getString(R.string.notif_level_body, res.getString(titleRes)))
+    }
+
+    private fun android.content.res.Resources.pick(arrayRes: Int): String = getStringArray(arrayRes).random()
 
     @SuppressLint("MissingPermission")
     private fun post(id: Int, channel: String, title: String, body: String) {
@@ -59,6 +90,7 @@ class NotificationHelper(private val context: Context) {
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(pending)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(context).notify(id, notification)

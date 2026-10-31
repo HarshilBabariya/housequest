@@ -28,8 +28,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.homequest.app.data.local.CategoryTotal
-import com.homequest.app.domain.ExpenseCategory
+import com.homequest.app.domain.Category
+import com.homequest.app.domain.CategoryAmount
 
 @Composable
 fun ProgressRing(
@@ -56,7 +56,7 @@ fun ProgressRing(
 }
 
 @Composable
-fun DonutChart(totals: List<CategoryTotal>, modifier: Modifier = Modifier, centerLabel: String) {
+fun DonutChart(totals: List<CategoryAmount>, modifier: Modifier = Modifier, centerLabel: String) {
     var started by remember { mutableStateOf(false) }
     LaunchedEffect(totals) { started = true }
     val reveal by animateFloatAsState(if (started) 1f else 0f, tween(1000), label = "donut")
@@ -75,7 +75,7 @@ fun DonutChart(totals: List<CategoryTotal>, modifier: Modifier = Modifier, cente
                 start += sweep
             }
         }
-        Text(centerLabel, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Text(centerLabel, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center, maxLines = 1, modifier = Modifier.padding(horizontal = 36.dp))
     }
 }
 
@@ -118,7 +118,7 @@ fun BarChart(values: List<Double>, labels: List<String>, modifier: Modifier = Mo
 }
 
 @Composable
-fun StackedMonthChart(months: List<String>, series: Map<ExpenseCategory, List<Double>>, modifier: Modifier = Modifier) {
+fun StackedMonthChart(months: List<String>, series: Map<Category, List<Double>>, modifier: Modifier = Modifier) {
     var started by remember { mutableStateOf(false) }
     LaunchedEffect(series) { started = true }
     val grow by animateFloatAsState(if (started) 1f else 0f, tween(900), label = "stack")

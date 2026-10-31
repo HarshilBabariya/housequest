@@ -7,9 +7,9 @@ import java.util.Locale
 
 object Dates {
     private val monthKeyFormat = DateTimeFormatter.ofPattern("yyyy-MM")
-    private val shortDate = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
-    private val longDate = DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.getDefault())
-    private val monthTitle = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
+    private val shortDate get() = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
+    private val longDate get() = DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.getDefault())
+    private val monthTitle get() = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
 
     fun today(): LocalDate = LocalDate.now()
 
@@ -25,9 +25,9 @@ object Dates {
 
     fun monthLabel(month: YearMonth): String = month.format(monthTitle)
 
-    fun relativeLabel(epochDay: Long, today: LocalDate = today()): String = when (epochDay) {
-        today.toEpochDay() -> "Today"
-        today.minusDays(1).toEpochDay() -> "Yesterday"
+    fun relativeLabel(epochDay: Long, todayLabel: String, yesterdayLabel: String, today: LocalDate = today()): String = when (epochDay) {
+        today.toEpochDay() -> todayLabel
+        today.minusDays(1).toEpochDay() -> yesterdayLabel
         else -> longLabel(epochDay)
     }
 }

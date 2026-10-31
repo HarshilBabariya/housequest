@@ -10,6 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         MemberEntity::class,
+        CategoryEntity::class,
         ExpenseEntity::class,
         ExpenseSplitEntity::class,
         GroupEntity::class,
@@ -22,11 +23,12 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         EarnedBadgeEntity::class,
         PointsLedgerEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class HomeQuestDatabase : RoomDatabase() {
     abstract fun memberDao(): MemberDao
+    abstract fun categoryDao(): CategoryDao
     abstract fun expenseDao(): ExpenseDao
     abstract fun groupDao(): GroupDao
     abstract fun reminderDao(): ReminderDao
@@ -45,9 +47,23 @@ abstract class HomeQuestDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `categories` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, " +
+                        "`color` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, `builtIn` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+                )
+                db.execSQL("ALTER TABLE expenses ADD COLUMN paymentMode TEXT NOT NULL DEFAULT 'CASH'")
+                db.execSQL("ALTER TABLE expenses ADD COLUMN isSample INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE members ADD COLUMN isSample INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `groups` ADD COLUMN isSample INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE reminders ADD COLUMN isSample INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun build(context: Context): HomeQuestDatabase =
             Room.databaseBuilder(context, HomeQuestDatabase::class.java, "homequest.db")
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
     }
 }

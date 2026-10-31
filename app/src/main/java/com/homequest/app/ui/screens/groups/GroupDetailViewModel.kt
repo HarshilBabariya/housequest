@@ -6,6 +6,8 @@ import com.homequest.app.AppContainer
 import com.homequest.app.data.local.ExpenseWithPayer
 import com.homequest.app.data.local.GroupWithMembers
 import com.homequest.app.data.local.MemberEntity
+import com.homequest.app.data.repository.byId
+import com.homequest.app.domain.Category
 import com.homequest.app.domain.MemberBalance
 import com.homequest.app.domain.Settlement
 import com.homequest.app.domain.SplitCalculator
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
 data class GroupDetailState(
     val group: GroupWithMembers? = null,
     val allMembers: List<MemberEntity> = emptyList(),
+    val categories: Map<String, Category> = emptyMap(),
     val expenses: List<ExpenseWithPayer> = emptyList(),
     val balances: List<MemberBalance> = emptyList(),
     val settlements: List<Settlement> = emptyList(),
@@ -39,10 +42,11 @@ class GroupDetailViewModel(private val container: AppContainer, private val grou
         repo.group(groupId),
         container.memberRepository.members,
         ledger,
+        container.categoryRepository.categories,
         container.settingsRepository.settings
-    ) { group, members, (expenses, splits, settled), settings ->
+    ) { group, members, (expenses, splits, settled), categories, settings ->
         val balances = group?.let { repo.balances(it.members, expenses, splits, settled) }.orEmpty()
-        GroupDetailState(group, members, expenses, balances, SplitCalculator.settlements(balances), settings.currencySymbol)
+        GroupDetailState(group, members, categories.byId(), expenses, balances, SplitCalculator.settlements(balances), settings.currencySymbol)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GroupDetailState())
 
     fun settle(s: Settlement) = viewModelScope.launch { repo.settle(groupId, s.fromId, s.toId, s.amount) }

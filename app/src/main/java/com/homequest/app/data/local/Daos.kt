@@ -23,6 +23,12 @@ interface MemberDao {
     @Query("SELECT COUNT(*) FROM members")
     suspend fun count(): Int
 
+    @Query("SELECT COUNT(*) FROM members WHERE isSample = 1")
+    suspend fun sampleCount(): Int
+
+    @Query("DELETE FROM members WHERE isSample = 1")
+    suspend fun deleteSamples()
+
     @Insert
     suspend fun insert(member: MemberEntity): Long
 
@@ -31,6 +37,27 @@ interface MemberDao {
 
     @Delete
     suspend fun delete(member: MemberEntity)
+}
+
+@Dao
+interface CategoryDao {
+    @Query("SELECT * FROM categories ORDER BY sortOrder ASC")
+    fun observeAll(): Flow<List<CategoryEntity>>
+
+    @Query("SELECT * FROM categories ORDER BY sortOrder ASC")
+    suspend fun all(): List<CategoryEntity>
+
+    @Query("SELECT COALESCE(MAX(sortOrder), 0) FROM categories")
+    suspend fun maxSortOrder(): Int
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAll(categories: List<CategoryEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(category: CategoryEntity)
+
+    @Query("DELETE FROM categories WHERE id = :id AND builtIn = 0")
+    suspend fun deleteCustom(id: String)
 }
 
 @Dao
@@ -70,6 +97,9 @@ interface ExpenseDao {
     @Query("SELECT COUNT(*) FROM expenses")
     suspend fun count(): Int
 
+    @Query("SELECT COUNT(*) FROM expenses WHERE epochDay = :epochDay")
+    suspend fun countOnDay(epochDay: Long): Int
+
     @Query("SELECT * FROM expense_splits WHERE expenseId IN (SELECT id FROM expenses WHERE groupId = :groupId)")
     fun observeSplitsForGroup(groupId: Long): Flow<List<ExpenseSplitEntity>>
 
@@ -78,6 +108,15 @@ interface ExpenseDao {
 
     @Query("SELECT * FROM expense_splits WHERE expenseId = :expenseId")
     suspend fun splitsFor(expenseId: Long): List<ExpenseSplitEntity>
+
+    @Query("UPDATE expenses SET category = :to WHERE category = :from")
+    suspend fun reassignCategory(from: String, to: String)
+
+    @Query("SELECT COUNT(*) FROM expenses WHERE isSample = 1")
+    fun observeSampleCount(): Flow<Int>
+
+    @Query("DELETE FROM expenses WHERE isSample = 1")
+    suspend fun deleteSamples()
 
     @Insert
     suspend fun insert(expense: ExpenseEntity): Long
@@ -110,11 +149,11 @@ interface ExpenseDao {
 @Dao
 interface GroupDao {
     @Transaction
-    @Query("SELECT * FROM groups ORDER BY createdAt DESC")
+    @Query("SELECT * FROM `groups` ORDER BY createdAt DESC")
     fun observeAll(): Flow<List<GroupWithMembers>>
 
     @Transaction
-    @Query("SELECT * FROM groups WHERE id = :id")
+    @Query("SELECT * FROM `groups` WHERE id = :id")
     fun observeById(id: Long): Flow<GroupWithMembers?>
 
     @Query("SELECT * FROM settlements WHERE groupId = :groupId ORDER BY settledAt DESC")
@@ -122,6 +161,9 @@ interface GroupDao {
 
     @Query("SELECT * FROM settlements")
     fun observeAllSettlements(): Flow<List<SettlementEntity>>
+
+    @Query("DELETE FROM `groups` WHERE isSample = 1")
+    suspend fun deleteSamples()
 
     @Insert
     suspend fun insert(group: GroupEntity): Long
@@ -157,8 +199,17 @@ interface ReminderDao {
     @Query("SELECT * FROM reminders ORDER BY hour, minute")
     fun observeAll(): Flow<List<ReminderEntity>>
 
+    @Query("SELECT * FROM reminders WHERE enabled = 1")
+    suspend fun allEnabled(): List<ReminderEntity>
+
     @Query("SELECT * FROM reminders WHERE id = :id")
     suspend fun byId(id: Long): ReminderEntity?
+
+    @Query("SELECT * FROM reminders WHERE isSample = 1")
+    suspend fun samples(): List<ReminderEntity>
+
+    @Query("DELETE FROM reminders WHERE isSample = 1")
+    suspend fun deleteSamples()
 
     @Insert
     suspend fun insert(reminder: ReminderEntity): Long

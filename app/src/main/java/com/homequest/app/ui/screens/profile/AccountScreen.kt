@@ -1,12 +1,12 @@
 package com.homequest.app.ui.screens.profile
 
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,15 +33,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.homequest.app.AppContainer
+import com.homequest.app.R
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.data.repository.hasPin
+import com.homequest.app.domain.Relations
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AvatarView
 import com.homequest.app.ui.components.HqTextField
@@ -52,8 +55,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-val Relations = listOf("Me", "Partner", "Child", "Parent", "Sibling", "Roommate", "Friend", "Other")
 
 fun isValidPhone(phone: String) = phone.filter(Char::isDigit).length >= 10
 
@@ -71,13 +72,13 @@ class AccountViewModel(private val container: AppContainer) : ViewModel() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     val vm = appViewModel { AccountViewModel(it) }
     val member by vm.member.collectAsStateWithLifecycle()
     var name by remember { mutableStateOf("") }
-    var relation by remember { mutableStateOf(Relations.first()) }
+    var relation by remember { mutableStateOf(Relations.ME) }
     var phone by remember { mutableStateOf("") }
     var loaded by remember { mutableStateOf(false) }
     var showPinSheet by remember { mutableStateOf(false) }
@@ -90,8 +91,8 @@ fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
-                title = { Text("Edit profile") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } }
+                title = { Text(stringResource(R.string.edit_profile)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } }
             )
         }
     ) { padding ->
@@ -99,35 +100,28 @@ fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
             member?.let { m ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                     AvatarView(m.avatar(), size = 120.dp)
-                    OutlinedButton(onClick = { onOpenAvatar(m.id) }) { Text("Change look") }
+                    OutlinedButton(onClick = { onOpenAvatar(m.id) }) { Text(stringResource(R.string.change_look)) }
                 }
             }
-            SectionCard("Details") {
+            SectionCard(stringResource(R.string.details)) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HqTextField(name, { name = it }, "Name")
-                    HqTextField(
-                        phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(15) }, "Mobile number",
-                        supporting = if (phone.isNotEmpty() && !isValidPhone(phone)) "Enter at least 10 digits" else null,
-                        isError = phone.isNotEmpty() && !isValidPhone(phone),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-                    )
-                    Text("Role in the house", style = MaterialTheme.typography.labelLarge)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Relations.forEach { r -> FilterChip(selected = relation == r, onClick = { relation = r }, label = { Text(r) }) }
-                    }
+                    HqTextField(name, { name = it }, stringResource(R.string.name))
+                    PhoneField(phone) { phone = it }
+                    Text(stringResource(R.string.role_in_house), style = MaterialTheme.typography.labelLarge)
+                    RelationChips(relation, includeMe = true) { relation = it }
                 }
             }
-            PrimaryButton("Save profile", onClick = { member?.let { vm.save(it, name, relation, phone); onBack() } }, enabled = name.isNotBlank() && isValidPhone(phone) && member != null)
+            PrimaryButton(stringResource(R.string.save_profile), onClick = { member?.let { vm.save(it, name, relation, phone); onBack() } }, enabled = name.isNotBlank() && isValidPhone(phone) && member != null)
 
-            SectionCard("Security") {
+            SectionCard(stringResource(R.string.security)) {
                 Text(
-                    if (member?.hasPin == true) "Your profile is protected by a 4-digit PIN." else "Add a 4-digit PIN so nobody else can open your profile on this phone.",
+                    stringResource(if (member?.hasPin == true) R.string.pin_protected else R.string.pin_add_hint),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    FilledTonalButton(onClick = { showPinSheet = true }) { Text(if (member?.hasPin == true) "Change PIN" else "Set PIN") }
-                    if (member?.hasPin == true) OutlinedButton(onClick = { member?.let { vm.setPin(it.id, null) } }) { Text("Remove PIN") }
+                    FilledTonalButton(onClick = { showPinSheet = true }) { Text(stringResource(if (member?.hasPin == true) R.string.change_pin else R.string.set_pin)) }
+                    if (member?.hasPin == true) OutlinedButton(onClick = { member?.let { vm.setPin(it.id, null) } }) { Text(stringResource(R.string.remove_pin)) }
                 }
             }
             Spacer(Modifier.height(24.dp))
@@ -136,5 +130,26 @@ fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
 
     if (showPinSheet) {
         PinSetupSheet(onDismiss = { showPinSheet = false }) { pin -> member?.let { vm.setPin(it.id, pin) }; showPinSheet = false }
+    }
+}
+
+@Composable
+fun PhoneField(phone: String, onChange: (String) -> Unit) {
+    HqTextField(
+        phone, { onChange(it.filter { c -> c.isDigit() || c == '+' }.take(15)) }, stringResource(R.string.mobile_number),
+        placeholder = stringResource(R.string.phone_hint),
+        supporting = if (phone.isNotEmpty() && !isValidPhone(phone)) stringResource(R.string.phone_error) else null,
+        isError = phone.isNotEmpty() && !isValidPhone(phone),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun RelationChips(selected: String, includeMe: Boolean, onSelect: (String) -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Relations.all.filter { includeMe || it.first != Relations.ME }.forEach { (key, labelRes) ->
+            FilterChip(selected = selected.equals(key, ignoreCase = true), onClick = { onSelect(key) }, label = { Text(stringResource(labelRes)) })
+        }
     }
 }

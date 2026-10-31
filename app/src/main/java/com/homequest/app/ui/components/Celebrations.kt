@@ -34,15 +34,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.homequest.app.R
 import com.homequest.app.data.repository.RewardEvent
+import com.homequest.app.domain.BadgeCatalog
+import com.homequest.app.domain.LedgerReasons
+import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.util.money
-import kotlinx.coroutines.delay
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
+import kotlinx.coroutines.delay
 
 @Composable
 fun AnimatedMoney(amount: Double, symbol: String, style: TextStyle, color: Color = MaterialTheme.colorScheme.onSurface) {
@@ -101,10 +107,10 @@ fun RewardToast(event: RewardEvent?, onDismiss: () -> Unit) {
         exit = slideOutVertically { -it } + fadeOut()
     ) {
         val (emoji, title, body) = when (event) {
-            is RewardEvent.PointsAwarded -> Triple("✨", "+${event.delta} points", event.reason)
-            is RewardEvent.BadgeEarned -> Triple(event.badge.emoji, "Badge unlocked: ${event.badge.name}", event.badge.description)
-            is RewardEvent.LevelUp -> Triple("🎉", "Level ${event.level}: ${event.title}", "You levelled up!")
-            is RewardEvent.StreakExtended -> Triple("🔥", "${event.days}-day streak", "Keep logging every day")
+            is RewardEvent.PointsAwarded -> Triple("✨", stringResource(R.string.toast_points, event.delta), reasonLabel(event.reason))
+            is RewardEvent.BadgeEarned -> Triple(event.badge.emoji, stringResource(R.string.toast_badge, stringResource(event.badge.nameRes)), stringResource(event.badge.descriptionRes))
+            is RewardEvent.LevelUp -> Triple("🎉", stringResource(R.string.toast_level, event.level, stringResource(event.titleRes)), stringResource(R.string.toast_level_body))
+            is RewardEvent.StreakExtended -> Triple("🔥", stringResource(R.string.toast_streak, event.days), stringResource(R.string.toast_streak_body))
             null -> Triple("", "", "")
         }
         Box(Modifier.fillMaxWidth().statusBarsPadding().padding(16.dp)) {
@@ -117,10 +123,25 @@ fun RewardToast(event: RewardEvent?, onDismiss: () -> Unit) {
             ) {
                 Text(emoji, fontSize = 30.sp)
                 Column(Modifier.padding(start = 14.dp)) {
-                    Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                    Text(body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
+    }
+}
+
+@Composable
+fun reasonLabel(reason: String): String {
+    val arg = LedgerReasons.arg(reason)
+    return when (LedgerReasons.kind(reason)) {
+        LedgerReasons.LOG_EXPENSE -> stringResource(R.string.reason_log_expense)
+        LedgerReasons.GROUP -> stringResource(R.string.reason_group)
+        LedgerReasons.SETTLE -> stringResource(R.string.reason_settle)
+        LedgerReasons.MEMBER -> stringResource(R.string.reason_member)
+        LedgerReasons.BUDGET -> stringResource(R.string.reason_budget, arg)
+        LedgerReasons.BADGE -> stringResource(R.string.reason_badge, BadgeCatalog.find(arg)?.let { stringResource(it.nameRes) } ?: arg)
+        LedgerReasons.UNLOCK -> stringResource(R.string.reason_unlock, RewardCatalog.find(arg)?.let { stringResource(it.nameRes) } ?: arg)
+        else -> reason
     }
 }

@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.homequest.app.domain.AppLanguage
 import com.homequest.app.domain.ThemeIds
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -29,7 +30,8 @@ data class AppSettings(
     val rewardNotificationsEnabled: Boolean = true,
     val appLockEnabled: Boolean = false,
     val activeMemberId: Long = 0,
-    val onboarded: Boolean = false
+    val onboarded: Boolean = false,
+    val language: String = AppLanguage.ENGLISH.tag
 )
 
 class SettingsRepository(private val context: Context) {
@@ -45,6 +47,7 @@ class SettingsRepository(private val context: Context) {
         val APP_LOCK = booleanPreferencesKey("app_lock")
         val ACTIVE_MEMBER = longPreferencesKey("active_member")
         val ONBOARDED = booleanPreferencesKey("onboarded")
+        val LANGUAGE = stringPreferencesKey("language")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -58,7 +61,8 @@ class SettingsRepository(private val context: Context) {
             rewardNotificationsEnabled = p[Keys.REWARD_NOTIFS] ?: true,
             appLockEnabled = p[Keys.APP_LOCK] ?: false,
             activeMemberId = p[Keys.ACTIVE_MEMBER] ?: 0,
-            onboarded = p[Keys.ONBOARDED] ?: false
+            onboarded = p[Keys.ONBOARDED] ?: false,
+            language = p[Keys.LANGUAGE] ?: AppLanguage.ENGLISH.tag
         )
     }
 
@@ -74,4 +78,5 @@ class SettingsRepository(private val context: Context) {
     suspend fun setAppLock(enabled: Boolean) = context.dataStore.edit { it[Keys.APP_LOCK] = enabled }
     suspend fun setActiveMember(id: Long) = context.dataStore.edit { it[Keys.ACTIVE_MEMBER] = id }
     suspend fun setOnboarded() = context.dataStore.edit { it[Keys.ONBOARDED] = true }
+    suspend fun setLanguage(tag: String) = context.dataStore.edit { it[Keys.LANGUAGE] = tag }
 }

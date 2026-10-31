@@ -9,19 +9,21 @@ import com.homequest.app.data.local.ExpenseEntity
 import com.homequest.app.data.local.ExpenseSplitEntity
 import com.homequest.app.data.local.ExpenseWithPayer
 import com.homequest.app.data.local.MonthCategoryTotal
-import com.homequest.app.domain.ExpenseCategory
+import com.homequest.app.domain.PaymentMode
 import com.homequest.app.domain.SplitCalculator
 import com.homequest.app.domain.SplitType
 import com.homequest.app.notifications.BudgetMonitor
 import com.homequest.app.util.Dates
-import kotlinx.coroutines.flow.Flow
+import com.homequest.app.util.titleCased
 import java.time.LocalDate
+import kotlinx.coroutines.flow.Flow
 
 data class ExpenseDraft(
     val id: Long = 0,
     val title: String,
     val amount: Double,
-    val category: ExpenseCategory,
+    val categoryId: String,
+    val paymentMode: PaymentMode,
     val date: LocalDate,
     val paidByMemberId: Long,
     val groupId: Long? = null,
@@ -51,19 +53,21 @@ class ExpenseRepository(
     suspend fun byId(id: Long): ExpenseEntity? = dao.byId(id)
     suspend fun splitsFor(expenseId: Long): List<ExpenseSplitEntity> = dao.splitsFor(expenseId)
     suspend fun allForExport(): List<ExpenseWithPayer> = dao.allForExport()
+    suspend fun loggedToday(): Boolean = dao.countOnDay(Dates.today().toEpochDay()) > 0
 
     suspend fun save(draft: ExpenseDraft): Long {
         val isNew = draft.id == 0L
         val entity = ExpenseEntity(
             id = draft.id,
-            title = draft.title.trim(),
+            title = draft.title.titleCased(),
             amount = draft.amount,
-            category = draft.category,
+            category = draft.categoryId,
+            paymentMode = draft.paymentMode,
             epochDay = draft.date.toEpochDay(),
             paidByMemberId = draft.paidByMemberId,
             groupId = draft.groupId,
             splitType = if (draft.groupId == null) SplitType.NONE else draft.splitType,
-            note = draft.note.trim()
+            note = draft.note.titleCased()
         )
         val shares = when (entity.splitType) {
             SplitType.EQUAL -> SplitCalculator.equalShares(draft.amount, draft.splitMemberIds)
@@ -73,14 +77,14 @@ class ExpenseRepository(
         val id = dao.upsertWithSplits(entity, shares)
         if (isNew) {
             gamification.recordExpenseLogged(Dates.today(), dao.count())
-            budgetMonitor.afterExpenseAdded(draft.category, draft.amount)
+            budgetMonitor.afterExpenseAdded(draft.categoryId, draft.amount)
         }
         return id
     }
 
     suspend fun delete(expense: ExpenseEntity) = dao.delete(expense)
 
-    suspend fun setCategoryBudget(category: ExpenseCategory, limit: Double?) {
-        if (limit == null || limit <= 0) budgetDao.delete(category.name) else budgetDao.upsert(BudgetEntity(category, limit))
+    suspend fun setCategoryBudget(categoryId: String, limit: Double?) {
+        if (limit == null || limit <= 0) budgetDao.delete(categoryId) else budgetDao.upsert(BudgetEntity(categoryId, limit))
     }
 }

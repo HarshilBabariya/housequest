@@ -7,7 +7,7 @@ import androidx.room.Index
 import androidx.room.Junction
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.homequest.app.domain.ExpenseCategory
+import com.homequest.app.domain.PaymentMode
 import com.homequest.app.domain.RepeatRule
 import com.homequest.app.domain.SplitType
 
@@ -24,7 +24,18 @@ data class MemberEntity(
     val hairColor: Int = 0,
     val outfitId: String,
     val accessoryId: String,
+    val isSample: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(tableName = "categories")
+data class CategoryEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val icon: String,
+    val color: Long,
+    val sortOrder: Int,
+    val builtIn: Boolean
 )
 
 @Entity(
@@ -39,12 +50,14 @@ data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val title: String,
     val amount: Double,
-    val category: ExpenseCategory,
+    val category: String,
+    val paymentMode: PaymentMode = PaymentMode.CASH,
     val epochDay: Long,
     val paidByMemberId: Long,
     val groupId: Long? = null,
     val splitType: SplitType = SplitType.NONE,
     val note: String = "",
+    val isSample: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )
 
@@ -68,6 +81,7 @@ data class GroupEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val emoji: String,
+    val isSample: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )
 
@@ -110,13 +124,14 @@ data class ReminderEntity(
     val dayOfMonth: Int = 1,
     val month: Int = 1,
     val amount: Double? = null,
-    val category: ExpenseCategory? = null,
-    val enabled: Boolean = true
+    val category: String? = null,
+    val enabled: Boolean = true,
+    val isSample: Boolean = false
 )
 
 @Entity(tableName = "budgets")
 data class BudgetEntity(
-    @PrimaryKey val category: ExpenseCategory,
+    @PrimaryKey val category: String,
     val monthlyLimit: Double
 )
 
@@ -165,8 +180,8 @@ data class GroupWithMembers(
     val members: List<MemberEntity>
 )
 
-data class CategoryTotal(val category: ExpenseCategory, val total: Double)
+data class CategoryTotal(val category: String, val total: Double)
 
 data class DayTotal(val epochDay: Long, val total: Double)
 
-data class MonthCategoryTotal(val month: String, val category: ExpenseCategory, val total: Double)
+data class MonthCategoryTotal(val month: String, val category: String, val total: Double)

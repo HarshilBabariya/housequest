@@ -1,5 +1,7 @@
 package com.homequest.app.domain
 
+import androidx.annotation.StringRes
+import com.homequest.app.R
 import kotlin.math.floor
 import kotlin.math.sqrt
 
@@ -16,9 +18,23 @@ object PointsRules {
     fun streakBonus(streakDays: Int): Int = (streakDays * STREAK_PER_DAY).coerceAtMost(STREAK_CAP)
 }
 
+object LedgerReasons {
+    const val LOG_EXPENSE = "log_expense"
+    const val GROUP = "group"
+    const val SETTLE = "settle"
+    const val MEMBER = "member"
+    const val BUDGET = "budget"
+    const val BADGE = "badge"
+    const val UNLOCK = "unlock"
+
+    fun encode(kind: String, arg: String = ""): String = if (arg.isEmpty()) kind else "$kind:$arg"
+    fun kind(reason: String): String = reason.substringBefore(':')
+    fun arg(reason: String): String = reason.substringAfter(':', "")
+}
+
 data class LevelInfo(
     val level: Int,
-    val title: String,
+    @StringRes val titleRes: Int,
     val currentLevelStart: Int,
     val nextLevelAt: Int
 ) {
@@ -31,16 +47,15 @@ data class LevelInfo(
 object Levels {
     private const val BASE = 100
     private val titles = listOf(
-        "Rookie", "Saver", "Planner", "Tracker", "Strategist",
-        "Accountant", "Treasurer", "Guardian", "Master", "Legend"
+        R.string.lvl_rookie, R.string.lvl_saver, R.string.lvl_planner, R.string.lvl_tracker, R.string.lvl_strategist,
+        R.string.lvl_accountant, R.string.lvl_treasurer, R.string.lvl_guardian, R.string.lvl_master, R.string.lvl_legend
     )
 
     fun fromLifetimePoints(points: Int): LevelInfo {
         val level = floor(sqrt(points.toDouble() / BASE)).toInt() + 1
         val start = (level - 1) * (level - 1) * BASE
         val next = level * level * BASE
-        val title = titles[(level - 1).coerceAtMost(titles.lastIndex)]
-        return LevelInfo(level, title, start, next)
+        return LevelInfo(level, titles[(level - 1).coerceAtMost(titles.lastIndex)], start, next)
     }
 }
 

@@ -1,42 +1,50 @@
 package com.homequest.app.notifications
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import android.content.Intent
+import android.os.Build
 import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.domain.RepeatRule
 import java.time.DayOfWeek
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
+import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 
 class ReminderScheduler(private val context: Context) {
 
     companion object {
         const val KEY_REMINDER_ID = "reminder_id"
-        private fun workName(id: Long) = "reminder_$id"
     }
+
+    private val alarms: AlarmManager get() = context.getSystemService(AlarmManager::class.java)
 
     fun schedule(reminder: ReminderEntity, now: LocalDateTime = LocalDateTime.now()) {
         if (!reminder.enabled) {
             cancel(reminder.id)
             return
         }
-        val delay = Duration.between(now, reminder.nextOccurrence(now)).coerceAtLeast(Duration.ofSeconds(1))
-        val request = OneTimeWorkRequestBuilder<ReminderWorker>()
-            .setInitialDelay(delay)
-            .setInputData(Data.Builder().putLong(KEY_REMINDER_ID, reminder.id).build())
-            .addTag(workName(reminder.id))
-            .build()
-        WorkManager.getInstance(context).enqueueUniqueWork(workName(reminder.id), ExistingWorkPolicy.REPLACE, request)
+        val at = reminder.nextOccurrence(now).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val intent = pendingIntent(reminder.id)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarms.canScheduleExactAlarms()) {
+            alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, intent)
+        } else {
+            alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, intent)
+        }
     }
 
-    fun cancel(id: Long) = WorkManager.getInstance(context).cancelUniqueWork(workName(id))
+    fun cancel(id: Long) = alarms.cancel(pendingIntent(id))
+
+    private fun pendingIntent(id: Long): PendingIntent = PendingIntent.getBroadcast(
+        context,
+        id.toInt(),
+        Intent(context, ReminderReceiver::class.java).putExtra(KEY_REMINDER_ID, id),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
 }
 
 fun ReminderEntity.nextOccurrence(now: LocalDateTime = LocalDateTime.now()): LocalDateTime {

@@ -24,6 +24,8 @@ data class BadgeStatus(val badge: Badge, val earnedAt: Long?, val progress: Int)
     val fraction: Float get() = if (earned) 1f else (progress.toFloat() / badge.target).coerceIn(0f, 1f)
 }
 
+data class RedeemMessage(val item: RewardItem, val missing: Int)
+
 data class RewardsState(
     val profile: ProfileEntity = ProfileEntity(),
     val level: LevelInfo = Levels.fromLifetimePoints(0),
@@ -34,12 +36,12 @@ data class RewardsState(
     val activeThemeId: String = "",
     val ledger: List<PointsLedgerEntity> = emptyList(),
     val ownerId: Long = 0,
-    val lastMessage: String? = null
+    val lastMessage: RedeemMessage? = null
 )
 
 class RewardsViewModel(private val container: AppContainer) : ViewModel() {
     private val kind = MutableStateFlow(RewardKind.THEME)
-    private val message = MutableStateFlow<String?>(null)
+    private val message = MutableStateFlow<RedeemMessage?>(null)
     private val gamification = container.gamificationRepository
 
     private val meta = combine(kind, message, container.memberRepository.activeMember, container.settingsRepository.settings) { k, m, owner, s ->
@@ -96,12 +98,12 @@ class RewardsViewModel(private val container: AppContainer) : ViewModel() {
 
     fun redeem(item: RewardItem) = viewModelScope.launch {
         val ok = gamification.redeem(item)
-        message.value = if (ok) "${item.emoji} ${item.name} unlocked!" else "Need ${item.cost - state.value.profile.points} more points for ${item.name}"
+        message.value = RedeemMessage(item, if (ok) 0 else item.cost - state.value.profile.points)
         if (ok && item.kind == RewardKind.THEME) container.settingsRepository.setTheme(item.id)
     }
 
     fun applyTheme(themeId: String) = viewModelScope.launch { container.settingsRepository.setTheme(themeId) }
 
-    private data class Meta(val kind: RewardKind, val message: String?, val ownerId: Long, val themeId: String)
+    private data class Meta(val kind: RewardKind, val message: RedeemMessage?, val ownerId: Long, val themeId: String)
     private data class Counts(val expenses: Int, val groups: Int, val settlements: Int, val members: Int)
 }

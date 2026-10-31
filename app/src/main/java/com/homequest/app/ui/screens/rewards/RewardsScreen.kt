@@ -15,14 +15,14 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,19 +33,23 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,37 +62,51 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.homequest.app.R
 import com.homequest.app.domain.RewardItem
 import com.homequest.app.domain.RewardKind
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AnimatedCount
 import com.homequest.app.ui.components.SectionHeader
+import com.homequest.app.ui.components.reasonLabel
 import com.homequest.app.ui.theme.Palettes
 import com.homequest.app.util.Dates
-import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RewardsScreen(onOpenAvatar: (Long) -> Unit) {
+fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     val vm = appViewModel { RewardsViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var selectedBadge by remember { mutableStateOf<BadgeStatus?>(null) }
+    val message = state.lastMessage
+    val messageText = message?.let {
+        val name = stringResource(it.item.nameRes)
+        if (it.missing <= 0) stringResource(R.string.unlocked_msg, it.item.emoji, name) else stringResource(R.string.need_more_points, it.missing, name)
+    }
 
-    LaunchedEffect(state.lastMessage) {
-        state.lastMessage?.let { snackbar.showSnackbar(it); vm.clearMessage() }
+    LaunchedEffect(messageText) {
+        messageText?.let { snackbar.showSnackbar(it); vm.clearMessage() }
     }
 
     selectedBadge?.let { BadgeDetailSheet(it, onDismiss = { selectedBadge = null }) }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = { TopAppBar(title = { Text("Rewards") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.rewards)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } }
+            )
+        },
         snackbarHost = { SnackbarHost(snackbar) }
     ) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 32.dp)) {
@@ -103,9 +121,15 @@ fun RewardsScreen(onOpenAvatar: (Long) -> Unit) {
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text("Points to spend", style = MaterialTheme.typography.labelLarge, color = scheme.onPrimary.copy(alpha = 0.9f))
+                            Text(stringResource(R.string.points_to_spend), style = MaterialTheme.typography.labelLarge, color = scheme.onPrimary.copy(alpha = 0.9f))
                             AnimatedCount(state.profile.points, MaterialTheme.typography.displayMedium, scheme.onPrimary)
-                            Text("Lifetime ${state.profile.lifetimePoints} XP · Level ${state.level.level} ${state.level.title}", style = MaterialTheme.typography.bodySmall, color = scheme.onPrimary.copy(alpha = 0.9f))
+                            Text(
+                                stringResource(R.string.lifetime_level, state.profile.lifetimePoints, state.level.level, stringResource(state.level.titleRes)),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = scheme.onPrimary.copy(alpha = 0.9f),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                         Text("⭐", fontSize = 56.sp)
                     }
@@ -113,15 +137,15 @@ fun RewardsScreen(onOpenAvatar: (Long) -> Unit) {
             }
             item {
                 val earnedCount = state.badges.count { it.earned }
-                SectionHeader("Badges · $earnedCount/${state.badges.size}")
+                SectionHeader(stringResource(R.string.badges_count, earnedCount, state.badges.size))
                 LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(state.badges, key = { it.badge.id }) { status -> BadgeTile(status, Modifier.width(118.dp)) { selectedBadge = status } }
                 }
             }
             item {
-                SectionHeader("Shop")
+                SectionHeader(stringResource(R.string.shop))
                 LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(RewardKind.entries) { k -> FilterChip(selected = state.kind == k, onClick = { vm.selectKind(k) }, label = { Text(k.label) }) }
+                    items(RewardKind.entries) { k -> FilterChip(selected = state.kind == k, onClick = { vm.selectKind(k) }, label = { Text(stringResource(k.labelRes), maxLines = 1) }) }
                 }
                 Spacer(Modifier.height(8.dp))
             }
@@ -141,10 +165,10 @@ fun RewardsScreen(onOpenAvatar: (Long) -> Unit) {
                     }
                 )
             }
-            item { SectionHeader("Points history") }
-            items(state.ledger, key = { it.id }) { entry ->
+            item { SectionHeader(stringResource(R.string.points_history)) }
+            items(state.ledger, key = { "led_${it.id}" }) { entry ->
                 Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) {
-                    Text(entry.reason, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                    Text(reasonLabel(entry.reason), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(
                         (if (entry.delta > 0) "+" else "") + entry.delta,
                         color = if (entry.delta > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
@@ -188,9 +212,9 @@ private fun BadgeTile(status: BadgeStatus, modifier: Modifier = Modifier, onClic
                 }
             }
         }
-        Text(badge.name, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp), maxLines = 1, color = if (status.earned) scheme.onSurface else scheme.onSurfaceVariant)
+        Text(stringResource(badge.nameRes), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, color = if (status.earned) scheme.onSurface else scheme.onSurfaceVariant)
         if (status.earned) {
-            Text("+${badge.bonusPoints} pts", style = MaterialTheme.typography.labelSmall, color = scheme.primary)
+            Text(stringResource(R.string.plus_pts, badge.bonusPoints), style = MaterialTheme.typography.labelSmall, color = scheme.primary)
         } else {
             LinearProgressIndicator(
                 progress = { status.fraction },
@@ -231,27 +255,27 @@ private fun BadgeDetailSheet(status: BadgeStatus, onDismiss: () -> Unit) {
                     Text(badge.emoji, fontSize = 56.sp, modifier = Modifier.alpha(if (status.earned) 1f else 0.45f))
                 }
             }
-            Text(badge.name, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 14.dp))
-            Text(badge.description, style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant)
+            Text(stringResource(badge.nameRes), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 14.dp))
+            Text(stringResource(badge.descriptionRes), style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant)
             Text(
-                if (status.earned) "Earned on ${Dates.longLabel(Instant.ofEpochMilli(status.earnedAt!!).atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay())} · +${badge.bonusPoints} points"
-                else "Reward: +${badge.bonusPoints} points",
+                if (status.earned) stringResource(R.string.earned_on, Dates.longLabel(Instant.ofEpochMilli(status.earnedAt!!).atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay()), badge.bonusPoints)
+                else stringResource(R.string.reward_points, badge.bonusPoints),
                 style = MaterialTheme.typography.labelLarge,
                 color = scheme.primary,
                 modifier = Modifier.padding(top = 6.dp)
             )
             if (!status.earned) {
                 LinearProgressIndicator(progress = { status.fraction }, modifier = Modifier.fillMaxWidth().height(8.dp).padding(top = 2.dp), color = scheme.primary, trackColor = scheme.surfaceContainerHigh)
-                Text("${status.progress.coerceAtMost(badge.target)} of ${badge.target} ${badge.unit}", style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp))
+                Text(stringResource(R.string.progress_of, status.progress.coerceAtMost(badge.target), badge.target, stringResource(badge.unitRes)), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp))
             }
-            Text("How to earn it", style = MaterialTheme.typography.titleSmall, color = scheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 6.dp))
-            badge.howTo.forEachIndexed { i, step ->
+            Text(stringResource(R.string.how_to_earn), style = MaterialTheme.typography.titleSmall, color = scheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 6.dp))
+            badge.howTo.forEachIndexed { i, stepRes ->
                 AnimatedVisibility(visible = i < revealed, enter = fadeIn() + slideInHorizontally { it / 4 }) {
                     Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(28.dp).background(if (status.earned) scheme.primaryContainer else scheme.surfaceContainerHigh, CircleShape), contentAlignment = Alignment.Center) {
                             Text(if (status.earned) "✓" else "${i + 1}", style = MaterialTheme.typography.labelLarge, color = if (status.earned) scheme.onPrimaryContainer else scheme.onSurfaceVariant)
                         }
-                        Text(step, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 12.dp))
+                        Text(stringResource(stepRes), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 12.dp))
                     }
                 }
             }
@@ -281,13 +305,13 @@ private fun RewardRow(item: RewardItem, unlocked: Boolean, active: Boolean, affo
             Text(item.emoji, fontSize = 28.sp, modifier = Modifier.padding(end = 12.dp))
         }
         Column(Modifier.weight(1f)) {
-            Text(item.name, style = MaterialTheme.typography.titleSmall)
-            Text(item.description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(item.nameRes), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(item.descriptionRes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         when {
-            active -> Text("Active", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-            unlocked && item.kind == RewardKind.FEATURE -> Text("Unlocked", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-            unlocked -> FilledTonalButton(onClick = onUse) { Text(if (item.kind == RewardKind.THEME) "Apply" else "Wear") }
+            active -> Text(stringResource(R.string.active), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
+            unlocked && item.kind == RewardKind.FEATURE -> Text(stringResource(R.string.unlocked), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
+            unlocked -> FilledTonalButton(onClick = onUse) { Text(stringResource(if (item.kind == RewardKind.THEME) R.string.apply else R.string.wear)) }
             else -> Button(onClick = onRedeem, enabled = affordable) { Text("⭐ ${item.cost}") }
         }
     }

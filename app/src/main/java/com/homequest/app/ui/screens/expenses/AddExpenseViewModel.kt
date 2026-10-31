@@ -6,8 +6,14 @@ import com.homequest.app.AppContainer
 import com.homequest.app.data.local.GroupWithMembers
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.ExpenseDraft
-import com.homequest.app.domain.ExpenseCategory
+import com.homequest.app.data.repository.byId
+import com.homequest.app.data.repository.resolve
+import com.homequest.app.domain.BuiltInCategories
+import com.homequest.app.domain.Category
+import com.homequest.app.domain.PaymentMode
 import com.homequest.app.domain.SplitType
+import com.homequest.app.util.VoiceParser
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,13 +21,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 data class AddExpenseForm(
     val id: Long = 0,
     val title: String = "",
     val amountText: String = "",
-    val category: ExpenseCategory = ExpenseCategory.GROCERIES,
+    val categoryId: String = BuiltInCategories.GROCERIES,
+    val paymentMode: PaymentMode = PaymentMode.UPI,
     val date: LocalDate = LocalDate.now(),
     val paidByMemberId: Long = 0,
     val groupId: Long? = null,
@@ -29,7 +35,8 @@ data class AddExpenseForm(
     val splitMemberIds: Set<Long> = emptySet(),
     val customShares: Map<Long, String> = emptyMap(),
     val note: String = "",
-    val loaded: Boolean = false
+    val loaded: Boolean = false,
+    val heardText: String? = null
 ) {
     val amount: Double? get() = amountText.toDoubleOrNull()?.takeIf { it > 0 }
     val isEdit: Boolean get() = id != 0L
@@ -47,10 +54,12 @@ data class AddExpenseState(
     val form: AddExpenseForm = AddExpenseForm(),
     val members: List<MemberEntity> = emptyList(),
     val groups: List<GroupWithMembers> = emptyList(),
+    val categories: List<Category> = emptyList(),
     val symbol: String = "₹"
 ) {
     val groupMembers: List<MemberEntity>
         get() = groups.firstOrNull { it.group.id == form.groupId }?.members ?: members
+    val category: Category get() = categories.byId().resolve(form.categoryId)
 }
 
 class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, presetGroupId: Long) : ViewModel() {
@@ -60,8 +69,9 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
         form,
         container.memberRepository.members,
         container.groupRepository.groups,
+        container.categoryRepository.categories,
         container.settingsRepository.settings
-    ) { f, members, groups, settings -> AddExpenseState(f, members, groups, settings.currencySymbol) }
+    ) { f, members, groups, categories, settings -> AddExpenseState(f, members, groups, categories, settings.currencySymbol) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AddExpenseState())
 
     init {
@@ -74,7 +84,8 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
                     id = existing.id,
                     title = existing.title,
                     amountText = trimAmount(existing.amount),
-                    category = existing.category,
+                    categoryId = existing.category,
+                    paymentMode = existing.paymentMode,
                     date = LocalDate.ofEpochDay(existing.epochDay),
                     paidByMemberId = existing.paidByMemberId,
                     groupId = existing.groupId,
@@ -104,6 +115,20 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
 
     fun setCustomShare(id: Long, text: String) = update { copy(customShares = customShares + (id to text)) }
 
+    fun applyVoice(text: String) {
+        val custom = state.value.categories.filter { !it.builtIn }.associate { it.id to it.customName }
+        val parsed = VoiceParser.parse(text, custom)
+        update {
+            copy(
+                heardText = text,
+                amountText = parsed.amount?.let { trimAmount(it) } ?: amountText,
+                title = parsed.title.ifBlank { title },
+                categoryId = parsed.categoryId ?: categoryId,
+                paymentMode = parsed.paymentMode ?: paymentMode
+            )
+        }
+    }
+
     fun save(onDone: () -> Unit) {
         val f = form.value
         val amount = f.amount ?: return
@@ -113,7 +138,8 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
                     id = f.id,
                     title = f.title,
                     amount = amount,
-                    category = f.category,
+                    categoryId = f.categoryId,
+                    paymentMode = f.paymentMode,
                     date = f.date,
                     paidByMemberId = f.paidByMemberId,
                     groupId = f.groupId,

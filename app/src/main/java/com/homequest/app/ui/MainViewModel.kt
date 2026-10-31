@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.homequest.app.AppContainer
 import com.homequest.app.data.local.MemberEntity
+import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.data.repository.AppSettings
 import com.homequest.app.data.repository.RewardEvent
+import com.homequest.app.domain.RepeatRule
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -40,12 +42,14 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
                 _toast.value = event
                 if (event is RewardEvent.BadgeEarned || event is RewardEvent.LevelUp) {
                     _confetti.value++
-                    val (title, body) = when (event) {
-                        is RewardEvent.BadgeEarned -> "Badge unlocked ${event.badge.emoji}" to event.badge.name
-                        is RewardEvent.LevelUp -> "Level ${event.level}!" to "You are now a ${event.title}"
-                        else -> return@collect
+                    val s = container.settingsRepository.current()
+                    if (s.rewardNotificationsEnabled) {
+                        when (event) {
+                            is RewardEvent.BadgeEarned -> container.notificationHelper.showBadge(s.language, event.badge)
+                            is RewardEvent.LevelUp -> container.notificationHelper.showLevelUp(s.language, event.level, event.titleRes)
+                            else -> Unit
+                        }
                     }
-                    if (container.settingsRepository.current().rewardNotificationsEnabled) container.notificationHelper.showReward(title, body)
                 }
             }
         }
@@ -59,6 +63,8 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun dismissToast() { _toast.value = null }
+
+    fun setLanguage(tag: String) = viewModelScope.launch { container.settingsRepository.setLanguage(tag) }
 
     fun unlock(member: MemberEntity, pin: String) = viewModelScope.launch {
         if (container.memberRepository.verifyPin(member.id, pin)) {
@@ -77,7 +83,7 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         container.memberRepository.signOut()
     }
 
-    fun completeOnboarding(name: String, phone: String, currency: String, budget: Double, pin: String?) = viewModelScope.launch {
+    fun completeOnboarding(name: String, phone: String, currency: String, budget: Double, pin: String?, nudgeTitle: String) = viewModelScope.launch {
         container.memberRepository.ensureOwner()
         val owner = container.memberRepository.members.first { it.isNotEmpty() }.first { it.isOwner }
         container.memberRepository.updateDetails(owner, name, owner.relation, phone)
@@ -86,6 +92,7 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         _sessionUnlocked.value = true
         container.settingsRepository.setCurrency(currency)
         container.settingsRepository.setMonthlyBudget(budget)
+        container.reminderRepository.save(ReminderEntity(title = nudgeTitle, hour = 20, minute = 30, repeat = RepeatRule.DAILY))
         container.settingsRepository.setOnboarded()
     }
 }

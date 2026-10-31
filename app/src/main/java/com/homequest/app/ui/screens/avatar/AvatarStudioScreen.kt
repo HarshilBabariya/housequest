@@ -3,12 +3,11 @@ package com.homequest.app.ui.screens.avatar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,12 +40,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.homequest.app.AppContainer
+import com.homequest.app.R
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.domain.AvatarConfig
 import com.homequest.app.domain.HairColors
@@ -118,13 +120,13 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
-                title = { Text(if (state.memberName.isBlank()) "Avatar studio" else "${state.memberName}'s avatar") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") } },
+                title = { Text(if (state.memberName.isBlank()) stringResource(R.string.avatar_studio) else stringResource(R.string.avatar_of, state.memberName), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } },
                 actions = { Text("⭐ ${state.points}", Modifier.padding(end = 16.dp), style = MaterialTheme.typography.titleMedium) }
             )
         },
         bottomBar = {
-            Button(onClick = { vm.save(onBack) }, enabled = state.dirty, modifier = Modifier.fillMaxWidth().padding(20.dp)) { Text("Save look") }
+            Button(onClick = { vm.save(onBack) }, enabled = state.dirty, modifier = Modifier.fillMaxWidth().padding(20.dp)) { Text(stringResource(R.string.save_look)) }
         }
     ) { padding ->
         Column(Modifier.padding(padding).verticalScroll(rememberScrollState())) {
@@ -136,24 +138,23 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    AvatarView(state.config, size = 200.dp, animated = true, mood = previewMood, waveTrigger = wave, modifier = Modifier.clickable { wave++ })
-                    Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf(Mood.HAPPY to "😊", Mood.NEUTRAL to "😐", Mood.WORRIED to "😟", Mood.ANGRY to "😠").forEach { (m, e) ->
-                            FilterChip(selected = previewMood == m, onClick = { previewMood = m }, label = { Text(e) })
-                        }
-                        FilterChip(selected = false, onClick = { wave++ }, label = { Text("👋 Say hi") })
+                    AvatarView(state.config, size = 200.dp, animated = true, mood = previewMood, waveTrigger = wave, modifier = Modifier.clickable { wave++ }, background = scheme.surfaceContainerLowest)
+                    Text(stringResource(previewMood.labelRes), style = MaterialTheme.typography.labelLarge, color = scheme.primary, modifier = Modifier.padding(top = 10.dp))
+                    LazyRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        item { FilterChip(selected = false, onClick = { wave++ }, label = { Text(stringResource(R.string.say_hi)) }) }
+                        items(Mood.entries) { m -> FilterChip(selected = previewMood == m, onClick = { previewMood = m }, label = { Text(m.emoji) }) }
                     }
                 }
             }
 
-            SectionHeader("Skin tone")
+            SectionHeader(stringResource(R.string.skin_tone))
             SwatchRow(SkinTones, state.config.skinTone) { vm.update { copy(skinTone = it) } }
-            SectionHeader("Hair colour")
+            SectionHeader(stringResource(R.string.hair_colour))
             SwatchRow(HairColors, state.config.hairColor) { vm.update { copy(hairColor = it) } }
 
-            ItemRow("Hair style", RewardKind.HAIR, state, selectedId = state.config.hairId, onSelect = { vm.update { copy(hairId = it) } }, onUnlock = vm::unlock)
-            ItemRow("Outfit", RewardKind.OUTFIT, state, selectedId = state.config.outfitId, onSelect = { vm.update { copy(outfitId = it) } }, onUnlock = vm::unlock)
-            ItemRow("Accessory", RewardKind.ACCESSORY, state, selectedId = state.config.accessoryId, onSelect = { vm.update { copy(accessoryId = it) } }, onUnlock = vm::unlock)
+            ItemRow(stringResource(R.string.hair_style), RewardKind.HAIR, state, selectedId = state.config.hairId, onSelect = { vm.update { copy(hairId = it) } }, onUnlock = vm::unlock)
+            ItemRow(stringResource(R.string.outfit), RewardKind.OUTFIT, state, selectedId = state.config.outfitId, onSelect = { vm.update { copy(outfitId = it) } }, onUnlock = vm::unlock)
+            ItemRow(stringResource(R.string.accessory), RewardKind.ACCESSORY, state, selectedId = state.config.accessoryId, onSelect = { vm.update { copy(accessoryId = it) } }, onUnlock = vm::unlock)
         }
     }
 }
@@ -192,13 +193,13 @@ private fun ItemRow(title: String, kind: RewardKind, state: AvatarStudioState, s
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(Modifier.alpha(if (unlocked) 1f else 0.5f)) {
-                    AvatarView(previewConfig(state.config, kind, item.id), size = 64.dp)
+                    AvatarView(previewConfig(state.config, kind, item.id), size = 64.dp, background = MaterialTheme.colorScheme.surfaceContainerHigh)
                 }
-                Text(item.name, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                Text(stringResource(item.nameRes), style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
                     when {
-                        unlocked -> if (selected) "Wearing" else "Owned"
-                        affordable -> "⭐ ${item.cost} · tap"
+                        unlocked -> stringResource(if (selected) R.string.wearing else R.string.owned)
+                        affordable -> stringResource(R.string.cost_tap, item.cost)
                         else -> "⭐ ${item.cost}"
                     },
                     style = MaterialTheme.typography.labelSmall,
