@@ -2,10 +2,21 @@
 
 ## Look & feel
 - Adaptive launcher icon: coral-to-pink gradient, white house with a gold star coin; round, squircle and Android 13+ themed (monochrome) variants are all supported.
-- Material 3 throughout, with Material icons for navigation, categories and actions; emoji are reserved for badges, rewards and group avatars.
+- Material 3 throughout; each of the six themes defines its own surface, card and chip colours so the whole UI (not just the accent) changes when you apply one.
+- Material icons for navigation, categories and actions; emoji are reserved for badges, rewards and group avatars.
 
-## First launch
-A welcome dialog asks for your name, currency and an optional monthly budget. Your avatar is created immediately and you start at Level 1 (Rookie).
+## First launch & accounts
+- The welcome dialog asks for your name, mobile number (optional), currency and an optional monthly budget; you become the household owner and start at Level 1 (Rookie).
+- Every family member is an account: name, relation, mobile number, avatar and an optional 4–6 digit PIN.
+- Member picker: on launch (or after Log out) you pick your avatar; members with a PIN get a keypad. One lone member without a PIN is signed in automatically.
+- App lock (Me → Security) asks for your PIN every time the app opens; it needs a PIN set first.
+- Log out / switch from the Me tab returns to the picker. Expenses, budgets and points are shared by the whole household — only avatar and greeting are per member.
+
+## Your avatar
+- Animated: breathes, blinks at random, sways, and waves when you open Home (tap it in the studio for another wave).
+- Moods react to the monthly budget on Home: happy under 60%, neutral to 85%, worried up to 100% (sweat drop), angry when over (furrowed brows, red cheeks, jitter).
+- A speech bubble greets you by time of day and comments on spending.
+- New family members get a randomised look (skin tone, hair colour, hair style); long and curly hair are free so households look varied from day one.
 
 ## Home dashboard
 - Gradient hero card with your animated avatar, level, XP progress bar, spendable points and current logging streak.
@@ -61,12 +72,15 @@ A welcome dialog asks for your name, currency and an optional monthly budget. Yo
 
 Points history is listed at the bottom of Rewards.
 
-## Reminders & notifications
-- Create reminders with a time, once/daily/weekly repeat and weekday; toggle or delete them.
-- Separate notification channels for reminders, budget alerts and rewards.
+## Reminders & bills
+- Repeat Once / Daily / Weekly (weekday) / Monthly (day of month) / Yearly (month + day) — made for rent, EMIs, utilities, insurance and school fees; quick presets fill these in.
+- Optional amount and category; cards show the schedule, "Due today / tomorrow / in N days" and the amount, sorted by next due date.
+- Toggle individual reminders on/off; the notification shows the amount due.
+- Separate notification channels and in-app toggles for reminders & bills, budget alerts and rewards (Me → Notifications).
 
-## Appearance & settings
-- System / light / dark mode.
-- Currency symbol (₹ $ € £ ¥ AED).
-- Rename yourself from the Me tab.
+## Me tab & settings
+- Profile header with animated avatar, level, points, streak; Edit profile (name, mobile, role, PIN) and Avatar studio.
+- Household: family members, budgets, reminders & bills, insights, CSV export (when unlocked).
+- Security: App lock toggle. Appearance: System / Light / Dark. Currency: scrollable list (INR, USD, EUR, GBP, AED, JPY, AUD, CAD, SGD).
+- Notifications: three independent toggles. Account: Log out / switch.
 - All data stays on the device and is included in Android backup.

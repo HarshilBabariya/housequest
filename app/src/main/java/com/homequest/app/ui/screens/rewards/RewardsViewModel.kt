@@ -38,7 +38,7 @@ class RewardsViewModel(private val container: AppContainer) : ViewModel() {
     private val message = MutableStateFlow<String?>(null)
     private val gamification = container.gamificationRepository
 
-    private val meta = combine(kind, message, container.memberRepository.owner, container.settingsRepository.settings) { k, m, owner, s ->
+    private val meta = combine(kind, message, container.memberRepository.activeMember, container.settingsRepository.settings) { k, m, owner, s ->
         Meta(k, m, owner?.id ?: 0, s.themeId)
     }
 

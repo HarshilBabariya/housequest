@@ -43,6 +43,7 @@ fun HomeQuestTheme(
     val surface by animateColorAsState(target.surface, spec, label = "surface")
     val primaryContainer by animateColorAsState(target.primaryContainer, spec, label = "primaryContainer")
     val secondaryContainer by animateColorAsState(target.secondaryContainer, spec, label = "secondaryContainer")
+    val surfaceContainer by animateColorAsState(target.surfaceContainer, spec, label = "surfaceContainer")
 
     MaterialTheme(
         colorScheme = target.copy(
@@ -52,7 +53,9 @@ fun HomeQuestTheme(
             background = background,
             surface = surface,
             primaryContainer = primaryContainer,
-            secondaryContainer = secondaryContainer
+            secondaryContainer = secondaryContainer,
+            surfaceContainer = surfaceContainer,
+            surfaceContainerLow = surfaceContainer
         ),
         typography = AppTypography,
         content = content

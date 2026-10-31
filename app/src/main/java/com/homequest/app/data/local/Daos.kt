@@ -15,9 +15,6 @@ interface MemberDao {
     fun observeAll(): Flow<List<MemberEntity>>
 
     @Query("SELECT * FROM members WHERE isOwner = 1 LIMIT 1")
-    fun observeOwner(): Flow<MemberEntity?>
-
-    @Query("SELECT * FROM members WHERE isOwner = 1 LIMIT 1")
     suspend fun owner(): MemberEntity?
 
     @Query("SELECT * FROM members WHERE id = :id")

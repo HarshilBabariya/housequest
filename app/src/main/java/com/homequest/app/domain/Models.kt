@@ -32,8 +32,19 @@ enum class SplitType { EQUAL, CUSTOM, NONE }
 enum class RepeatRule(val label: String) {
     ONCE("Once"),
     DAILY("Daily"),
-    WEEKLY("Weekly")
+    WEEKLY("Weekly"),
+    MONTHLY("Monthly"),
+    YEARLY("Yearly")
 }
+
+enum class Mood { HAPPY, NEUTRAL, WORRIED, ANGRY }
+
+data class Currency(val code: String, val symbol: String)
+
+val Currencies = listOf(
+    Currency("INR", "₹"), Currency("USD", "$"), Currency("EUR", "€"), Currency("GBP", "£"),
+    Currency("AED", "د.إ"), Currency("JPY", "¥"), Currency("AUD", "A$"), Currency("CAD", "C$"), Currency("SGD", "S$")
+)
 
 enum class RewardKind(val label: String) {
     THEME("Themes"),

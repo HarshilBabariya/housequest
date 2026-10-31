@@ -27,6 +27,7 @@ import com.homequest.app.ui.screens.expenses.ExpensesScreen
 import com.homequest.app.ui.screens.family.FamilyScreen
 import com.homequest.app.ui.screens.groups.GroupDetailScreen
 import com.homequest.app.ui.screens.groups.GroupsScreen
+import com.homequest.app.ui.screens.profile.AccountScreen
 import com.homequest.app.ui.screens.profile.BudgetsScreen
 import com.homequest.app.ui.screens.profile.InsightsScreen
 import com.homequest.app.ui.screens.profile.ProfileScreen
@@ -77,7 +78,7 @@ fun HomeQuestNavHost(navController: NavHostController) {
                     onOpenExpenses = { navController.navigate(Routes.EXPENSES) },
                     onOpenInsights = { navController.navigate(Routes.INSIGHTS) },
                     onOpenBudgets = { navController.navigate(Routes.BUDGETS) },
-                    onOpenRewards = { navController.navigate(Routes.REWARDS) }
+                    onOpenProfile = { navController.navigate(Routes.PROFILE) }
                 )
             }
             composable(Routes.EXPENSES) {
@@ -94,6 +95,7 @@ fun HomeQuestNavHost(navController: NavHostController) {
             }
             composable(Routes.PROFILE) {
                 ProfileScreen(
+                    onOpenAccount = { navController.navigate(Routes.ACCOUNT) },
                     onOpenFamily = { navController.navigate(Routes.FAMILY) },
                     onOpenAvatar = { navController.navigate(Routes.avatar(it)) },
                     onOpenReminders = { navController.navigate(Routes.REMINDERS) },
@@ -128,6 +130,9 @@ fun HomeQuestNavHost(navController: NavHostController) {
             }
             composable(Routes.AVATAR, arguments = listOf(navArgument("memberId") { type = NavType.LongType })) { entry ->
                 AvatarStudioScreen(memberId = entry.arguments?.getLong("memberId") ?: 0L, onBack = { navController.popBackStack() })
+            }
+            composable(Routes.ACCOUNT) {
+                AccountScreen(onBack = { navController.popBackStack() }, onOpenAvatar = { navController.navigate(Routes.avatar(it)) })
             }
             composable(Routes.REMINDERS) { RemindersScreen(onBack = { navController.popBackStack() }) }
             composable(Routes.BUDGETS) { BudgetsScreen(onBack = { navController.popBackStack() }) }

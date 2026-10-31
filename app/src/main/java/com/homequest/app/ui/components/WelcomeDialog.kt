@@ -2,7 +2,8 @@ package com.homequest.app.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -21,13 +22,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.homequest.app.domain.AvatarConfig
-
-private val currencies = listOf("₹", "$", "€", "£")
+import com.homequest.app.domain.Currencies
 
 @Composable
-fun WelcomeDialog(onComplete: (name: String, currency: String, budget: Double) -> Unit) {
+fun WelcomeDialog(onComplete: (name: String, phone: String, currency: String, budget: Double) -> Unit) {
     var name by remember { mutableStateOf("") }
-    var currency by remember { mutableStateOf(currencies.first()) }
+    var phone by remember { mutableStateOf("") }
+    var currency by remember { mutableStateOf(Currencies.first()) }
     var budget by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = {},
@@ -38,21 +39,28 @@ fun WelcomeDialog(onComplete: (name: String, currency: String, budget: Double) -
                 AvatarView(AvatarConfig(), size = 96.dp, animated = true, modifier = Modifier.fillMaxWidth())
                 Text("Log expenses, earn points, unlock themes and outfits. Let's set you up.", style = MaterialTheme.typography.bodyMedium)
                 OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Your name") }, singleLine = true)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    currencies.forEach { c -> FilterChip(selected = currency == c, onClick = { currency = c }, label = { Text(c) }) }
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it.filter { c -> c.isDigit() || c == '+' } },
+                    label = { Text("Mobile number (optional)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    singleLine = true
+                )
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    items(Currencies, key = { it.code }) { c -> FilterChip(selected = currency == c, onClick = { currency = c }, label = { Text("${c.symbol} ${c.code}") }) }
                 }
                 OutlinedTextField(
                     value = budget,
                     onValueChange = { budget = it.filter { ch -> ch.isDigit() } },
                     label = { Text("Monthly budget (optional)") },
-                    prefix = { Text(currency) },
+                    prefix = { Text(currency.symbol) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onComplete(name.trim(), currency, budget.toDoubleOrNull() ?: 0.0) }, enabled = name.isNotBlank()) { Text("Start my quest") }
+            Button(onClick = { onComplete(name.trim(), phone, currency.symbol, budget.toDoubleOrNull() ?: 0.0) }, enabled = name.isNotBlank()) { Text("Start my quest") }
         }
     )
 }

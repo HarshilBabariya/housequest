@@ -20,7 +20,7 @@ class AppContainer(context: Context) {
     val reminderScheduler = ReminderScheduler(context)
     val gamificationRepository = GamificationRepository(db.gamificationDao())
     val budgetMonitor = BudgetMonitor(db.expenseDao(), db.budgetDao(), settingsRepository, gamificationRepository, notificationHelper)
-    val memberRepository = MemberRepository(db.memberDao(), gamificationRepository)
+    val memberRepository = MemberRepository(db.memberDao(), settingsRepository, gamificationRepository)
     val expenseRepository = ExpenseRepository(db.expenseDao(), db.budgetDao(), gamificationRepository, budgetMonitor)
     val groupRepository = GroupRepository(db.groupDao(), gamificationRepository)
     val reminderRepository = ReminderRepository(db.reminderDao(), reminderScheduler)

@@ -22,7 +22,7 @@ Push this folder to a GitHub repository (branch `main`). The included workflow `
 
 ## Docs
 
-- [docs/previews/](docs/previews/) — rendered screen mockups and the launcher icon
+- [docs/previews/](docs/previews/) — rendered screen mockups (from 1.0.1) and the launcher icon
 
 - [docs/FEATURES.md](docs/FEATURES.md) — what the app does, written for users and product
 - [docs/HANDOFF.md](docs/HANDOFF.md) — architecture, data model, gamification rules, and how to extend it
@@ -31,5 +31,6 @@ Push this folder to a GitHub repository (branch `main`). The included workflow `
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.1.0 | 2026-10-31 | Member accounts (phone + PIN, member picker, app lock, log out), expressive animated avatar with budget moods and greetings, randomised avatars per member, themed surface colours, reminders with monthly/yearly bills, notification toggles, currency list, edit-profile screen |
 | 1.0.1 | 2026-10-31 | Adaptive launcher icon (gradient + house/coin, themed-icon support), Material category icons replacing emoji, GitHub Actions APK build |
 | 1.0.0 | 2026-10-31 | Initial build: expenses, budgets, groups & splits, family members, avatar studio, rewards shop, badges, reminders, notifications, insights, CSV export |

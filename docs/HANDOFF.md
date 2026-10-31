@@ -5,7 +5,7 @@
 |---|---|
 | Language / UI | Kotlin 2.1, Jetpack Compose (BOM 2024.12), Material 3, material-icons-extended |
 | Navigation | navigation-compose 2.8 with string routes (`ui/navigation/Routes.kt`) |
-| Persistence | Room 2.6 (KSP) + DataStore Preferences |
+| Persistence | Room 2.6 (KSP, schema v2 with migration) + DataStore Preferences |
 | Background | WorkManager 2.10 for reminders |
 | DI | Manual `AppContainer` held by `HomeQuestApp`; screens obtain view models through `appViewModel { AppContainer -> VM }` |
 | Build | AGP 8.7, compileSdk 35, minSdk 26, JDK 17 |
@@ -14,7 +14,7 @@
 The source was written and statically reviewed but **not compiled** in the authoring environment (no Android SDK / Maven access there). Expect a first `assembleDebug` to surface only trivial issues such as a missing import or an API-signature mismatch for a Compose version. The `schemas/` directory for Room is generated on first build.
 
 ## CI
-`.github/workflows/build-apk.yml` runs `assembleDebug` on Ubuntu with JDK 17 + Android SDK and uploads `app-debug.apk` as an artifact. Trigger: push to `main` or manual dispatch.
+`.github/workflows/build-apk.yml` runs `assembleDebug` on Ubuntu with JDK 17 and the runner's preinstalled Android SDK (platform 35 / build-tools 35.0.0 installed via `sdkmanager`; the `setup-android` action is deliberately not used because it tries to install the retired `tools` package) and uploads `app-debug.apk` as an artifact. Trigger: push to `main` or manual dispatch.
 
 ## Package layout (`com.homequest.app`)
 ```
@@ -33,13 +33,21 @@ ui/screens/*          one package per feature, each with its screen and view mod
 ```
 
 ## Data model
-- `members` — owner row seeded on first run (`isOwner = 1`); avatar fields stored inline (`skinTone`, `hairId`, `hairColor`, `outfitId`, `accessoryId`). `MemberEntity.avatar()` converts to `AvatarConfig`.
+- `members` — owner row seeded on first run (`isOwner = 1`); avatar fields stored inline (`skinTone`, `hairId`, `hairColor`, `outfitId`, `accessoryId`), plus `phone` and `pinHash` (`salt:sha256(salt:pin)`, see `util/Pin.kt`). `MemberEntity.avatar()` converts to `AvatarConfig`; `MemberEntity.hasPin` is derived. New members get a random avatar in `MemberRepository.add()`.
+- Active account: `SettingsRepository.activeMemberId` (0 = nobody signed in). `MemberRepository.activeMember` is the flow screens use for "who am I"; `activeMemberId()` falls back to the owner. `MainViewModel.gate()` decides between onboarding, the lock screen (`ui/screens/profile/LockScreen.kt`) and the app; `sessionUnlocked` is in-memory so App lock re-prompts on every cold start.
 - `expenses` — `epochDay` (LocalDate.toEpochDay) is the only date used for grouping/queries; `createdAt` orders within a day. `paidByMemberId` cascades on member delete; `groupId` is set null on group delete.
 - `expense_splits` — per-member share; present only for group expenses. Deleted with the expense.
 - `groups`, `group_members` (junction), `settlements` — balances are computed in `GroupRepository.balances()` from expenses + splits + settlements; `SplitCalculator.settlements()` produces the minimal transfer list.
-- `reminders`, `budgets` (per category; the overall monthly budget lives in DataStore), `profile` (single row: points, lifetime XP, streak, last log day, last budget month checked), `unlocks`, `earned_badges`, `points_ledger`.
+- `reminders` — `repeat` ONCE/DAILY/WEEKLY/MONTHLY/YEARLY with `weekday`, `dayOfMonth`, `month`, optional `amount` and `category`; `ReminderEntity.nextOccurrence()` (in `ReminderScheduler.kt`) computes the next fire time and clamps day-of-month to the month length.
+- `budgets` (per category; the overall monthly budget lives in DataStore), `profile` (single row: points, lifetime XP, streak, last log day, last budget month checked), `unlocks`, `earned_badges`, `points_ledger`.
 
 Month/category aggregation for Insights uses `strftime('%Y-%m', epochDay * 86400, 'unixepoch')`.
+
+## Database versions
+- v1 → v2 (`MIGRATION_1_2`): adds `members.phone`, `members.pinHash`, `reminders.dayOfMonth/month/amount/category`. Add further migrations to `HomeQuestDatabase.build()`; never bump the version without one.
+
+## Avatar & moods
+`ui/components/AvatarView.kt` draws the character on a Canvas: `animated` enables breathing/sway/blink, `mood` (`domain.Mood`) selects brows/mouth/extras, `waveTrigger` plays a 3-wave arm animation whenever its value changes. `moodFor(progress, hasBudget)` and `moodLine(mood, name, hour)` map budget state to a mood and greeting; the dashboard hero uses both.
 
 ## Gamification rules
 All numeric rules live in `domain/Gamification.kt` (`PointsRules`, `Levels`) and `domain/Catalogs.kt` (`RewardCatalog`, `BadgeCatalog`). `GamificationRepository` is the only writer of points/badges/unlocks and emits `RewardEvent`s on a `SharedFlow`; `MainViewModel` turns those into the toast, confetti and reward notification.

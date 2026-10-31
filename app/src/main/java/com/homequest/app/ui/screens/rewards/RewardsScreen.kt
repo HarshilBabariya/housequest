@@ -22,8 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
@@ -41,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -69,14 +68,21 @@ fun RewardsScreen(onOpenAvatar: (Long) -> Unit) {
     ) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 32.dp)) {
             item {
-                Card(Modifier.padding(20.dp).fillMaxWidth(), colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)) {
-                    Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                val scheme = MaterialTheme.colorScheme
+                Box(
+                    Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .background(Brush.linearGradient(listOf(scheme.primary, scheme.tertiary)), RoundedCornerShape(24.dp))
+                        .padding(20.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text("Points to spend", style = MaterialTheme.typography.labelMedium)
-                            AnimatedCount(state.profile.points, MaterialTheme.typography.displayMedium, MaterialTheme.colorScheme.onPrimaryContainer)
-                            Text("Lifetime ${state.profile.lifetimePoints} XP · Level ${state.level.level} ${state.level.title}", style = MaterialTheme.typography.bodySmall)
+                            Text("Points to spend", style = MaterialTheme.typography.labelLarge, color = scheme.onPrimary.copy(alpha = 0.9f))
+                            AnimatedCount(state.profile.points, MaterialTheme.typography.displayMedium, scheme.onPrimary)
+                            Text("Lifetime ${state.profile.lifetimePoints} XP · Level ${state.level.level} ${state.level.title}", style = MaterialTheme.typography.bodySmall, color = scheme.onPrimary.copy(alpha = 0.9f))
                         }
-                        Text("⭐", fontSize = 48.sp)
+                        Text("⭐", fontSize = 56.sp)
                     }
                 }
             }
@@ -132,7 +138,7 @@ private fun BadgeTile(badge: Badge, earned: Boolean) {
             .width(108.dp)
             .scale(scale)
             .alpha(if (earned) 1f else 0.45f)
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(18.dp))
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -152,7 +158,7 @@ private fun RewardRow(item: RewardItem, unlocked: Boolean, active: Boolean, affo
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 6.dp)
             .border(2.dp, border, RoundedCornerShape(18.dp))
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(18.dp))
             .clickable(enabled = unlocked && item.kind != RewardKind.FEATURE, onClick = onUse)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically

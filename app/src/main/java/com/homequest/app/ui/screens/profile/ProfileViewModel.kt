@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class ProfileState(
-    val owner: MemberEntity? = null,
+    val member: MemberEntity? = null,
     val settings: AppSettings = AppSettings(),
     val level: LevelInfo = Levels.fromLifetimePoints(0),
     val points: Int = 0,
@@ -28,15 +28,18 @@ data class ProfileState(
 )
 
 class ProfileViewModel(private val container: AppContainer) : ViewModel() {
+    private val settings = container.settingsRepository
+
     val state: StateFlow<ProfileState> = combine(
         container.memberRepository.members,
-        container.settingsRepository.settings,
+        container.memberRepository.activeMember,
+        settings.settings,
         container.gamificationRepository.profile,
         container.gamificationRepository.unlockedIds
-    ) { members, settings, profile, unlocked ->
+    ) { members, member, s, profile, unlocked ->
         ProfileState(
-            owner = members.firstOrNull { it.isOwner },
-            settings = settings,
+            member = member,
+            settings = s,
             level = Levels.fromLifetimePoints(profile.lifetimePoints),
             points = profile.points,
             streak = profile.streakDays,
@@ -45,13 +48,13 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileState())
 
-    fun rename(name: String) = viewModelScope.launch {
-        state.value.owner?.let { container.memberRepository.rename(it, name, it.relation) }
-    }
-
-    fun setDarkMode(mode: DarkMode) = viewModelScope.launch { container.settingsRepository.setDarkMode(mode) }
-    fun setCurrency(symbol: String) = viewModelScope.launch { container.settingsRepository.setCurrency(symbol) }
-    fun setBudgetAlerts(enabled: Boolean) = viewModelScope.launch { container.settingsRepository.setBudgetAlerts(enabled) }
+    fun setDarkMode(mode: DarkMode) = viewModelScope.launch { settings.setDarkMode(mode) }
+    fun setCurrency(symbol: String) = viewModelScope.launch { settings.setCurrency(symbol) }
+    fun setBudgetAlerts(enabled: Boolean) = viewModelScope.launch { settings.setBudgetAlerts(enabled) }
+    fun setReminderNotifications(enabled: Boolean) = viewModelScope.launch { settings.setReminderNotifications(enabled) }
+    fun setRewardNotifications(enabled: Boolean) = viewModelScope.launch { settings.setRewardNotifications(enabled) }
+    fun setAppLock(enabled: Boolean) = viewModelScope.launch { settings.setAppLock(enabled) }
+    fun signOut() = viewModelScope.launch { container.memberRepository.signOut() }
 
     fun exportCsv(context: Context) = viewModelScope.launch {
         Sharing.exportCsv(context, container.expenseRepository.allForExport())

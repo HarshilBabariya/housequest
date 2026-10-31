@@ -66,7 +66,7 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
 
     init {
         viewModelScope.launch {
-            val ownerId = container.memberRepository.ownerId()
+            val ownerId = container.memberRepository.activeMemberId()
             val existing = if (expenseId != 0L) container.expenseRepository.byId(expenseId) else null
             if (existing != null) {
                 val splits = container.expenseRepository.splitsFor(existing.id)

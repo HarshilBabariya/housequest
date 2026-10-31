@@ -41,8 +41,8 @@ class NotificationHelper(private val context: Context) {
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
-    fun showReminder(reminderId: Long, title: String) =
-        post(ID_REMINDER_BASE + reminderId.toInt(), CHANNEL_REMINDERS, title, "Tap to log today's expenses and keep your streak alive.")
+    fun showReminder(reminderId: Long, title: String, detail: String?) =
+        post(ID_REMINDER_BASE + reminderId.toInt(), CHANNEL_REMINDERS, title, detail ?: "Tap to log today's expenses and keep your streak alive.")
 
     fun showBudgetAlert(title: String, body: String) = post(ID_BUDGET, CHANNEL_BUDGET, title, body)
 

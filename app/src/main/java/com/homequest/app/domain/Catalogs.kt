@@ -28,8 +28,8 @@ object RewardCatalog {
         RewardItem(Outfits.HERO, RewardKind.OUTFIT, "Hero suit", "Savings superhero", 500, "🦸"),
 
         RewardItem(HairStyles.SHORT, RewardKind.HAIR, "Short", "Classic crop", 0, "💇"),
-        RewardItem(HairStyles.LONG, RewardKind.HAIR, "Long", "Flowing locks", 100, "💁"),
-        RewardItem(HairStyles.CURLY, RewardKind.HAIR, "Curly", "Bouncy curls", 120, "🌀"),
+        RewardItem(HairStyles.LONG, RewardKind.HAIR, "Long", "Flowing locks", 0, "💁"),
+        RewardItem(HairStyles.CURLY, RewardKind.HAIR, "Curly", "Bouncy curls", 0, "🌀"),
         RewardItem(HairStyles.BUN, RewardKind.HAIR, "Top bun", "Neat and tidy", 120, "🎀"),
         RewardItem(HairStyles.MOHAWK, RewardKind.HAIR, "Mohawk", "Bold statement", 180, "🎸"),
 

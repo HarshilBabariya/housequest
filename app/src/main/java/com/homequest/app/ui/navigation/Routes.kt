@@ -15,6 +15,7 @@ object Routes {
     const val REWARDS = "rewards"
     const val PROFILE = "profile"
     const val FAMILY = "family"
+    const val ACCOUNT = "account"
     const val AVATAR = "avatar/{memberId}"
     const val REMINDERS = "reminders"
     const val BUDGETS = "budgets"

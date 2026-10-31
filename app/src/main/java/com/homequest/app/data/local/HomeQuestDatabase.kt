@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [
@@ -20,7 +22,7 @@ import androidx.room.RoomDatabase
         EarnedBadgeEntity::class,
         PointsLedgerEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class HomeQuestDatabase : RoomDatabase() {
@@ -32,7 +34,20 @@ abstract class HomeQuestDatabase : RoomDatabase() {
     abstract fun gamificationDao(): GamificationDao
 
     companion object {
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE members ADD COLUMN phone TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE members ADD COLUMN pinHash TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE reminders ADD COLUMN dayOfMonth INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("ALTER TABLE reminders ADD COLUMN month INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("ALTER TABLE reminders ADD COLUMN amount REAL")
+                db.execSQL("ALTER TABLE reminders ADD COLUMN category TEXT")
+            }
+        }
+
         fun build(context: Context): HomeQuestDatabase =
-            Room.databaseBuilder(context, HomeQuestDatabase::class.java, "homequest.db").build()
+            Room.databaseBuilder(context, HomeQuestDatabase::class.java, "homequest.db")
+                .addMigrations(MIGRATION_1_2)
+                .build()
     }
 }

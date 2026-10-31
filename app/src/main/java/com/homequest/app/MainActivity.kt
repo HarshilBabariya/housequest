@@ -18,12 +18,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import com.homequest.app.ui.Gate
 import com.homequest.app.ui.MainViewModel
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.ConfettiBurst
 import com.homequest.app.ui.components.RewardToast
 import com.homequest.app.ui.components.WelcomeDialog
 import com.homequest.app.ui.navigation.HomeQuestNavHost
+import com.homequest.app.ui.screens.profile.LockScreen
 import com.homequest.app.ui.theme.HomeQuestTheme
 
 class MainActivity : ComponentActivity() {
@@ -40,6 +42,9 @@ private fun HomeQuestRoot() {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val toast by vm.toast.collectAsStateWithLifecycle()
     val confetti by vm.confetti.collectAsStateWithLifecycle()
+    val members by vm.members.collectAsStateWithLifecycle()
+    val unlocked by vm.sessionUnlocked.collectAsStateWithLifecycle()
+    val pinError by vm.pinError.collectAsStateWithLifecycle()
     val navController = rememberNavController()
 
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
@@ -50,10 +55,21 @@ private fun HomeQuestRoot() {
     HomeQuestTheme(themeId = settings.themeId, darkMode = settings.darkMode) {
         Surface(Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxSize()) {
-                HomeQuestNavHost(navController)
-                ConfettiBurst(trigger = confetti)
-                Box(Modifier.align(Alignment.TopCenter)) { RewardToast(event = toast, onDismiss = vm::dismissToast) }
-                if (!settings.onboarded) WelcomeDialog(onComplete = vm::completeOnboarding)
+                when (vm.gate(settings, unlocked)) {
+                    Gate.ONBOARDING -> WelcomeDialog(onComplete = vm::completeOnboarding)
+                    Gate.LOCKED -> LockScreen(
+                        members = members,
+                        preselectedId = settings.activeMemberId,
+                        pinError = pinError,
+                        onClearError = vm::clearPinError,
+                        onUnlock = vm::unlock
+                    )
+                    Gate.OPEN -> {
+                        HomeQuestNavHost(navController)
+                        ConfettiBurst(trigger = confetti)
+                        Box(Modifier.align(Alignment.TopCenter)) { RewardToast(event = toast, onDismiss = vm::dismissToast) }
+                    }
+                }
             }
         }
     }

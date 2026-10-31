@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +31,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -43,6 +49,7 @@ import com.homequest.app.AppContainer
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.domain.AvatarConfig
 import com.homequest.app.domain.HairColors
+import com.homequest.app.domain.Mood
 import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.domain.RewardItem
 import com.homequest.app.domain.RewardKind
@@ -103,6 +110,8 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
     val vm = appViewModel { AvatarStudioViewModel(it, memberId) }
     val state by vm.state.collectAsStateWithLifecycle()
     val scheme = MaterialTheme.colorScheme
+    var previewMood by remember { mutableStateOf(Mood.HAPPY) }
+    var wave by remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -124,7 +133,15 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
                     .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
-                AvatarView(state.config, size = 200.dp, animated = true)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    AvatarView(state.config, size = 200.dp, animated = true, mood = previewMood, waveTrigger = wave, modifier = Modifier.clickable { wave++ })
+                    Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(Mood.HAPPY to "😊", Mood.NEUTRAL to "😐", Mood.WORRIED to "😟", Mood.ANGRY to "😠").forEach { (m, e) ->
+                            FilterChip(selected = previewMood == m, onClick = { previewMood = m }, label = { Text(e) })
+                        }
+                        FilterChip(selected = false, onClick = { wave++ }, label = { Text("👋 Say hi") })
+                    }
+                }
             }
 
             SectionHeader("Skin tone")
@@ -167,7 +184,7 @@ private fun ItemRow(title: String, kind: RewardKind, state: AvatarStudioState, s
                 Modifier
                     .width(96.dp)
                     .border(2.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(16.dp))
                     .clickable { if (unlocked) onSelect(item.id) else if (affordable) onUnlock(item) }
                     .padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally

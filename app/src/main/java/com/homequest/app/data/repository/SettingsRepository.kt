@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.homequest.app.domain.ThemeIds
@@ -24,6 +25,10 @@ data class AppSettings(
     val currencySymbol: String = "₹",
     val monthlyBudget: Double = 0.0,
     val budgetAlertsEnabled: Boolean = true,
+    val reminderNotificationsEnabled: Boolean = true,
+    val rewardNotificationsEnabled: Boolean = true,
+    val appLockEnabled: Boolean = false,
+    val activeMemberId: Long = 0,
     val onboarded: Boolean = false
 )
 
@@ -35,6 +40,10 @@ class SettingsRepository(private val context: Context) {
         val CURRENCY = stringPreferencesKey("currency")
         val BUDGET = doublePreferencesKey("monthly_budget")
         val BUDGET_ALERTS = booleanPreferencesKey("budget_alerts")
+        val REMINDER_NOTIFS = booleanPreferencesKey("reminder_notifications")
+        val REWARD_NOTIFS = booleanPreferencesKey("reward_notifications")
+        val APP_LOCK = booleanPreferencesKey("app_lock")
+        val ACTIVE_MEMBER = longPreferencesKey("active_member")
         val ONBOARDED = booleanPreferencesKey("onboarded")
     }
 
@@ -45,6 +54,10 @@ class SettingsRepository(private val context: Context) {
             currencySymbol = p[Keys.CURRENCY] ?: "₹",
             monthlyBudget = p[Keys.BUDGET] ?: 0.0,
             budgetAlertsEnabled = p[Keys.BUDGET_ALERTS] ?: true,
+            reminderNotificationsEnabled = p[Keys.REMINDER_NOTIFS] ?: true,
+            rewardNotificationsEnabled = p[Keys.REWARD_NOTIFS] ?: true,
+            appLockEnabled = p[Keys.APP_LOCK] ?: false,
+            activeMemberId = p[Keys.ACTIVE_MEMBER] ?: 0,
             onboarded = p[Keys.ONBOARDED] ?: false
         )
     }
@@ -56,5 +69,9 @@ class SettingsRepository(private val context: Context) {
     suspend fun setCurrency(symbol: String) = context.dataStore.edit { it[Keys.CURRENCY] = symbol }
     suspend fun setMonthlyBudget(amount: Double) = context.dataStore.edit { it[Keys.BUDGET] = amount }
     suspend fun setBudgetAlerts(enabled: Boolean) = context.dataStore.edit { it[Keys.BUDGET_ALERTS] = enabled }
+    suspend fun setReminderNotifications(enabled: Boolean) = context.dataStore.edit { it[Keys.REMINDER_NOTIFS] = enabled }
+    suspend fun setRewardNotifications(enabled: Boolean) = context.dataStore.edit { it[Keys.REWARD_NOTIFS] = enabled }
+    suspend fun setAppLock(enabled: Boolean) = context.dataStore.edit { it[Keys.APP_LOCK] = enabled }
+    suspend fun setActiveMember(id: Long) = context.dataStore.edit { it[Keys.ACTIVE_MEMBER] = id }
     suspend fun setOnboarded() = context.dataStore.edit { it[Keys.ONBOARDED] = true }
 }

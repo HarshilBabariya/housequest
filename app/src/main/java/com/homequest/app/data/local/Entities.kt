@@ -17,6 +17,8 @@ data class MemberEntity(
     val name: String,
     val relation: String,
     val isOwner: Boolean = false,
+    val phone: String = "",
+    val pinHash: String = "",
     val skinTone: Int = 0,
     val hairId: String,
     val hairColor: Int = 0,
@@ -105,6 +107,10 @@ data class ReminderEntity(
     val minute: Int,
     val repeat: RepeatRule,
     val weekday: Int = 1,
+    val dayOfMonth: Int = 1,
+    val month: Int = 1,
+    val amount: Double? = null,
+    val category: ExpenseCategory? = null,
     val enabled: Boolean = true
 )
 

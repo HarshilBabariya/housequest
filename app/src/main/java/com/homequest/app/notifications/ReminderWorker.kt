@@ -14,7 +14,9 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         val container = (applicationContext as HomeQuestApp).container
         val reminder = container.reminderRepository.byId(id) ?: return Result.success()
         if (!reminder.enabled) return Result.success()
-        container.notificationHelper.showReminder(reminder.id, reminder.title)
+        if (container.settingsRepository.current().reminderNotificationsEnabled) {
+            container.notificationHelper.showReminder(reminder.id, reminder.title, reminder.amount?.let { "${container.settingsRepository.current().currencySymbol}${"%,.0f".format(it)} due" })
+        }
         if (reminder.repeat == RepeatRule.ONCE) {
             container.reminderRepository.setEnabled(reminder, false)
         } else {
