@@ -19,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -39,6 +38,7 @@ import com.homequest.app.AppContainer
 import com.homequest.app.domain.ExpenseCategory
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.CategoryIcon
+import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.ui.components.SectionHeader
 import com.homequest.app.util.Dates
 import com.homequest.app.util.money
@@ -112,7 +112,7 @@ fun BudgetsScreen(onBack: () -> Unit) {
                         Text(c.label, style = MaterialTheme.typography.bodyLarge)
                         BudgetBar(state.spent[c] ?: 0.0, state.limits[c] ?: 0.0, state.symbol)
                     }
-                    AmountField(state.limits[c] ?: 0.0, state.symbol, null, Modifier.width(120.dp)) { vm.setCategory(c, it) }
+                    AmountField(state.limits[c] ?: 0.0, state.symbol, "Limit", Modifier.width(130.dp)) { vm.setCategory(c, it) }
                 }
             }
         }
@@ -120,20 +120,16 @@ fun BudgetsScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun AmountField(initial: Double, symbol: String, label: String?, modifier: Modifier = Modifier, onCommit: (Double?) -> Unit) {
+private fun AmountField(initial: Double, symbol: String, label: String, modifier: Modifier = Modifier, onCommit: (Double?) -> Unit) {
     var text by remember(initial) { mutableStateOf(if (initial > 0) (if (initial % 1.0 == 0.0) initial.toLong().toString() else initial.toString()) else "") }
-    OutlinedTextField(
-        value = text,
-        onValueChange = { v ->
-            text = v.filter { it.isDigit() || it == '.' }
-            onCommit(text.toDoubleOrNull())
-        },
-        label = label?.let { { Text(it) } },
-        prefix = { Text(symbol) },
-        placeholder = { Text("None") },
-        singleLine = true,
+    HqTextField(
+        text,
+        { v -> text = v.filter { it.isDigit() || it == '.' }; onCommit(text.toDoubleOrNull()) },
+        label,
+        placeholder = "None",
+        prefix = symbol,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
     )
 }
 

@@ -6,27 +6,35 @@
 - Material icons for navigation, categories and actions; emoji are reserved for badges, rewards and group avatars.
 
 ## First launch & accounts
-- The welcome dialog asks for your name, mobile number (optional), currency and an optional monthly budget; you become the household owner and start at Level 1 (Rookie).
-- Every family member is an account: name, relation, mobile number, avatar and an optional 4–6 digit PIN.
+- A three-step onboarding (You → Money → PIN) asks for your name and mobile number (required, 10+ digits), currency and optional budget, then lets you create a 4-digit PIN or skip it. You become the household owner and start at Level 1 (Rookie).
+- Every family member is an account: name, relation, mobile number (required), avatar and an optional 4-digit PIN. Weak PINs (1111, 1234…) are rejected and the PIN is confirmed twice.
+- Note: accounts live on this phone only. Cross-device access needs a sync backend, which is not part of this release.
 - Member picker: on launch (or after Log out) you pick your avatar; members with a PIN get a keypad. One lone member without a PIN is signed in automatically.
-- App lock (Me → Security) asks for your PIN every time the app opens; it needs a PIN set first.
+- App lock (Me → Security): switching it on creates a PIN on the spot if you don't have one, then asks for it every time the app opens.
 - Log out / switch from the Me tab returns to the picker. Expenses, budgets and points are shared by the whole household — only avatar and greeting are per member.
 
 ## Your avatar
+- Bitmoji-style illustration: egg-shaped head with a thin dark outline, large eyes with lash line and two-tone iris, bold shaped brows, small nose, wide toothy smile, rounded blush.
+- 9 hair styles (short, buzz, long, wavy, bob, ponytail, curly, top bun, braids, mohawk), 7 hair colours, 6 skin tones.
+- 12 outfits: casual tee, shirt, hoodie, denim jacket, sweater, blazer, kurta, sherwani, saree, dress, spacesuit, hero suit.
+- 6 accessories: bindi, earrings, glasses, cap, headphones, crown.
 - Animated: breathes, blinks at random, sways, and waves when you open Home (tap it in the studio for another wave).
 - Moods react to the monthly budget on Home: happy under 60%, neutral to 85%, worried up to 100% (sweat drop), angry when over (furrowed brows, red cheeks, jitter).
 - A speech bubble greets you by time of day and comments on spending.
-- New family members get a randomised look (skin tone, hair colour, hair style); long and curly hair are free so households look varied from day one.
+- New family members get a randomised look (skin tone, hair colour, short/buzz/long/curly hair, tee or shirt); those parts are free so households look varied from day one.
 
 ## Home dashboard
-- Gradient hero card with your animated avatar, level, XP progress bar, spendable points and current logging streak.
+- Gradient hero card with your animated avatar, level, XP progress bar, spendable points, streak and the mood bubble.
+- Stat tiles: Today, vs last month, Group balance (owed / you owe, tap to open Groups), Top category.
+- "Who paid this month" bars per family member and "Upcoming bills" (next three with amounts and due-in-N-days).
 - Monthly budget ring that fills as you spend; turns red when over.
 - Animated 7-day bar chart and a category donut for the current month.
 - Five most recent expenses, with a shortcut to the full list.
 - "Insights" shortcut appears once the Advanced Insights feature is unlocked.
 
 ## Expenses
-- Add an expense with amount, title, category (10 built-in categories, each with its own Material icon and colour used consistently in lists, chips and charts), date, who paid, optional note.
+- The list opens with This month / vs last month tiles, a search field and category filters; entries are grouped by day with subtotals.
+- Add expense: a large amount hero, then Details, a 5-column category icon grid, "Paid by" avatar chips, Today / Yesterday / Pick-a-date, and an optional group split (equal or custom) — all as card sections.
 - Search by title/note and filter by category; list is grouped by day with daily subtotals.
 - Tap any expense to edit or delete it.
 - Every new expense earns points (see Rewards).
@@ -51,7 +59,7 @@
 
 ## Avatar studio
 - Skin tone (6) and hair colour (7) swatches, always free.
-- Hair styles (5), outfits (6) and accessories (5): some free, the rest unlockable with points directly from the studio.
+- Hair (9), outfits (12) and accessories (6): short/buzz/long/curly hair, tee and shirt are free; the rest unlock with points directly from the studio.
 - Live preview of every option on your own avatar; the avatar gently bobs on the dashboard and profile.
 
 ## Rewards & gamification
@@ -63,7 +71,7 @@
 
 **Levels** — XP-based (Rookie → Saver → Planner → Tracker → Strategist → Accountant → Treasurer → Guardian → Master → Legend). Level-ups trigger confetti, an in-app toast and a notification.
 
-**Badges (11)** — First step, Getting serious, Century, Week warrior, Month master, Team player, Fair share, Family first, Budget boss, Stylist, Collector.
+**Badges (11)** — shown as a 3-column grid, earned first (newest at top, gradient ring, bonus points) then locked ones with a progress bar (e.g. 6/7 days). Tap any badge for an animated detail card: emblem pops in (spinning gradient ring when earned), progress, reward points, earned date, and a numbered "How to earn it" list. First step, Getting serious, Century, Week warrior, Month master, Team player, Fair share, Family first, Budget boss, Stylist, Collector.
 
 **Shop** — spend points on:
 - 6 colour themes (Sunrise free; Ocean, Forest, Midnight, Candy, Royal). Applying a theme animates the whole UI's colours.

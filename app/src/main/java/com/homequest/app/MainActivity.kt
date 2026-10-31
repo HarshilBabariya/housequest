@@ -17,14 +17,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.compose.rememberNavController
 import com.homequest.app.ui.Gate
 import com.homequest.app.ui.MainViewModel
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.ConfettiBurst
 import com.homequest.app.ui.components.RewardToast
-import com.homequest.app.ui.components.WelcomeDialog
 import com.homequest.app.ui.navigation.HomeQuestNavHost
+import com.homequest.app.ui.screens.onboarding.OnboardingScreen
 import com.homequest.app.ui.screens.profile.LockScreen
 import com.homequest.app.ui.theme.HomeQuestTheme
 
@@ -45,7 +44,6 @@ private fun HomeQuestRoot() {
     val members by vm.members.collectAsStateWithLifecycle()
     val unlocked by vm.sessionUnlocked.collectAsStateWithLifecycle()
     val pinError by vm.pinError.collectAsStateWithLifecycle()
-    val navController = rememberNavController()
 
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     LaunchedEffect(Unit) {
@@ -56,7 +54,7 @@ private fun HomeQuestRoot() {
         Surface(Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxSize()) {
                 when (vm.gate(settings, unlocked)) {
-                    Gate.ONBOARDING -> WelcomeDialog(onComplete = vm::completeOnboarding)
+                    Gate.ONBOARDING -> OnboardingScreen(onComplete = vm::completeOnboarding)
                     Gate.LOCKED -> LockScreen(
                         members = members,
                         preselectedId = settings.activeMemberId,
@@ -65,7 +63,7 @@ private fun HomeQuestRoot() {
                         onUnlock = vm::unlock
                     )
                     Gate.OPEN -> {
-                        HomeQuestNavHost(navController)
+                        HomeQuestNavHost(onSignOut = vm::signOut)
                         ConfettiBurst(trigger = confetti)
                         Box(Modifier.align(Alignment.TopCenter)) { RewardToast(event = toast, onDismiss = vm::dismissToast) }
                     }

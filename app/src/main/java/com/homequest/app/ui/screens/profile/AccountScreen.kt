@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,15 +14,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -34,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,14 +43,18 @@ import com.homequest.app.data.repository.avatar
 import com.homequest.app.data.repository.hasPin
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AvatarView
-import com.homequest.app.ui.components.SectionHeader
-import com.homequest.app.util.Pin
+import com.homequest.app.ui.components.HqTextField
+import com.homequest.app.ui.components.PinSetupSheet
+import com.homequest.app.ui.components.PrimaryButton
+import com.homequest.app.ui.components.SectionCard
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 val Relations = listOf("Me", "Partner", "Child", "Parent", "Sibling", "Roommate", "Friend", "Other")
+
+fun isValidPhone(phone: String) = phone.filter(Char::isDigit).length >= 10
 
 class AccountViewModel(private val container: AppContainer) : ViewModel() {
     val member: StateFlow<MemberEntity?> =
@@ -76,9 +78,8 @@ fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     var name by remember { mutableStateOf("") }
     var relation by remember { mutableStateOf(Relations.first()) }
     var phone by remember { mutableStateOf("") }
-    var pin by remember { mutableStateOf("") }
-    var pinConfirm by remember { mutableStateOf("") }
     var loaded by remember { mutableStateOf(false) }
+    var showPinSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(member?.id) {
         member?.let { if (!loaded) { name = it.name; relation = it.relation; phone = it.phone; loaded = true } }
@@ -92,58 +93,46 @@ fun AccountScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
             )
         }
     ) { padding ->
-        Column(Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             member?.let { m ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                    AvatarView(m.avatar(), size = 110.dp, animated = true)
+                    AvatarView(m.avatar(), size = 120.dp, animated = true)
                     OutlinedButton(onClick = { onOpenAvatar(m.id) }) { Text("Change look") }
                 }
             }
-            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(
-                value = phone,
-                onValueChange = { phone = it.filter { c -> c.isDigit() || c == '+' } },
-                label = { Text("Mobile number") },
-                supportingText = { Text("Used to identify you on the member picker") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Text("Role in the house", style = MaterialTheme.typography.labelLarge)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Relations.forEach { r -> FilterChip(selected = relation == r, onClick = { relation = r }, label = { Text(r) }) }
-            }
-            Button(
-                onClick = { member?.let { vm.save(it, name, relation, phone); onBack() } },
-                enabled = name.isNotBlank() && member != null,
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Save profile") }
-
-            SectionHeader(if (member?.hasPin == true) "Change PIN" else "Set a PIN", Modifier.padding(top = 8.dp))
-            Card {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("A 4–6 digit PIN protects your profile on the member picker and enables App lock.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    OutlinedTextField(
-                        value = pin, onValueChange = { pin = it.filter(Char::isDigit).take(6) }, label = { Text("New PIN") },
-                        visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                        singleLine = true, modifier = Modifier.fillMaxWidth()
+            SectionCard("Details") {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    HqTextField(name, { name = it }, "Name")
+                    HqTextField(
+                        phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(15) }, "Mobile number",
+                        supporting = if (phone.isNotEmpty() && !isValidPhone(phone)) "Enter at least 10 digits" else null,
+                        isError = phone.isNotEmpty() && !isValidPhone(phone),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                     )
-                    OutlinedTextField(
-                        value = pinConfirm, onValueChange = { pinConfirm = it.filter(Char::isDigit).take(6) }, label = { Text("Confirm PIN") },
-                        visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                        singleLine = true, isError = pinConfirm.isNotEmpty() && pinConfirm != pin, modifier = Modifier.fillMaxWidth()
-                    )
-                    Button(
-                        onClick = { member?.let { vm.setPin(it.id, pin); pin = ""; pinConfirm = "" } },
-                        enabled = Pin.isValid(pin) && pin == pinConfirm,
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("Save PIN") }
-                    if (member?.hasPin == true) {
-                        OutlinedButton(onClick = { member?.let { vm.setPin(it.id, null) } }, modifier = Modifier.fillMaxWidth()) { Text("Remove PIN") }
+                    Text("Role in the house", style = MaterialTheme.typography.labelLarge)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Relations.forEach { r -> FilterChip(selected = relation == r, onClick = { relation = r }, label = { Text(r) }) }
                     }
+                }
+            }
+            PrimaryButton("Save profile", onClick = { member?.let { vm.save(it, name, relation, phone); onBack() } }, enabled = name.isNotBlank() && isValidPhone(phone) && member != null)
+
+            SectionCard("Security") {
+                Text(
+                    if (member?.hasPin == true) "Your profile is protected by a 4-digit PIN." else "Add a 4-digit PIN so nobody else can open your profile on this phone.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    FilledTonalButton(onClick = { showPinSheet = true }) { Text(if (member?.hasPin == true) "Change PIN" else "Set PIN") }
+                    if (member?.hasPin == true) OutlinedButton(onClick = { member?.let { vm.setPin(it.id, null) } }) { Text("Remove PIN") }
                 }
             }
             Spacer(Modifier.height(24.dp))
         }
+    }
+
+    if (showPinSheet) {
+        PinSetupSheet(onDismiss = { showPinSheet = false }) { pin -> member?.let { vm.setPin(it.id, pin) }; showPinSheet = false }
     }
 }

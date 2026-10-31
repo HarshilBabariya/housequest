@@ -18,6 +18,7 @@ class GroupRepository(
 
     fun group(id: Long): Flow<GroupWithMembers?> = dao.observeById(id)
     fun settlements(groupId: Long): Flow<List<SettlementEntity>> = dao.observeSettlements(groupId)
+    val allSettlements: Flow<List<SettlementEntity>> = dao.observeAllSettlements()
 
     suspend fun create(name: String, emoji: String, memberIds: List<Long>): Long {
         val id = dao.createWithMembers(GroupEntity(name = name.trim(), emoji = emoji), memberIds)
@@ -40,7 +41,12 @@ class GroupRepository(
         splits: List<ExpenseSplitEntity>,
         settlements: List<SettlementEntity>
     ): List<MemberBalance> {
-        val net = members.associate { it.id to 0.0 }.toMutableMap()
+        val net = netByMember(expenses, splits, settlements)
+        return members.map { MemberBalance(it.id, it.name, net[it.id] ?: 0.0) }
+    }
+
+    fun netByMember(expenses: List<ExpenseWithPayer>, splits: List<ExpenseSplitEntity>, settlements: List<SettlementEntity>): Map<Long, Double> {
+        val net = mutableMapOf<Long, Double>()
         val splitByExpense = splits.groupBy { it.expenseId }
         expenses.forEach { e ->
             val shares = splitByExpense[e.expense.id].orEmpty()
@@ -52,6 +58,6 @@ class GroupRepository(
             net[s.fromMemberId] = (net[s.fromMemberId] ?: 0.0) + s.amount
             net[s.toMemberId] = (net[s.toMemberId] ?: 0.0) - s.amount
         }
-        return members.map { MemberBalance(it.id, it.name, Math.round((net[it.id] ?: 0.0) * 100) / 100.0) }
+        return net.mapValues { Math.round(it.value * 100) / 100.0 }
     }
 }

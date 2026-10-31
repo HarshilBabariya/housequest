@@ -25,7 +25,6 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -54,10 +53,13 @@ import com.homequest.app.data.repository.hasPin
 import com.homequest.app.domain.Currencies
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AvatarView
+import com.homequest.app.ui.components.HqCard
+import com.homequest.app.ui.components.PinSetupSheet
 import com.homequest.app.ui.components.SectionHeader
 
 @Composable
 fun ProfileScreen(
+    onSignOut: () -> Unit,
     onOpenAccount: () -> Unit,
     onOpenFamily: () -> Unit,
     onOpenAvatar: (Long) -> Unit,
@@ -70,6 +72,7 @@ fun ProfileScreen(
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
     var confirmSignOut by remember { mutableStateOf(false) }
+    var setupPin by remember { mutableStateOf(false) }
     val member = state.member
 
     Column(Modifier.verticalScroll(rememberScrollState())) {
@@ -113,7 +116,7 @@ fun ProfileScreen(
         }
 
         SectionHeader("Household")
-        Card(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
+        HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
             NavRow("👨‍👩‍👧", "Family members", "${state.memberCount} people · each with their own login", onOpenFamily)
             NavRow("🎯", "Budgets", "Monthly and per-category limits", onOpenBudgets)
             NavRow("⏰", "Reminders & bills", "Rent, EMIs, subscriptions, daily nudges", onOpenReminders)
@@ -122,13 +125,12 @@ fun ProfileScreen(
         }
 
         SectionHeader("Security")
-        Card(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
+        HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
             ToggleRow(
                 "App lock",
-                if (member?.hasPin == true) "Ask for your PIN when the app opens" else "Set a PIN in Edit profile to enable",
+                if (member?.hasPin == true) "Ask for your PIN every time the app opens" else "Turn on to create a PIN and lock the app",
                 checked = state.settings.appLockEnabled,
-                enabled = member?.hasPin == true,
-                onChange = vm::setAppLock
+                onChange = { on -> if (on && member?.hasPin != true) setupPin = true else vm.setAppLock(on) }
             )
         }
 
@@ -155,7 +157,7 @@ fun ProfileScreen(
         }
 
         SectionHeader("Notifications")
-        Card(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
+        HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
             ToggleRow("Budget alerts", "At 80% and 100% of any budget", state.settings.budgetAlertsEnabled, onChange = vm::setBudgetAlerts)
             ToggleRow("Reminders & bills", "Scheduled nudges and due dates", state.settings.reminderNotificationsEnabled, onChange = vm::setReminderNotifications)
             ToggleRow("Rewards", "Badges and level-ups", state.settings.rewardNotificationsEnabled, onChange = vm::setRewardNotifications, last = true)
@@ -170,7 +172,7 @@ fun ProfileScreen(
             }
         }
         Text(
-            "HomeQuest 1.1.0 · everyone in the household shares one ledger and one points pool; each member has their own avatar, phone and PIN.",
+            "HomeQuest 1.2.2 · everyone in the household shares one ledger and one points pool; each member has their own avatar, phone and PIN.",
             style = MaterialTheme.typography.labelSmall,
             color = scheme.onSurfaceVariant,
             modifier = Modifier.padding(20.dp)
@@ -178,12 +180,19 @@ fun ProfileScreen(
         Spacer(Modifier.height(80.dp))
     }
 
+    if (setupPin) {
+        PinSetupSheet(onDismiss = { setupPin = false }) { pin ->
+            member?.let { vm.setPinAndLock(it.id, pin) }
+            setupPin = false
+        }
+    }
+
     if (confirmSignOut) {
         AlertDialog(
             onDismissRequest = { confirmSignOut = false },
             title = { Text("Log out?") },
             text = { Text("You'll be taken to the member picker. Your data stays on this device.") },
-            confirmButton = { TextButton(onClick = { confirmSignOut = false; vm.signOut() }) { Text("Log out") } },
+            confirmButton = { TextButton(onClick = { confirmSignOut = false; onSignOut() }) { Text("Log out") } },
             dismissButton = { TextButton(onClick = { confirmSignOut = false }) { Text("Cancel") } }
         )
     }

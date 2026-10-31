@@ -9,18 +9,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,7 +44,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homequest.app.data.local.GroupEntity
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.ui.appViewModel
+import com.homequest.app.data.repository.avatar
+import com.homequest.app.ui.components.AvatarView
 import com.homequest.app.ui.components.EmptyState
+import com.homequest.app.ui.components.HqCard
+import com.homequest.app.ui.components.HqTextField
+import com.homequest.app.ui.components.PrimaryButton
+import com.homequest.app.ui.screens.expenses.MemberChip
 
 private val groupEmojis = listOf("🏠", "👨‍👩‍👧", "✈️", "🎉", "🍕", "🏖️", "🛒", "💼")
 
@@ -52,19 +64,26 @@ fun GroupsScreen(onOpenGroup: (Long) -> Unit) {
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Groups") }) },
-        floatingActionButton = { FloatingActionButton(onClick = { showCreate = true }) { Icon(Icons.Filled.Add, contentDescription = "New group") } }
+        floatingActionButton = { ExtendedFloatingActionButton(onClick = { showCreate = true }, icon = { Icon(Icons.Filled.Add, contentDescription = null) }, text = { Text("New group") }) }
     ) { padding ->
         if (state.groups.isEmpty()) {
             EmptyState("🤝", "No groups yet", "Create a group to split expenses with family or friends and earn the Team Player badge.", Modifier.padding(padding))
         } else {
             LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(state.groups, key = { it.group.id }) { g ->
-                    Card(Modifier.fillMaxWidth().combinedClickable(onClick = { onOpenGroup(g.group.id) }, onLongClick = { pendingDelete = g.group })) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(g.group.emoji, fontSize = 32.sp)
-                            Column(Modifier.padding(start = 14.dp)) {
+                    HqCard(Modifier.fillMaxWidth().combinedClickable(onClick = { onOpenGroup(g.group.id) }, onLongClick = { pendingDelete = g.group })) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(52.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
+                                Text(g.group.emoji, fontSize = 26.sp)
+                            }
+                            Column(Modifier.weight(1f).padding(start = 14.dp)) {
                                 Text(g.group.name, style = MaterialTheme.typography.titleMedium)
-                                Text(g.members.joinToString { it.name }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("${g.members.size} members · hold to delete", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy((-10).dp)) {
+                                g.members.take(4).forEach { m ->
+                                    Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.surfaceContainerLowest, CircleShape).padding(2.dp)) { AvatarView(m.avatar(), size = 32.dp) }
+                                }
                             }
                         }
                     }
@@ -74,7 +93,7 @@ fun GroupsScreen(onOpenGroup: (Long) -> Unit) {
     }
 
     if (showCreate) {
-        CreateGroupDialog(state.members, onDismiss = { showCreate = false }) { name, emoji, ids ->
+        CreateGroupSheet(state.members, onDismiss = { showCreate = false }) { name, emoji, ids ->
             vm.create(name, emoji, ids)
             showCreate = false
         }
@@ -91,33 +110,25 @@ fun GroupsScreen(onOpenGroup: (Long) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun CreateGroupDialog(members: List<MemberEntity>, onDismiss: () -> Unit, onCreate: (String, String, List<Long>) -> Unit) {
+fun CreateGroupSheet(members: List<MemberEntity>, onDismiss: () -> Unit, onCreate: (String, String, List<Long>) -> Unit) {
     var name by remember { mutableStateOf("") }
     var emoji by remember { mutableStateOf(groupEmojis.first()) }
     var selected by remember { mutableStateOf(members.map { it.id }.toSet()) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("New group") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Group name") }, singleLine = true)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    items(groupEmojis) { e -> FilterChip(selected = emoji == e, onClick = { emoji = e }, label = { Text(e) }) }
-                }
-                Text("Members", style = MaterialTheme.typography.labelLarge)
-                members.forEach { m ->
-                    FilterChip(
-                        selected = m.id in selected,
-                        onClick = { selected = if (m.id in selected) selected - m.id else selected + m.id },
-                        label = { Text(m.name) }
-                    )
-                }
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Text("New group", style = MaterialTheme.typography.titleLarge)
+            HqTextField(name, { name = it }, "Group name", placeholder = "e.g. Goa trip, Flat 4B")
+            Text("Icon", style = MaterialTheme.typography.labelLarge)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                groupEmojis.forEach { e -> FilterChip(selected = emoji == e, onClick = { emoji = e }, label = { Text(e, fontSize = 20.sp) }) }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = { onCreate(name, emoji, selected.toList()) }, enabled = name.isNotBlank() && selected.size >= 2) { Text("Create") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
-    )
+            Text("Members", style = MaterialTheme.typography.labelLarge)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                members.forEach { m -> MemberChip(m, selected = m.id in selected) { selected = if (m.id in selected) selected - m.id else selected + m.id } }
+            }
+            PrimaryButton("Create group", onClick = { onCreate(name, emoji, selected.toList()) }, enabled = name.isNotBlank() && selected.size >= 2)
+        }
+    }
 }

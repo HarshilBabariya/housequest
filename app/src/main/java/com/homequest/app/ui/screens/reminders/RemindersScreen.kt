@@ -35,7 +35,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -65,6 +64,7 @@ import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.CategoryChip
 import com.homequest.app.ui.components.CategoryIcon
 import com.homequest.app.ui.components.EmptyState
+import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.util.money
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -212,15 +212,10 @@ private fun AddReminderSheet(symbol: String, onDismiss: () -> Unit, onSave: (Rem
                     FilterChip(selected = title == p.title, onClick = { title = p.title; repeat = p.repeat; category = p.category }, label = { Text(p.title) })
                 }
             }
-            OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it.filter { c -> c.isDigit() || c == '.' } },
-                label = { Text("Amount (optional)") },
-                prefix = { Text(symbol) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            HqTextField(title, { title = it }, "Title", placeholder = "e.g. Rent")
+            HqTextField(
+                amount, { amount = it.filter { c -> c.isDigit() || c == '.' } }, "Amount (optional)",
+                prefix = symbol, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
             Text("Repeats", style = MaterialTheme.typography.labelLarge)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

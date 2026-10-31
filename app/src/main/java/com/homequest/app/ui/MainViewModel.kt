@@ -72,10 +72,16 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
 
     fun clearPinError() { _pinError.value = false }
 
-    fun completeOnboarding(name: String, phone: String, currency: String, budget: Double) = viewModelScope.launch {
+    fun signOut() = viewModelScope.launch {
+        _sessionUnlocked.value = false
+        container.memberRepository.signOut()
+    }
+
+    fun completeOnboarding(name: String, phone: String, currency: String, budget: Double, pin: String?) = viewModelScope.launch {
         container.memberRepository.ensureOwner()
         val owner = container.memberRepository.members.first { it.isNotEmpty() }.first { it.isOwner }
         container.memberRepository.updateDetails(owner, name, owner.relation, phone)
+        pin?.let { container.memberRepository.setPin(owner.id, it) }
         container.memberRepository.signIn(owner.id)
         _sessionUnlocked.value = true
         container.settingsRepository.setCurrency(currency)

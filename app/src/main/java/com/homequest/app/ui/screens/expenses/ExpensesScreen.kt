@@ -12,10 +12,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -29,6 +28,8 @@ import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.CategoryChip
 import com.homequest.app.ui.components.EmptyState
 import com.homequest.app.ui.components.ExpenseRow
+import com.homequest.app.ui.components.HqTextField
+import com.homequest.app.ui.components.StatTile
 import com.homequest.app.util.Dates
 import com.homequest.app.util.money
 
@@ -39,18 +40,28 @@ fun ExpensesScreen(onAddExpense: () -> Unit, onOpenExpense: (Long) -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Expenses") }, actions = { Text(state.total.money(state.symbol), Modifier.padding(end = 16.dp), style = MaterialTheme.typography.titleMedium) }) },
-        floatingActionButton = { FloatingActionButton(onClick = onAddExpense) { Icon(Icons.Filled.Add, contentDescription = "Add expense") } }
+        topBar = { TopAppBar(title = { Text("Expenses") }) },
+        floatingActionButton = { ExtendedFloatingActionButton(onClick = onAddExpense, icon = { Icon(Icons.Filled.Add, contentDescription = null) }, text = { Text("Add") }) }
     ) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 96.dp)) {
             item {
-                OutlinedTextField(
-                    value = state.query,
-                    onValueChange = vm::setQuery,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
-                    placeholder = { Text("Search expenses") },
-                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                    singleLine = true
+                val change = if (state.lastMonthTotal > 0) (state.monthTotal - state.lastMonthTotal) / state.lastMonthTotal * 100 else null
+                Row(Modifier.padding(horizontal = 20.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    StatTile("This month", state.monthTotal.money(state.symbol), Modifier.weight(1f), hint = "${state.monthCount} expenses", emoji = "🗓️")
+                    StatTile(
+                        "vs last month",
+                        change?.let { "${if (it >= 0) "+" else ""}${"%.0f".format(it)}%" } ?: "—",
+                        Modifier.weight(1f),
+                        hint = if (change == null) "No data yet" else if (change <= 0) "Spending less" else "Spending more",
+                        emoji = if (change == null || change <= 0) "📉" else "📈",
+                        accent = if (change != null && change > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    )
+                }
+                HqTextField(
+                    state.query, vm::setQuery, "Search",
+                    placeholder = "Title or note",
+                    leading = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                 )
                 LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(ExpenseCategory.entries) { c ->

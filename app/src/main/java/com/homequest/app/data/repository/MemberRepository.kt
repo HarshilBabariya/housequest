@@ -77,9 +77,9 @@ class MemberRepository(
 
     private fun randomAvatar() = AvatarConfig(
         skinTone = Random.nextInt(SkinTones.size),
-        hairId = listOf(HairStyles.SHORT, HairStyles.LONG, HairStyles.CURLY).random(),
+        hairId = listOf(HairStyles.SHORT, HairStyles.BUZZ, HairStyles.LONG, HairStyles.CURLY).random(),
         hairColor = Random.nextInt(HairColors.size),
-        outfitId = Outfits.TEE,
+        outfitId = listOf(Outfits.TEE, Outfits.SHIRT).random(),
         accessoryId = Accessories.NONE
     )
 

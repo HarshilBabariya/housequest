@@ -14,11 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.homequest.app.ui.screens.avatar.AvatarStudioScreen
 import com.homequest.app.ui.screens.dashboard.DashboardScreen
@@ -35,7 +35,8 @@ import com.homequest.app.ui.screens.reminders.RemindersScreen
 import com.homequest.app.ui.screens.rewards.RewardsScreen
 
 @Composable
-fun HomeQuestNavHost(navController: NavHostController) {
+fun HomeQuestNavHost(onSignOut: () -> Unit) {
+    val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
     val showBottomBar = BottomTab.entries.any { it.route == currentRoute }
@@ -78,6 +79,8 @@ fun HomeQuestNavHost(navController: NavHostController) {
                     onOpenExpenses = { navController.navigate(Routes.EXPENSES) },
                     onOpenInsights = { navController.navigate(Routes.INSIGHTS) },
                     onOpenBudgets = { navController.navigate(Routes.BUDGETS) },
+                    onOpenGroups = { navController.navigate(Routes.GROUPS) },
+                    onOpenReminders = { navController.navigate(Routes.REMINDERS) },
                     onOpenProfile = { navController.navigate(Routes.PROFILE) }
                 )
             }
@@ -95,6 +98,7 @@ fun HomeQuestNavHost(navController: NavHostController) {
             }
             composable(Routes.PROFILE) {
                 ProfileScreen(
+                    onSignOut = onSignOut,
                     onOpenAccount = { navController.navigate(Routes.ACCOUNT) },
                     onOpenFamily = { navController.navigate(Routes.FAMILY) },
                     onOpenAvatar = { navController.navigate(Routes.avatar(it)) },

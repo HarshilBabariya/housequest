@@ -54,7 +54,10 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     fun setReminderNotifications(enabled: Boolean) = viewModelScope.launch { settings.setReminderNotifications(enabled) }
     fun setRewardNotifications(enabled: Boolean) = viewModelScope.launch { settings.setRewardNotifications(enabled) }
     fun setAppLock(enabled: Boolean) = viewModelScope.launch { settings.setAppLock(enabled) }
-    fun signOut() = viewModelScope.launch { container.memberRepository.signOut() }
+    fun setPinAndLock(memberId: Long, pin: String) = viewModelScope.launch {
+        container.memberRepository.setPin(memberId, pin)
+        settings.setAppLock(true)
+    }
 
     fun exportCsv(context: Context) = viewModelScope.launch {
         Sharing.exportCsv(context, container.expenseRepository.allForExport())

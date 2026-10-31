@@ -78,34 +78,34 @@ private fun Color.lighten(amount: Float) = Color(red + (1 - red) * amount, green
 object Palettes {
     private val byId: Map<String, Palette> = mapOf(
         ThemeIds.SUNRISE to Palette(
-            primary = Color(0xFFFF6B35), secondary = Color(0xFFFFB627), tertiary = Color(0xFF2EC4B6),
-            lightBackground = Color(0xFFFFF8F3), lightSurface = Color(0xFFFFFFFF),
-            darkBackground = Color(0xFF1A1210), darkSurface = Color(0xFF26201C)
+            primary = Color(0xFFF2673A), secondary = Color(0xFFF7B32B), tertiary = Color(0xFF2EC4B6),
+            lightBackground = Color(0xFFFBF7F3), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF15110F), darkSurface = Color(0xFF211B18)
         ),
         ThemeIds.OCEAN to Palette(
-            primary = Color(0xFF0077B6), secondary = Color(0xFF00B4D8), tertiary = Color(0xFF90E0EF),
-            lightBackground = Color(0xFFF0F9FF), lightSurface = Color(0xFFFFFFFF),
-            darkBackground = Color(0xFF0B1A26), darkSurface = Color(0xFF122636)
+            primary = Color(0xFF2563EB), secondary = Color(0xFF0EA5E9), tertiary = Color(0xFF14B8A6),
+            lightBackground = Color(0xFFF4F7FB), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF0B1220), darkSurface = Color(0xFF131C2E)
         ),
         ThemeIds.FOREST to Palette(
-            primary = Color(0xFF2D6A4F), secondary = Color(0xFF52B788), tertiary = Color(0xFFD8F3DC),
-            lightBackground = Color(0xFFF3FAF5), lightSurface = Color(0xFFFFFFFF),
-            darkBackground = Color(0xFF0E1A14), darkSurface = Color(0xFF17261E)
+            primary = Color(0xFF15803D), secondary = Color(0xFF4ADE80), tertiary = Color(0xFFA3E635),
+            lightBackground = Color(0xFFF3F8F4), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF0C1510), darkSurface = Color(0xFF152219)
         ),
         ThemeIds.MIDNIGHT to Palette(
-            primary = Color(0xFF7C4DFF), secondary = Color(0xFF00E5FF), tertiary = Color(0xFFFF4081),
-            lightBackground = Color(0xFFF4F1FF), lightSurface = Color(0xFFFFFFFF),
-            darkBackground = Color(0xFF0D0B1A), darkSurface = Color(0xFF181430)
+            primary = Color(0xFF7C3AED), secondary = Color(0xFF06B6D4), tertiary = Color(0xFFF472B6),
+            lightBackground = Color(0xFFF6F3FD), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF0E0B1A), darkSurface = Color(0xFF181330)
         ),
         ThemeIds.CANDY to Palette(
-            primary = Color(0xFFFF4F9A), secondary = Color(0xFFB388FF), tertiary = Color(0xFFFFD166),
-            lightBackground = Color(0xFFFFF3F8), lightSurface = Color(0xFFFFFFFF),
-            darkBackground = Color(0xFF1F1119), darkSurface = Color(0xFF2E1A26)
+            primary = Color(0xFFEC4899), secondary = Color(0xFFA78BFA), tertiary = Color(0xFFFBBF24),
+            lightBackground = Color(0xFFFDF4F8), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF1C1016), darkSurface = Color(0xFF2A1823)
         ),
         ThemeIds.ROYAL to Palette(
-            primary = Color(0xFF6A1B9A), secondary = Color(0xFFFFC107), tertiary = Color(0xFF26A69A),
-            lightBackground = Color(0xFFF8F3FB), lightSurface = Color(0xFFFFFFFF),
-            darkBackground = Color(0xFF150B1C), darkSurface = Color(0xFF23142C)
+            primary = Color(0xFF6D28D9), secondary = Color(0xFFF59E0B), tertiary = Color(0xFF14B8A6),
+            lightBackground = Color(0xFFF7F3FB), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF130B1C), darkSurface = Color(0xFF21142C)
         )
     )
 

@@ -19,12 +19,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+data class BadgeStatus(val badge: Badge, val earnedAt: Long?, val progress: Int) {
+    val earned: Boolean get() = earnedAt != null
+    val fraction: Float get() = if (earned) 1f else (progress.toFloat() / badge.target).coerceIn(0f, 1f)
+}
+
 data class RewardsState(
     val profile: ProfileEntity = ProfileEntity(),
     val level: LevelInfo = Levels.fromLifetimePoints(0),
     val unlocked: Set<String> = emptySet(),
-    val earnedBadgeIds: Set<String> = emptySet(),
-    val badges: List<Badge> = BadgeCatalog.badges,
+    val badges: List<BadgeStatus> = emptyList(),
     val kind: RewardKind = RewardKind.THEME,
     val items: List<RewardItem> = emptyList(),
     val activeThemeId: String = "",
@@ -42,18 +46,41 @@ class RewardsViewModel(private val container: AppContainer) : ViewModel() {
         Meta(k, m, owner?.id ?: 0, s.themeId)
     }
 
+    private val counts = combine(
+        container.expenseRepository.all,
+        container.groupRepository.groups,
+        container.groupRepository.allSettlements,
+        container.memberRepository.members
+    ) { expenses, groups, settlements, members -> Counts(expenses.size, groups.size, settlements.size, members.size - 1) }
+
     val state: StateFlow<RewardsState> = combine(
         gamification.profile,
         gamification.unlockedIds,
         gamification.earnedBadges,
         gamification.ledger(),
-        meta
-    ) { profile, unlocked, badges, ledger, meta ->
+        combine(meta, counts) { m, c -> m to c }
+    ) { profile, unlocked, badges, ledger, (meta, counts) ->
+        val earnedAt = badges.associate { it.badgeId to it.earnedAt }
+        val paidUnlocks = unlocked.count { id -> RewardCatalog.items.firstOrNull { it.id == id }?.let { !it.isFree } == true }
+        val outfitUnlocks = unlocked.count { id -> RewardCatalog.items.firstOrNull { it.id == id }?.let { it.kind == RewardKind.OUTFIT && !it.isFree } == true }
+        val statuses = BadgeCatalog.badges.map { b ->
+            val progress = when (b.id) {
+                BadgeCatalog.FIRST_STEP, BadgeCatalog.TEN_LOGGED, BadgeCatalog.CENTURY -> counts.expenses
+                BadgeCatalog.WEEK_WARRIOR, BadgeCatalog.MONTH_MASTER -> profile.streakDays
+                BadgeCatalog.TEAM_PLAYER -> counts.groups
+                BadgeCatalog.FAIR_SHARE -> counts.settlements
+                BadgeCatalog.FAMILY_FIRST -> counts.members
+                BadgeCatalog.STYLIST -> outfitUnlocks
+                BadgeCatalog.COLLECTOR -> paidUnlocks
+                else -> 0
+            }
+            BadgeStatus(b, earnedAt[b.id], progress)
+        }.sortedWith(compareByDescending<BadgeStatus> { it.earned }.thenByDescending { it.earnedAt ?: 0L }.thenByDescending { it.fraction })
         RewardsState(
             profile = profile,
             level = Levels.fromLifetimePoints(profile.lifetimePoints),
             unlocked = unlocked,
-            earnedBadgeIds = badges.map { it.badgeId }.toSet(),
+            badges = statuses,
             kind = meta.kind,
             items = RewardCatalog.ofKind(meta.kind),
             activeThemeId = meta.themeId,
@@ -76,4 +103,5 @@ class RewardsViewModel(private val container: AppContainer) : ViewModel() {
     fun applyTheme(themeId: String) = viewModelScope.launch { container.settingsRepository.setTheme(themeId) }
 
     private data class Meta(val kind: RewardKind, val message: String?, val ownerId: Long, val themeId: String)
+    private data class Counts(val expenses: Int, val groups: Int, val settlements: Int, val members: Int)
 }

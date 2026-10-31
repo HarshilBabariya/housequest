@@ -42,6 +42,7 @@ class ExpenseRepository(
 
     fun byGroup(groupId: Long): Flow<List<ExpenseWithPayer>> = dao.observeByGroup(groupId)
     fun splitsForGroup(groupId: Long): Flow<List<ExpenseSplitEntity>> = dao.observeSplitsForGroup(groupId)
+    val allSplits: Flow<List<ExpenseSplitEntity>> = dao.observeAllSplits()
     fun total(range: LongRange): Flow<Double> = dao.observeTotal(range.first, range.last)
     fun categoryTotals(range: LongRange): Flow<List<CategoryTotal>> = dao.observeCategoryTotals(range.first, range.last)
     fun dayTotals(range: LongRange): Flow<List<DayTotal>> = dao.observeDayTotals(range.first, range.last)

@@ -64,23 +64,36 @@ data class AvatarConfig(
 
 object HairStyles {
     const val SHORT = "hair_short"
+    const val BUZZ = "hair_buzz"
     const val LONG = "hair_long"
+    const val WAVY = "hair_wavy"
+    const val BOB = "hair_bob"
+    const val PONYTAIL = "hair_ponytail"
     const val CURLY = "hair_curly"
-    const val MOHAWK = "hair_mohawk"
     const val BUN = "hair_bun"
+    const val BRAIDS = "hair_braids"
+    const val MOHAWK = "hair_mohawk"
 }
 
 object Outfits {
     const val TEE = "outfit_tee"
+    const val SHIRT = "outfit_shirt"
     const val HOODIE = "outfit_hoodie"
+    const val DENIM = "outfit_denim"
+    const val SWEATER = "outfit_sweater"
     const val BLAZER = "outfit_blazer"
     const val KURTA = "outfit_kurta"
+    const val SHERWANI = "outfit_sherwani"
+    const val SAREE = "outfit_saree"
+    const val DRESS = "outfit_dress"
     const val SPACESUIT = "outfit_spacesuit"
     const val HERO = "outfit_hero"
 }
 
 object Accessories {
     const val NONE = "acc_none"
+    const val BINDI = "acc_bindi"
+    const val EARRINGS = "acc_earrings"
     const val GLASSES = "acc_glasses"
     const val CAP = "acc_cap"
     const val HEADPHONES = "acc_headphones"
@@ -102,11 +115,11 @@ object ThemeIds {
 }
 
 val SkinTones = listOf(
-    Color(0xFFFFDBB4), Color(0xFFEDB98A), Color(0xFFD08B5B),
-    Color(0xFFAE5D29), Color(0xFF694D3D), Color(0xFF3B2219)
+    Color(0xFFFFE0BD), Color(0xFFF1C27D), Color(0xFFD9A066),
+    Color(0xFFB5753F), Color(0xFF8D5524), Color(0xFF5C3A21)
 )
 
 val HairColors = listOf(
-    Color(0xFF2C1B18), Color(0xFF6A4E42), Color(0xFFB55239),
-    Color(0xFFE6BE8A), Color(0xFF9E9E9E), Color(0xFF7B1FA2), Color(0xFF00ACC1)
+    Color(0xFF2A1B17), Color(0xFF5B3A29), Color(0xFFB4532A),
+    Color(0xFFE0B678), Color(0xFF8E8E8E), Color(0xFF6D28D9), Color(0xFF0E9AA7)
 )

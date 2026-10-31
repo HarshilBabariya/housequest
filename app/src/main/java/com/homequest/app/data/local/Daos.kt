@@ -73,6 +73,9 @@ interface ExpenseDao {
     @Query("SELECT * FROM expense_splits WHERE expenseId IN (SELECT id FROM expenses WHERE groupId = :groupId)")
     fun observeSplitsForGroup(groupId: Long): Flow<List<ExpenseSplitEntity>>
 
+    @Query("SELECT * FROM expense_splits")
+    fun observeAllSplits(): Flow<List<ExpenseSplitEntity>>
+
     @Query("SELECT * FROM expense_splits WHERE expenseId = :expenseId")
     suspend fun splitsFor(expenseId: Long): List<ExpenseSplitEntity>
 
@@ -116,6 +119,9 @@ interface GroupDao {
 
     @Query("SELECT * FROM settlements WHERE groupId = :groupId ORDER BY settledAt DESC")
     fun observeSettlements(groupId: Long): Flow<List<SettlementEntity>>
+
+    @Query("SELECT * FROM settlements")
+    fun observeAllSettlements(): Flow<List<SettlementEntity>>
 
     @Insert
     suspend fun insert(group: GroupEntity): Long

@@ -18,14 +18,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,7 +48,11 @@ import com.homequest.app.data.repository.avatar
 import com.homequest.app.data.repository.hasPin
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AvatarView
+import com.homequest.app.ui.components.HqCard
+import com.homequest.app.ui.components.HqTextField
+import com.homequest.app.ui.components.PrimaryButton
 import com.homequest.app.ui.screens.profile.Relations
+import com.homequest.app.ui.screens.profile.isValidPhone
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -94,8 +98,8 @@ fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
                 )
             }
             items(members, key = { it.id }) { m ->
-                Card(Modifier.fillMaxWidth()) {
-                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                HqCard(Modifier.fillMaxWidth(), padding = 12) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         AvatarView(m.avatar(), size = 64.dp, modifier = Modifier.clickable { onOpenAvatar(m.id) })
                         Column(Modifier.weight(1f).padding(start = 12.dp)) {
                             Text(m.name, style = MaterialTheme.typography.titleMedium)
@@ -132,7 +136,7 @@ fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun MemberDialog(
     title: String,
@@ -145,26 +149,24 @@ private fun MemberDialog(
     var name by remember { mutableStateOf(initialName) }
     var relation by remember { mutableStateOf(initialRelation) }
     var phone by remember { mutableStateOf(initialPhone) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(
-                    value = phone, onValueChange = { phone = it.filter { c -> c.isDigit() || c == '+' } }, label = { Text("Mobile (optional)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), singleLine = true, modifier = Modifier.fillMaxWidth()
-                )
-                Text("Relation", style = MaterialTheme.typography.labelLarge)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Relations.filter { it != "Me" || initialRelation == "Me" }.forEach { r ->
-                        FilterChip(selected = relation == r, onClick = { relation = r }, label = { Text(r) })
-                    }
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(title, style = MaterialTheme.typography.titleLarge)
+            HqTextField(name, { name = it }, "Name")
+            HqTextField(
+                phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(15) }, "Mobile number",
+                supporting = if (phone.isNotEmpty() && !isValidPhone(phone)) "Enter at least 10 digits" else "They'll use it to find their profile on this phone",
+                isError = phone.isNotEmpty() && !isValidPhone(phone),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+            )
+            Text("Relation", style = MaterialTheme.typography.labelLarge)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Relations.filter { it != "Me" || initialRelation == "Me" }.forEach { r ->
+                    FilterChip(selected = relation == r, onClick = { relation = r }, label = { Text(r) })
                 }
-                Text("A random avatar is created; they can restyle it from the Avatar studio.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-        },
-        confirmButton = { TextButton(onClick = { onSave(name, relation, phone) }, enabled = name.isNotBlank()) { Text("Save") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
-    )
+            Text("A random look is created; they can restyle it in the Avatar studio and set their own PIN after logging in.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            PrimaryButton("Save", onClick = { onSave(name, relation, phone) }, enabled = name.isNotBlank() && isValidPhone(phone))
+        }
+    }
 }
