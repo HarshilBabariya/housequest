@@ -122,11 +122,11 @@ object BuiltInCategories {
     fun nameRes(id: String): Int? = nameById[id]
 }
 
-enum class PaymentMode(@StringRes val labelRes: Int, val icon: ImageVector) {
-    CASH(R.string.pay_cash, Icons.Filled.Payments),
-    UPI(R.string.pay_upi, Icons.Filled.QrCode),
-    CARD(R.string.pay_card, Icons.Filled.CreditCard),
-    BANK(R.string.pay_bank, Icons.Filled.AccountBalance)
+enum class PaymentMode(@StringRes val labelRes: Int, val icon: ImageVector, val color: Color) {
+    CASH(R.string.pay_cash, Icons.Filled.Payments, Color(0xFF43A047)),
+    UPI(R.string.pay_upi, Icons.Filled.QrCode, Color(0xFF5E35B1)),
+    CARD(R.string.pay_card, Icons.Filled.CreditCard, Color(0xFFFB8C00)),
+    BANK(R.string.pay_bank, Icons.Filled.AccountBalance, Color(0xFF039BE5))
 }
 
 enum class SplitType { EQUAL, CUSTOM, NONE }

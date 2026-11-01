@@ -48,6 +48,7 @@ data class DashboardState(
     val categories: Map<String, Category> = emptyMap(),
     val weekValues: List<Double> = emptyList(),
     val weekLabels: List<String> = emptyList(),
+    val monthCumulative: List<Double> = emptyList(),
     val recent: List<ExpenseWithPayer> = emptyList(),
     val payers: List<PayerShare> = emptyList(),
     val groupNet: Double = 0.0,
@@ -62,6 +63,7 @@ data class DashboardState(
             return moodFor(budgetProgress, settings.monthlyBudget > 0, profile.streakDays, sinceLog, LocalTime.now().hour, today.dayOfMonth)
         }
     val monthChangePercent: Double? get() = if (lastMonthTotal > 0) (monthTotal - lastMonthTotal) / lastMonthTotal * 100 else null
+    val monthProjection: Double get() = (monthCumulative.lastOrNull() ?: 0.0) / today.dayOfMonth * today.lengthOfMonth()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -87,6 +89,7 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
             val today = date.toEpochDay()
             val thisMonth = all.filter { it.expense.epochDay in monthRange }
             val paid = thisMonth.groupBy { it.expense.paidByMemberId }.mapValues { (_, list) -> list.sumOf { it.expense.amount } }
+            val daily = thisMonth.groupBy { it.expense.epochDay }.mapValues { (_, list) -> list.sumOf { it.expense.amount } }
             val map = catalog.byId()
             SpendSlice(
                 today = date,
@@ -97,6 +100,7 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
                 categoryMap = map,
                 weekValues = dayKeys.map { byDay[it] ?: 0.0 },
                 weekLabels = dayKeys.map { LocalDate.ofEpochDay(it).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()) },
+                monthCumulative = (1..date.dayOfMonth).map { daily[month.atDay(it).toEpochDay()] ?: 0.0 }.runningReduce(Double::plus),
                 recent = all.take(5),
                 payers = members.mapNotNull { m -> paid[m.id]?.let { PayerShare(m, it) } }.sortedByDescending { it.total }
             )
@@ -135,6 +139,7 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
             categories = slice.categoryMap,
             weekValues = slice.weekValues,
             weekLabels = slice.weekLabels,
+            monthCumulative = slice.monthCumulative,
             recent = slice.recent,
             payers = slice.payers,
             groupNet = social.net,
@@ -152,6 +157,7 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
         val categoryMap: Map<String, Category>,
         val weekValues: List<Double>,
         val weekLabels: List<String>,
+        val monthCumulative: List<Double>,
         val recent: List<ExpenseWithPayer>,
         val payers: List<PayerShare>
     )

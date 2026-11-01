@@ -1,22 +1,34 @@
 package com.homequest.app.ui.screens.profile
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.homequest.app.AppContainer
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.AppSettings
 import com.homequest.app.data.repository.DarkMode
+import com.homequest.app.data.repository.ImportResult
 import com.homequest.app.data.repository.byId
 import com.homequest.app.domain.Features
 import com.homequest.app.domain.LevelInfo
 import com.homequest.app.domain.Levels
+import com.homequest.app.util.Dates
 import com.homequest.app.util.Sharing
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class ProfileState(
     val member: MemberEntity? = null,
@@ -25,19 +37,32 @@ data class ProfileState(
     val points: Int = 0,
     val streak: Int = 0,
     val memberCount: Int = 0,
-    val exportUnlocked: Boolean = false
+    val exportUnlocked: Boolean = false,
+    val exportMonths: List<YearMonth> = emptyList()
 )
+
+sealed interface ImportOutcome {
+    data class Done(val result: ImportResult) : ImportOutcome
+    data object Unreadable : ImportOutcome
+}
 
 class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     private val settings = container.settingsRepository
 
+    private val _importOutcome = MutableStateFlow<ImportOutcome?>(null)
+    val importOutcome: StateFlow<ImportOutcome?> = _importOutcome
+
+    private val exportMonths = container.expenseRepository.all.map { list ->
+        list.map { YearMonth.from(LocalDate.ofEpochDay(it.expense.epochDay)) }.distinct().sortedDescending()
+    }
+
     val state: StateFlow<ProfileState> = combine(
-        container.memberRepository.members,
-        container.memberRepository.activeMember,
+        combine(container.memberRepository.members, container.memberRepository.activeMember, ::Pair),
         settings.settings,
         container.gamificationRepository.profile,
-        container.gamificationRepository.unlockedIds
-    ) { members, member, s, profile, unlocked ->
+        container.gamificationRepository.unlockedIds,
+        exportMonths
+    ) { (members, member), s, profile, unlocked, months ->
         ProfileState(
             member = member,
             settings = s,
@@ -45,7 +70,8 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
             points = profile.points,
             streak = profile.streakDays,
             memberCount = members.size,
-            exportUnlocked = Features.EXPORT_CSV in unlocked
+            exportUnlocked = Features.EXPORT_CSV in unlocked,
+            exportMonths = months
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileState())
 
@@ -61,7 +87,19 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
         settings.setAppLock(true)
     }
 
-    fun exportCsv(context: Context) = viewModelScope.launch {
-        Sharing.exportCsv(context, container.expenseRepository.allForExport(), container.categoryRepository.all().byId())
+    fun exportCsv(context: Context, month: YearMonth?) = viewModelScope.launch {
+        val all = container.expenseRepository.allForExport()
+        val expenses = month?.let { m -> Dates.monthRange(m).let { range -> all.filter { it.expense.epochDay in range } } } ?: all
+        val fileName = month?.let { "HomeQuest_${it.format(DateTimeFormatter.ofPattern("MMMM_yyyy", Locale.ENGLISH))}.csv" } ?: "homequest-expenses.csv"
+        Sharing.exportCsv(context, expenses, container.categoryRepository.all().byId(), fileName)
     }
+
+    fun importCsv(context: Context, uri: Uri) = viewModelScope.launch {
+        val result = withContext(NonCancellable + Dispatchers.IO) {
+            runCatching { context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() } }.getOrNull()?.let { container.csvImporter.import(it) }
+        }
+        _importOutcome.value = result?.let { ImportOutcome.Done(it) } ?: ImportOutcome.Unreadable
+    }
+
+    fun clearImportOutcome() { _importOutcome.value = null }
 }

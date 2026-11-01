@@ -8,7 +8,6 @@ import com.homequest.app.data.local.ExpenseDao
 import com.homequest.app.data.local.ExpenseEntity
 import com.homequest.app.data.local.ExpenseSplitEntity
 import com.homequest.app.data.local.ExpenseWithPayer
-import com.homequest.app.data.local.MonthCategoryTotal
 import com.homequest.app.domain.PaymentMode
 import com.homequest.app.domain.SplitCalculator
 import com.homequest.app.domain.SplitType
@@ -50,7 +49,6 @@ class ExpenseRepository(
     fun total(range: LongRange): Flow<Double> = dao.observeTotal(range.first, range.last)
     fun categoryTotals(range: LongRange): Flow<List<CategoryTotal>> = dao.observeCategoryTotals(range.first, range.last)
     fun dayTotals(range: LongRange): Flow<List<DayTotal>> = dao.observeDayTotals(range.first, range.last)
-    fun monthCategoryTotals(fromDay: Long): Flow<List<MonthCategoryTotal>> = dao.observeMonthCategoryTotals(fromDay)
 
     suspend fun byId(id: Long): ExpenseEntity? = dao.byId(id)
     suspend fun splitsFor(expenseId: Long): List<ExpenseSplitEntity> = dao.splitsFor(expenseId)

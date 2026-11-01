@@ -61,7 +61,7 @@ import com.homequest.app.ui.screens.rewards.BadgesScreen
 import com.homequest.app.ui.screens.rewards.RewardsScreen
 
 @Composable
-fun HomeQuestNavHost(onSignOut: () -> Unit) {
+fun HomeQuestNavHost(onSignOut: () -> Unit, onEraseAll: () -> Unit) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
@@ -117,6 +117,7 @@ fun HomeQuestNavHost(onSignOut: () -> Unit) {
             composable(Routes.PROFILE) {
                 ProfileScreen(
                     onSignOut = onSignOut,
+                    onEraseAll = onEraseAll,
                     onOpenAccount = { navController.navigate(Routes.ACCOUNT) },
                     onOpenFamily = { navController.navigate(Routes.FAMILY) },
                     onOpenAvatar = { navController.navigate(Routes.avatar(it)) },

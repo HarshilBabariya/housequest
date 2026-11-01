@@ -66,6 +66,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
@@ -152,6 +153,7 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
                     .fillMaxWidth()
                     .background(scheme.tertiaryContainer.copy(alpha = 0.55f), RoundedCornerShape(18.dp))
                     .border(1.dp, scheme.tertiary.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
+                    .clip(RoundedCornerShape(18.dp))
                     .clickable(onClick = startVoice)
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -202,6 +204,7 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
                                 .weight(1f)
                                 .background(if (selected) scheme.primaryContainer else scheme.surfaceContainerHigh, RoundedCornerShape(14.dp))
                                 .border(1.5.dp, if (selected) scheme.primary else Color.Transparent, RoundedCornerShape(14.dp))
+                                .clip(RoundedCornerShape(14.dp))
                                 .clickable { vm.update { copy(paymentMode = mode) } }
                                 .padding(vertical = 10.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -221,10 +224,16 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
                     value = when (form.date) {
                         today -> stringResource(R.string.today_with_date, Dates.longLabel(form.date.toEpochDay()))
                         today.minusDays(1) -> stringResource(R.string.yesterday_with_date, Dates.longLabel(form.date.toEpochDay()))
+                        today.plusDays(1) -> stringResource(R.string.tomorrow_with_date, Dates.longLabel(form.date.toEpochDay()))
                         else -> Dates.longLabel(form.date.toEpochDay())
                     },
                     onClick = { showDatePicker = true }
                 )
+                Row(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(today.minusDays(1) to R.string.yesterday, today to R.string.today, today.plusDays(1) to R.string.tomorrow).forEach { (day, labelRes) ->
+                        FilterChip(selected = form.date == day, onClick = { vm.update { copy(date = day) } }, label = { Text(stringResource(labelRes), maxLines = 1) })
+                    }
+                }
                 PickerRow(icon = state.category.icon, tint = state.category.color, label = stringResource(R.string.category), value = state.category.label(), onClick = { sheet = Sheet.CATEGORY })
                 PickerRow(
                     icon = Icons.Filled.Groups,
@@ -357,7 +366,7 @@ fun CategoryGrid(categories: List<Category>, selectedId: String, onSelect: (Stri
     FlowRow(maxItemsInEachRow = 4, horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
         categories.forEach { c ->
             val selected = selectedId == c.id
-            Column(Modifier.weight(1f).clickable { onSelect(c.id) }, horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).clickable { onSelect(c.id) }, horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     Modifier
                         .size(52.dp)
@@ -378,6 +387,7 @@ fun MemberChip(member: MemberEntity, selected: Boolean, onClick: () -> Unit) {
         Modifier
             .background(if (selected) scheme.primaryContainer else scheme.surfaceContainerHigh, CircleShape)
             .border(1.5.dp, if (selected) scheme.primary else Color.Transparent, CircleShape)
+            .clip(CircleShape)
             .clickable(onClick = onClick)
             .padding(start = 4.dp, end = 14.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically

@@ -77,6 +77,8 @@ class SettingsRepository(private val context: Context) {
     suspend fun setRewardNotifications(enabled: Boolean) = context.dataStore.edit { it[Keys.REWARD_NOTIFS] = enabled }
     suspend fun setAppLock(enabled: Boolean) = context.dataStore.edit { it[Keys.APP_LOCK] = enabled }
     suspend fun setActiveMember(id: Long) = context.dataStore.edit { it[Keys.ACTIVE_MEMBER] = id }
+
+    suspend fun clear() = context.dataStore.edit { it.clear() }
     suspend fun setOnboarded() = context.dataStore.edit { it[Keys.ONBOARDED] = true }
     suspend fun setLanguage(tag: String) = context.dataStore.edit { it[Keys.LANGUAGE] = tag }
 }

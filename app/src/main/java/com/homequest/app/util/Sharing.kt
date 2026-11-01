@@ -10,8 +10,11 @@ import com.homequest.app.domain.MemberBalance
 import com.homequest.app.domain.Settlement
 import com.homequest.app.ui.components.label
 import java.io.File
+import java.time.LocalDate
+import java.util.Locale
 
 object Sharing {
+    const val EXPORT_DIR = "exports"
 
     fun shareText(context: Context, title: String, text: String) {
         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -49,23 +52,23 @@ object Sharing {
         }
     }
 
-    fun exportCsv(context: Context, expenses: List<ExpenseWithPayer>, categories: Map<String, Category>) {
-        val dir = File(context.cacheDir, "exports").apply { mkdirs() }
-        val file = File(dir, "homequest-expenses.csv")
+    fun exportCsv(context: Context, expenses: List<ExpenseWithPayer>, categories: Map<String, Category>, fileName: String) {
+        val dir = File(context.cacheDir, EXPORT_DIR).apply { mkdirs() }
+        val file = File(dir, fileName)
         file.bufferedWriter().use { w ->
-            w.appendLine("date,title,category,payment_mode,amount,paid_by,group_id,note")
+            w.appendLine(CsvColumns.HEADER.joinToString(","))
             expenses.forEach { e ->
                 w.appendLine(
                     listOf(
-                        Dates.longLabel(e.expense.epochDay),
+                        LocalDate.ofEpochDay(e.expense.epochDay).toString(),
                         e.expense.title,
                         categories[e.expense.category]?.label(context) ?: e.expense.category,
                         e.expense.paymentMode.name,
-                        "%.2f".format(e.expense.amount),
+                        "%.2f".format(Locale.ROOT, e.expense.amount),
                         e.payer.name,
                         e.expense.groupId?.toString().orEmpty(),
                         e.expense.note
-                    ).joinToString(",") { csvCell(it) }
+                    ).joinToString(",") { Csv.cell(it) }
                 )
             }
         }
@@ -77,7 +80,4 @@ object Sharing {
         }
         context.startActivity(Intent.createChooser(intent, context.getString(R.string.export_csv)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
-
-    private fun csvCell(value: String): String =
-        if (value.any { it == ',' || it == '"' || it == '\n' }) "\"${value.replace("\"", "\"\"")}\"" else value
 }

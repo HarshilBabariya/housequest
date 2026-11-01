@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -159,6 +160,7 @@ private fun CategoryEditor(category: Category?, onDismiss: () -> Unit, onDelete:
                             .size(42.dp)
                             .background(if (key == icon) color.copy(alpha = 0.2f) else scheme.surfaceContainerHigh, RoundedCornerShape(12.dp))
                             .border(2.dp, if (key == icon) color else Color.Transparent, RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(12.dp))
                             .clickable { icon = key },
                         contentAlignment = Alignment.Center
                     ) { Icon(CategoryIcons.of(key), contentDescription = null, tint = if (key == icon) color else scheme.onSurfaceVariant, modifier = Modifier.size(22.dp)) }
@@ -172,7 +174,8 @@ private fun CategoryEditor(category: Category?, onDismiss: () -> Unit, onDelete:
                             .size(36.dp)
                             .border(3.dp, if (c == color) scheme.onSurface else Color.Transparent, CircleShape)
                             .padding(4.dp)
-                            .background(c, CircleShape)
+                            .clip(CircleShape)
+                            .background(c)
                             .clickable { color = c }
                     )
                 }

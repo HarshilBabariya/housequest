@@ -52,6 +52,7 @@ private fun HomeQuestRoot() {
     val members by vm.members.collectAsStateWithLifecycle()
     val unlocked by vm.sessionUnlocked.collectAsStateWithLifecycle()
     val pinError by vm.pinError.collectAsStateWithLifecycle()
+    val erasing by vm.erasing.collectAsStateWithLifecycle()
     val baseContext = LocalContext.current
     val localized = remember(settings.language) {
         Locale.setDefault(Locale.forLanguageTag(settings.language))
@@ -66,7 +67,7 @@ private fun HomeQuestRoot() {
     CompositionLocalProvider(LocalContext provides localized, LocalConfiguration provides localized.resources.configuration) {
         HomeQuestTheme(themeId = settings.themeId, darkMode = settings.darkMode) {
             Surface(Modifier.fillMaxSize()) {
-                Crossfade(targetState = vm.gate(settings, unlocked), animationSpec = tween(350), label = "gate") { gate ->
+                Crossfade(targetState = vm.gate(settings, unlocked, erasing), animationSpec = tween(350), label = "gate") { gate ->
                     Box(Modifier.fillMaxSize()) {
                         when (gate) {
                             Gate.ONBOARDING -> OnboardingScreen(language = settings.language, onLanguage = vm::setLanguage, onComplete = vm::completeOnboarding)
@@ -78,7 +79,7 @@ private fun HomeQuestRoot() {
                                 onUnlock = vm::unlock
                             )
                             Gate.OPEN -> {
-                                HomeQuestNavHost(onSignOut = vm::signOut)
+                                HomeQuestNavHost(onSignOut = vm::signOut, onEraseAll = vm::eraseAll)
                                 ConfettiBurst(trigger = confetti)
                                 Box(Modifier.align(Alignment.TopCenter)) { RewardToast(event = toast, onDismiss = vm::dismissToast) }
                             }

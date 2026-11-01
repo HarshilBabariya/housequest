@@ -9,6 +9,7 @@ import com.homequest.app.data.local.ExpenseDao
 import com.homequest.app.domain.BuiltInCategories
 import com.homequest.app.domain.Category
 import com.homequest.app.util.titleCased
+import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -27,7 +28,7 @@ class CategoryRepository(
     )
 
     suspend fun add(name: String, iconKey: String, color: Color): String {
-        val id = "custom_${System.currentTimeMillis()}"
+        val id = "custom_${UUID.randomUUID()}"
         dao.upsert(CategoryEntity(id, name.titleCased(), iconKey, color.toArgb().toLong(), dao.maxSortOrder() + 1, builtIn = false))
         badges.refresh()
         return id

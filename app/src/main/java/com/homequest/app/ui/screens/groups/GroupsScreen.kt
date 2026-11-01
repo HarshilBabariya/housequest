@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AvatarView
+import com.homequest.app.ui.components.CardShape
 import com.homequest.app.ui.components.EmptyState
 import com.homequest.app.ui.components.HqCard
 import com.homequest.app.ui.components.HqTextField
@@ -74,7 +76,7 @@ fun GroupsScreen(onOpenGroup: (Long) -> Unit) {
         } else {
             LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 100.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(state.groups, key = { it.group.id }) { g ->
-                    HqCard(Modifier.fillMaxWidth().combinedClickable(onClick = { onOpenGroup(g.group.id) }, onLongClick = { pendingDelete = g.group })) {
+                    HqCard(Modifier.fillMaxWidth().clip(CardShape).combinedClickable(onClick = { onOpenGroup(g.group.id) }, onLongClick = { pendingDelete = g.group })) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(Modifier.size(52.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
                                 Text(g.group.emoji, fontSize = 26.sp)

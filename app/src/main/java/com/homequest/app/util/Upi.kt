@@ -6,7 +6,7 @@ import android.net.Uri
 enum class UpiResult { SUCCESS, FAILED, UNKNOWN }
 
 object Upi {
-    const val ID = "harshilbabariya01-4@okhdfcbank"
+    private const val ID = "harshilbabariya01-4@okhdfcbank"
     private const val PAYEE = "HomeQuest"
 
     fun payIntent(rupees: Int, note: String): Intent {

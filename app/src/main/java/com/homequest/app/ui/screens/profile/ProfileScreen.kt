@@ -1,5 +1,7 @@
 package com.homequest.app.ui.screens.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +21,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -40,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -58,10 +63,13 @@ import com.homequest.app.ui.components.HqCard
 import com.homequest.app.ui.components.PinSetupSheet
 import com.homequest.app.ui.components.SectionHeader
 import com.homequest.app.ui.components.relationLabel
+import com.homequest.app.ui.screens.expenses.OptionSheet
+import com.homequest.app.util.Dates
 
 @Composable
 fun ProfileScreen(
     onSignOut: () -> Unit,
+    onEraseAll: () -> Unit,
     onOpenAccount: () -> Unit,
     onOpenFamily: () -> Unit,
     onOpenAvatar: (Long) -> Unit,
@@ -77,6 +85,10 @@ fun ProfileScreen(
     val scheme = MaterialTheme.colorScheme
     var confirmSignOut by remember { mutableStateOf(false) }
     var setupPin by remember { mutableStateOf(false) }
+    var exporting by remember { mutableStateOf(false) }
+    var confirmErase by remember { mutableStateOf(false) }
+    val importOutcome by vm.importOutcome.collectAsStateWithLifecycle()
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let { vm.importCsv(context, it) } }
     val member = state.member
 
     Column(Modifier.verticalScroll(rememberScrollState())) {
@@ -104,7 +116,7 @@ fun ProfileScreen(
                     stringResource(R.string.level_summary, state.level.level, stringResource(state.level.titleRes), state.points, state.streak),
                     style = MaterialTheme.typography.labelLarge,
                     color = scheme.primary,
-                    modifier = Modifier.padding(top = 6.dp).clickable(onClick = onOpenRewards),
+                    modifier = Modifier.padding(top = 6.dp).clip(RoundedCornerShape(50)).clickable(onClick = onOpenRewards),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -130,8 +142,13 @@ fun ProfileScreen(
             NavRow("🏷️", stringResource(R.string.categories), stringResource(R.string.categories_sub), onOpenCategories)
             NavRow("🎯", stringResource(R.string.budgets), stringResource(R.string.budgets_sub), onOpenBudgets)
             NavRow("⏰", stringResource(R.string.reminders_bills), stringResource(R.string.reminders_sub), onOpenReminders)
-            NavRow("📈", stringResource(R.string.insights), stringResource(R.string.insights_sub), onOpenInsights, last = !state.exportUnlocked)
-            if (state.exportUnlocked) NavRow("📤", stringResource(R.string.export_csv), stringResource(R.string.export_sub), { vm.exportCsv(context) }, last = true)
+            NavRow("📈", stringResource(R.string.insights), stringResource(R.string.insights_sub), onOpenInsights, last = true)
+        }
+
+        SectionHeader(stringResource(R.string.your_data))
+        HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
+            NavRow("📥", stringResource(R.string.import_csv), stringResource(R.string.import_sub), { importLauncher.launch(CSV_TYPES) }, last = !state.exportUnlocked)
+            if (state.exportUnlocked) NavRow("📤", stringResource(R.string.export_csv), stringResource(R.string.export_sub), { exporting = true }, last = true)
         }
 
         SectionHeader(stringResource(R.string.security))
@@ -182,8 +199,19 @@ fun ProfileScreen(
             Spacer(Modifier.size(6.dp))
             Text(stringResource(R.string.log_out_switch), maxLines = 1)
         }
+        if (member?.isOwner == true) {
+            TextButton(
+                onClick = { confirmErase = true },
+                colors = ButtonDefaults.textButtonColors(contentColor = scheme.error),
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp).fillMaxWidth()
+            ) {
+                Icon(Icons.Filled.DeleteForever, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.size(6.dp))
+                Text(stringResource(R.string.erase_all), maxLines = 1)
+            }
+        }
         Text(
-            stringResource(R.string.about_footer, "1.4.1"),
+            stringResource(R.string.about_footer, "1.5.0"),
             style = MaterialTheme.typography.labelSmall,
             color = scheme.onSurfaceVariant,
             modifier = Modifier.padding(20.dp)
@@ -198,6 +226,46 @@ fun ProfileScreen(
         }
     }
 
+    if (exporting) {
+        OptionSheet(stringResource(R.string.export_csv), onDismiss = { exporting = false }) {
+            HqCard(Modifier.fillMaxWidth(), padding = 0) {
+                NavRow("🗂️", stringResource(R.string.export_all), stringResource(R.string.export_all_sub), { exporting = false; vm.exportCsv(context, null) }, last = state.exportMonths.isEmpty())
+                state.exportMonths.forEachIndexed { i, month ->
+                    NavRow("📅", Dates.monthLabel(month), stringResource(R.string.export_month_sub), { exporting = false; vm.exportCsv(context, month) }, last = i == state.exportMonths.lastIndex)
+                }
+            }
+        }
+    }
+
+    importOutcome?.let { outcome ->
+        AlertDialog(
+            onDismissRequest = vm::clearImportOutcome,
+            title = { Text(stringResource(if (outcome is ImportOutcome.Done) R.string.import_done else R.string.import_failed)) },
+            text = {
+                Text(
+                    when (outcome) {
+                        is ImportOutcome.Done -> stringResource(R.string.import_summary, outcome.result.added, outcome.result.duplicates, outcome.result.invalid)
+                        ImportOutcome.Unreadable -> stringResource(R.string.import_failed_body)
+                    }
+                )
+            },
+            confirmButton = { TextButton(onClick = vm::clearImportOutcome) { Text(stringResource(R.string.ok)) } }
+        )
+    }
+
+    if (confirmErase) {
+        AlertDialog(
+            onDismissRequest = { confirmErase = false },
+            icon = { Icon(Icons.Filled.DeleteForever, contentDescription = null, tint = scheme.error) },
+            title = { Text(stringResource(R.string.erase_all_q)) },
+            text = { Text(stringResource(R.string.erase_all_body)) },
+            confirmButton = {
+                TextButton(onClick = { confirmErase = false; onEraseAll() }, colors = ButtonDefaults.textButtonColors(contentColor = scheme.error)) { Text(stringResource(R.string.erase_all_confirm)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmErase = false }) { Text(stringResource(R.string.cancel)) } }
+        )
+    }
+
     if (confirmSignOut) {
         AlertDialog(
             onDismissRequest = { confirmSignOut = false },
@@ -208,6 +276,8 @@ fun ProfileScreen(
         )
     }
 }
+
+private val CSV_TYPES = arrayOf("text/csv", "text/comma-separated-values", "text/plain", "application/csv", "application/vnd.ms-excel", "application/octet-stream")
 
 @Composable
 private fun NavRow(emoji: String, title: String, subtitle: String, onClick: () -> Unit, last: Boolean = false) {

@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
@@ -65,7 +66,8 @@ fun BadgeTile(status: BadgeStatus, index: Int, modifier: Modifier = Modifier, on
         modifier
             .scale(0.7f + 0.3f * appear.value)
             .alpha(appear.value)
-            .background(scheme.surfaceContainerLowest, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(scheme.surfaceContainerLowest)
             .border(1.dp, if (status.earned) scheme.primary.copy(alpha = 0.35f) else scheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
             .clickable(onClick = onClick)
             .padding(vertical = 12.dp, horizontal = 6.dp),

@@ -52,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -76,7 +77,7 @@ val FieldShape = RoundedCornerShape(14.dp)
 fun HqCard(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, padding: Int = 16, content: @Composable ColumnScope.() -> Unit) {
     val scheme = MaterialTheme.colorScheme
     Surface(
-        modifier = modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        modifier = modifier.then(if (onClick != null) Modifier.clip(CardShape).clickable(onClick = onClick) else Modifier),
         shape = CardShape,
         color = scheme.surfaceContainerLowest,
         border = BorderStroke(1.dp, scheme.outlineVariant.copy(alpha = 0.6f))
@@ -291,7 +292,7 @@ fun PinPad(onDigit: (Char) -> Unit, onBackspace: () -> Unit, modifier: Modifier 
                     Box(
                         Modifier
                             .size(64.dp)
-                            .then(if (key == ' ') Modifier else Modifier.background(keyColor, CircleShape).clickable { if (key == '⌫') onBackspace() else onDigit(key) }),
+                            .then(if (key == ' ') Modifier else Modifier.clip(CircleShape).background(keyColor).clickable { if (key == '⌫') onBackspace() else onDigit(key) }),
                         contentAlignment = Alignment.Center
                     ) {
                         when (key) {

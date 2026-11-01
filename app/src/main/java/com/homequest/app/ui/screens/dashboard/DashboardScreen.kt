@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,6 +51,7 @@ import com.homequest.app.notifications.nextOccurrence
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AnimatedCount
 import com.homequest.app.ui.components.AnimatedMoney
+import com.homequest.app.ui.components.AreaChart
 import com.homequest.app.ui.components.AvatarView
 import com.homequest.app.ui.components.BarChart
 import com.homequest.app.ui.components.CategoryIcon
@@ -157,9 +159,40 @@ fun DashboardScreen(
                 }
             }
 
+            if (state.monthTotal > 0) {
+                item {
+                    val month = YearMonth.from(state.today)
+                    SectionHeader(stringResource(R.string.month_so_far))
+                    HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
+                        Text(stringResource(R.string.on_pace_for), style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant)
+                        AnimatedMoney(state.monthProjection, symbol, MaterialTheme.typography.titleLarge, if (state.settings.monthlyBudget > 0 && state.monthProjection > state.settings.monthlyBudget) scheme.error else scheme.onSurface)
+                        if (state.settings.monthlyBudget > 0) {
+                            Text(stringResource(R.string.pace_hint), style = MaterialTheme.typography.bodySmall, color = scheme.tertiary, modifier = Modifier.padding(bottom = 8.dp))
+                        }
+                        AreaChart(
+                            values = state.monthCumulative,
+                            axisLabels = listOf(1, 8, 15, 22, month.lengthOfMonth()).map { Dates.shortLabel(month.atDay(it).toEpochDay()) },
+                            slots = month.lengthOfMonth(),
+                            pace = state.settings.monthlyBudget.takeIf { it > 0 },
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                }
+            }
+
             item {
                 SectionHeader(stringResource(R.string.last_7_days))
-                HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) { BarChart(state.weekValues, state.weekLabels) }
+                HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
+                    val weekTotal = state.weekValues.sum()
+                    Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(bottom = 12.dp)) {
+                        Column(Modifier.weight(1f)) {
+                            Text(stringResource(R.string.spent_this_week), style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, maxLines = 1)
+                            AnimatedMoney(weekTotal, symbol, MaterialTheme.typography.titleLarge)
+                        }
+                        Text(stringResource(R.string.avg_per_day, (weekTotal / 7).money(symbol)), style = MaterialTheme.typography.labelMedium, color = scheme.primary, maxLines = 1)
+                    }
+                    BarChart(state.weekValues, state.weekLabels, highlightLabel = state.todayTotal.money(symbol))
+                }
             }
 
             item {
@@ -250,7 +283,7 @@ private fun Header(state: DashboardState, onOpenProfile: () -> Unit, onVoice: ()
 
     Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.border(2.dp, scheme.primary.copy(alpha = 0.35f), CircleShape).padding(3.dp).clickable(onClick = onOpenProfile)) {
+            Box(Modifier.border(2.dp, scheme.primary.copy(alpha = 0.35f), CircleShape).padding(3.dp).clip(CircleShape).clickable(onClick = onOpenProfile)) {
                 state.member?.let { AvatarView(it.avatar(), size = 64.dp, animated = true, mood = mood, waveTrigger = wave) }
             }
             Column(Modifier.weight(1f).padding(start = 14.dp)) {
@@ -258,7 +291,8 @@ private fun Header(state: DashboardState, onOpenProfile: () -> Unit, onVoice: ()
                 Row(
                     Modifier
                         .padding(top = 4.dp)
-                        .background(scheme.primaryContainer, RoundedCornerShape(50))
+                        .clip(RoundedCornerShape(50))
+                        .background(scheme.primaryContainer)
                         .clickable(onClick = onOpenRewards)
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically

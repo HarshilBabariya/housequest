@@ -24,6 +24,8 @@ class ReminderRepository(
 
     suspend fun rescheduleAll() = dao.allEnabled().forEach { scheduler.schedule(it) }
 
+    suspend fun cancelAll() = dao.allEnabled().forEach { scheduler.cancel(it.id) }
+
     suspend fun setEnabled(reminder: ReminderEntity, enabled: Boolean) = save(reminder.copy(enabled = enabled))
 
     suspend fun delete(reminder: ReminderEntity) {

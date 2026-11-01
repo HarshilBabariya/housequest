@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -138,7 +139,7 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    AvatarView(state.config, size = 200.dp, animated = true, mood = state.config.mood ?: Mood.HAPPY, waveTrigger = wave, modifier = Modifier.clickable { wave++ }, background = scheme.surfaceContainerLowest)
+                    AvatarView(state.config, size = 200.dp, animated = true, mood = state.config.mood ?: Mood.HAPPY, waveTrigger = wave, modifier = Modifier.clip(CircleShape).clickable { wave++ }, background = scheme.surfaceContainerLowest)
                     Text(
                         state.config.mood?.let { stringResource(it.labelRes) } ?: stringResource(R.string.mood_auto_hint),
                         style = MaterialTheme.typography.labelLarge, color = scheme.primary, modifier = Modifier.padding(top = 10.dp)
@@ -177,7 +178,8 @@ private fun SwatchRow(colors: List<Color>, selected: Int, onSelect: (Int) -> Uni
                     .size(40.dp)
                     .border(3.dp, if (i == selected) MaterialTheme.colorScheme.primary else Color.Transparent, CircleShape)
                     .padding(4.dp)
-                    .background(colors[i], CircleShape)
+                    .clip(CircleShape)
+                    .background(colors[i])
                     .clickable { onSelect(i) }
             )
         }
@@ -196,7 +198,8 @@ private fun ItemRow(title: String, kind: RewardKind, state: AvatarStudioState, s
                 Modifier
                     .width(96.dp)
                     .border(2.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
                     .clickable { if (unlocked) onSelect(item.id) else if (affordable) onUnlock(item) }
                     .padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally

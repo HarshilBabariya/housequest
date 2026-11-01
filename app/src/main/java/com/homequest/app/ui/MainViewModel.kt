@@ -9,12 +9,14 @@ import com.homequest.app.data.repository.AppSettings
 import com.homequest.app.data.repository.RewardEvent
 import com.homequest.app.domain.Gender
 import com.homequest.app.domain.RepeatRule
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 enum class Gate { ONBOARDING, LOCKED, OPEN }
 
@@ -33,6 +35,9 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
 
     private val _sessionUnlocked = MutableStateFlow(false)
     val sessionUnlocked: StateFlow<Boolean> = _sessionUnlocked
+
+    private val _erasing = MutableStateFlow(false)
+    val erasing: StateFlow<Boolean> = _erasing
 
     private val _pinError = MutableStateFlow(false)
     val pinError: StateFlow<Boolean> = _pinError
@@ -56,8 +61,8 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    fun gate(s: AppSettings, unlocked: Boolean): Gate = when {
-        !s.onboarded -> Gate.ONBOARDING
+    fun gate(s: AppSettings, unlocked: Boolean, erasing: Boolean): Gate = when {
+        erasing || !s.onboarded -> Gate.ONBOARDING
         s.activeMemberId == 0L -> Gate.LOCKED
         s.appLockEnabled && !unlocked -> Gate.LOCKED
         else -> Gate.OPEN
@@ -80,8 +85,16 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
     fun clearPinError() { _pinError.value = false }
 
     fun signOut() = viewModelScope.launch {
-        _sessionUnlocked.value = false
         container.memberRepository.signOut()
+        settings.first { it?.activeMemberId == 0L }
+        _sessionUnlocked.value = false
+    }
+
+    fun eraseAll() = viewModelScope.launch {
+        _erasing.value = true
+        withContext(NonCancellable) { container.eraseAll() }
+        _sessionUnlocked.value = false
+        _erasing.value = false
     }
 
     fun completeOnboarding(name: String, phone: String, gender: Gender, currency: String, budget: Double, pin: String?, nudgeTitle: String) = viewModelScope.launch {

@@ -82,12 +82,6 @@ interface ExpenseDao {
     @Query("SELECT epochDay, SUM(amount) AS total FROM expenses WHERE epochDay BETWEEN :fromDay AND :toDay GROUP BY epochDay ORDER BY epochDay ASC")
     fun observeDayTotals(fromDay: Long, toDay: Long): Flow<List<DayTotal>>
 
-    @Query(
-        "SELECT strftime('%Y-%m', epochDay * 86400, 'unixepoch') AS month, category, SUM(amount) AS total " +
-            "FROM expenses WHERE epochDay >= :fromDay GROUP BY month, category ORDER BY month ASC"
-    )
-    fun observeMonthCategoryTotals(fromDay: Long): Flow<List<MonthCategoryTotal>>
-
     @Query("SELECT * FROM expenses")
     suspend fun all(): List<ExpenseEntity>
 
@@ -105,6 +99,9 @@ interface ExpenseDao {
 
     @Insert
     suspend fun insert(expense: ExpenseEntity): Long
+
+    @Insert
+    suspend fun insertAll(expenses: List<ExpenseEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSplits(splits: List<ExpenseSplitEntity>)

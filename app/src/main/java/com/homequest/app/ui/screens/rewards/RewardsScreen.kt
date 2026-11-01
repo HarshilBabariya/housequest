@@ -220,7 +220,6 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges
                             }
                         }
                     }
-                    Text(stringResource(R.string.upi_to, Upi.ID), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 10.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
             item { SectionHeader(stringResource(R.string.points_history)) }
@@ -243,7 +242,8 @@ private fun PackTile(pack: PointPack, modifier: Modifier, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     Column(
         modifier
-            .background(scheme.primaryContainer.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(scheme.primaryContainer.copy(alpha = 0.5f))
             .border(1.dp, scheme.primary.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
             .padding(vertical = 12.dp),
@@ -261,8 +261,9 @@ private fun RewardRow(modifier: Modifier, item: RewardItem, unlocked: Boolean, a
         modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(18.dp))
             .border(2.dp, border, RoundedCornerShape(18.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .clickable(enabled = unlocked && item.kind != RewardKind.FEATURE, onClick = onUse)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically

@@ -188,4 +188,3 @@ data class CategoryTotal(val category: String, val total: Double)
 
 data class DayTotal(val epochDay: Long, val total: Double)
 
-data class MonthCategoryTotal(val month: String, val category: String, val total: Double)
