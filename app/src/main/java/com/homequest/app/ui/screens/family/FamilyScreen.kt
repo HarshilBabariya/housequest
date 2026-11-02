@@ -12,10 +12,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -99,11 +99,11 @@ fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.family_members)) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } }
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back)) } }
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { adding = true }, icon = { Icon(Icons.Filled.Add, contentDescription = null) }, text = { Text(stringResource(R.string.add_member)) })
+            ExtendedFloatingActionButton(onClick = { adding = true }, icon = { Icon(Icons.Rounded.Add, contentDescription = null) }, text = { Text(stringResource(R.string.add_member)) })
         }
     ) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 100.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -125,8 +125,8 @@ fun FamilyScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit) {
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
-                        IconButton(onClick = { editing = m }) { Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit)) }
-                        if (!m.isOwner) IconButton(onClick = { deleting = m }) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.remove)) }
+                        IconButton(onClick = { editing = m }) { Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.edit)) }
+                        if (!m.isOwner) IconButton(onClick = { deleting = m }) { Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.remove)) }
                     }
                 }
             }

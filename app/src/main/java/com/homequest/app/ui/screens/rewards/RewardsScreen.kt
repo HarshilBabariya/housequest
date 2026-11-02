@@ -33,7 +33,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,6 +53,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,9 +76,10 @@ import com.homequest.app.domain.RewardItem
 import com.homequest.app.domain.RewardKind
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AnimatedCount
-import com.homequest.app.ui.components.HqCard
+import com.homequest.app.ui.components.ProCard
 import com.homequest.app.ui.components.SectionHeader
 import com.homequest.app.ui.components.reasonLabel
+import com.homequest.app.ui.screens.expenses.OptionSheet
 import com.homequest.app.ui.theme.Palettes
 import com.homequest.app.util.Upi
 import com.homequest.app.util.UpiResult
@@ -85,7 +87,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges: () -> Unit) {
+fun RewardsScreen(openPro: Boolean, onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges: () -> Unit) {
     val vm = appViewModel { RewardsViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -102,6 +104,7 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges
     }
     var paying by remember { mutableStateOf<PointPack?>(null) }
     var confirming by remember { mutableStateOf<PointPack?>(null) }
+    var showPlans by rememberSaveable { mutableStateOf(openPro) }
     val payLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val pack = paying ?: return@rememberLauncherForActivityResult
         paying = null
@@ -118,6 +121,25 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges
     }
 
     selectedBadge?.let { BadgeDetailSheet(it, onDismiss = { selectedBadge = null }) }
+    if (showPlans) {
+        OptionSheet(stringResource(R.string.pro_title), onDismiss = { showPlans = false }) {
+            Text(stringResource(R.string.topup_sub), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(Modifier.padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                PointPacks.packs.forEachIndexed { i, pack ->
+                    PlanRow(pack, best = i == PointPacks.packs.lastIndex) {
+                        showPlans = false
+                        paying = pack
+                        try {
+                            payLauncher.launch(Upi.payIntent(pack.rupees, packNote))
+                        } catch (e: ActivityNotFoundException) {
+                            paying = null
+                            vm.notify(RewardsMessage.NoUpiApp)
+                        }
+                    }
+                }
+            }
+        }
+    }
     confirming?.let { pack ->
         AlertDialog(
             onDismissRequest = { confirming = null },
@@ -133,7 +155,7 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.rewards)) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } }
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back)) } }
             )
         },
         snackbarHost = { SnackbarHost(snackbar) }
@@ -205,22 +227,7 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges
             }
             item {
                 SectionHeader(stringResource(R.string.topup_title))
-                HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
-                    Text(stringResource(R.string.topup_sub), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        PointPacks.packs.forEach { pack ->
-                            PackTile(pack, Modifier.weight(1f)) {
-                                paying = pack
-                                try {
-                                    payLauncher.launch(Upi.payIntent(pack.rupees, packNote))
-                                } catch (e: ActivityNotFoundException) {
-                                    paying = null
-                                    vm.notify(RewardsMessage.NoUpiApp)
-                                }
-                            }
-                        }
-                    }
-                }
+                ProCard({ showPlans = true }, Modifier.padding(horizontal = 20.dp))
             }
             item { SectionHeader(stringResource(R.string.points_history)) }
             items(state.ledger, key = { "led_${it.id}" }) { entry ->
@@ -238,19 +245,35 @@ fun RewardsScreen(onBack: () -> Unit, onOpenAvatar: (Long) -> Unit, onOpenBadges
 }
 
 @Composable
-private fun PackTile(pack: PointPack, modifier: Modifier, onClick: () -> Unit) {
+private fun PlanRow(pack: PointPack, best: Boolean, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
-    Column(
-        modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(scheme.primaryContainer.copy(alpha = 0.5f))
-            .border(1.dp, scheme.primary.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+    val shape = RoundedCornerShape(18.dp)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(if (best) scheme.primaryContainer else scheme.surfaceContainerLowest)
+            .border(if (best) 2.dp else 1.dp, if (best) scheme.primary else scheme.outlineVariant, shape)
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(stringResource(R.string.pack_points, pack.points), style = MaterialTheme.typography.titleMedium, color = scheme.primary, maxLines = 1)
-        Text(stringResource(R.string.pack_price, pack.rupees), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 2.dp), maxLines = 1)
+        Column(Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(pack.nameRes), style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                if (best) {
+                    Text(
+                        stringResource(R.string.best_value),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = scheme.onPrimary,
+                        modifier = Modifier.padding(start = 8.dp).background(scheme.primary, RoundedCornerShape(50)).padding(horizontal = 8.dp, vertical = 2.dp),
+                        maxLines = 1
+                    )
+                }
+            }
+            Text(stringResource(R.string.pack_points, pack.points), style = MaterialTheme.typography.bodyMedium, color = scheme.primary, maxLines = 1)
+        }
+        Text(stringResource(R.string.pack_price, pack.rupees), style = MaterialTheme.typography.titleLarge, maxLines = 1)
     }
 }
 

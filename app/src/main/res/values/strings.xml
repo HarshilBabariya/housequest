@@ -62,7 +62,7 @@
     <string name="pay_cash">Cash</string>
     <string name="pay_upi">UPI</string>
     <string name="pay_card">Card</string>
-    <string name="pay_bank">Bank transfer</string>
+    <string name="pay_bank">Bank</string>
     <string name="repeat_once">Once</string>
     <string name="repeat_daily">Daily</string>
     <string name="repeat_weekly">Weekly</string>
@@ -78,16 +78,6 @@
     <string name="mood_sad">Sad</string>
     <string name="mood_worried">Worried</string>
     <string name="mood_angry">Angry</string>
-    <string name="mood_line_happy">%1$s! Spending looks healthy this month.</string>
-    <string name="mood_line_love">%1$s, that streak is gorgeous. I\'m smitten.</string>
-    <string name="mood_line_excited">%1$s, you\'re on a roll! Keep that streak alive.</string>
-    <string name="mood_line_smart">%1$s, way under budget halfway through. Genius move.</string>
-    <string name="mood_line_neutral">%1$s. Nothing logged today yet — fancy adding one?</string>
-    <string name="mood_line_confused">%1$s… where is it all going? Let\'s keep an eye on it.</string>
-    <string name="mood_line_sleepy">%1$s, late night? Log it and let\'s both get some sleep.</string>
-    <string name="mood_line_sad">%1$s, it\'s been a few days. I miss our little updates.</string>
-    <string name="mood_line_worried">%1$s, we\'re getting close to the budget line…</string>
-    <string name="mood_line_angry">%1$s! We\'ve gone over budget this month.</string>
     <string name="good_morning">Good morning,</string>
     <string name="good_afternoon">Good afternoon,</string>
     <string name="good_evening">Good evening,</string>
@@ -211,13 +201,6 @@
     <string name="toast_level_body">You levelled up!</string>
     <string name="toast_streak">%1$d-day streak</string>
     <string name="toast_streak_body">Keep logging every day</string>
-    <string name="notif_bill_title">%1$s is due today 💸</string>
-    <string name="notif_budget_warn_body">%1$s: %2$s of %3$s gone. The month isn\'t. Easy does it.</string>
-    <string name="notif_budget_over_body">%1$s: you\'ve crossed %3$s (now at %2$s). Your avatar is… not thrilled 😤</string>
-    <string name="notif_badge_title">Badge unlocked %1$s</string>
-    <string name="notif_badge_body">%1$s — nice one! +%2$d points</string>
-    <string name="notif_level_title">Level %1$d! 🎉</string>
-    <string name="notif_level_body">You\'re now a %1$s. Keep climbing.</string>
     <string name="welcome_title">Welcome to HomeQuest</string>
     <string name="welcome_body">Track what the house spends, split it fairly, and earn rewards for staying on budget.</string>
     <string name="your_name">Your name</string>
@@ -280,7 +263,6 @@
     <string name="due_tomorrow">Due tomorrow</string>
     <string name="due_in_days">In %1$d days · %2$s</string>
     <string name="recent_transactions">Recent transactions</string>
-    <string name="level_n">Level %1$d</string>
     <string name="voice_title">Say it or type it</string>
     <string name="voice_subtitle">One sentence and it\'s logged — e.g. \"250 groceries by UPI\"</string>
     <string name="voice_prompt">Say the amount and what it was for</string>
@@ -359,7 +341,6 @@
     <string name="avatar_studio">Avatar studio</string>
     <string name="avatar_of">%1$s\'s avatar</string>
     <string name="save_look">Save look</string>
-    <string name="say_hi">👋 Say hi</string>
     <string name="skin_tone">Skin tone</string>
     <string name="hair_colour">Hair colour</string>
     <string name="hair_style">Hair style</string>
@@ -643,7 +624,7 @@
     <string name="badges_hard">Hard · %1$d</string>
     <string name="badge_points_total">%1$d pts</string>
     <string name="topup_title">Top up with UPI</string>
-    <string name="topup_sub">Trial: pay with any UPI app. Payments can\'t be verified automatically yet, so points are added on your confirmation.</string>
+    <string name="topup_sub">Pay with any UPI app. Points are added as soon as the app confirms the payment, or when you confirm it went through.</string>
     <string name="pack_points">%1$d pts</string>
     <string name="pack_price">₹%1$d</string>
     <string name="upi_note">HomeQuest points</string>
@@ -692,12 +673,218 @@
     <string name="daily_average">Daily avg</string>
     <string name="transactions">Entries</string>
     <string name="biggest">Biggest</string>
+    <string name="face_shape">Face shape</string>
+    <string name="face_oval">Oval</string>
+    <string name="face_round">Round</string>
+    <string name="face_square">Square</string>
+    <string name="face_heart">Heart</string>
+    <string name="face_long">Long</string>
+    <string name="beard">Beard</string>
+    <string name="beard_none">None</string>
+    <string name="beard_stubble">Stubble</string>
+    <string name="beard_mustache">Mustache</string>
+    <string name="beard_goatee">Goatee</string>
+    <string name="beard_chin_strap">Chin strap</string>
+    <string name="beard_full">Full beard</string>
+    <string name="act_wave">Wave</string>
+    <string name="act_jump">Jump</string>
+    <string name="act_spin">Spin</string>
+    <string name="act_dance">Dance</string>
+    <string name="act_wink">Wink</string>
+    <string name="act_cheer">Cheer</string>
+    <string name="act_laugh">Laugh</string>
+    <string name="free">Free</string>
+    <string name="xp_level_label">Level %1$d · %2$s</string>
+    <string name="xp_to_next">%1$d XP to Level %2$d</string>
+    <string name="day_n">Day %1$d</string>
+    <string name="calendar">Calendar</string>
+    <string name="avg_daily_budget">Average daily budget: %1$s</string>
+    <string name="calendar_no_budget">Set a monthly budget to see which days went over.</string>
+    <string name="over_budget">Over budget</string>
+    <string name="within_budget">Within budget</string>
+    <string name="calendar_quiet_day">Nothing spent this day</string>
+    <string name="views">Views</string>
+    <string name="view_day">Day</string>
+    <string name="pro_title">Unlock everything with Pro</string>
+    <string name="pro_sub">Grab a points pack and unlock themes, looks and features faster.</string>
+    <string name="plan_starter">Starter</string>
+    <string name="plan_plus">Plus</string>
+    <string name="plan_pro">Pro</string>
+    <string name="best_value">Best value</string>
+    <string name="more_options">More options</string>
+    <string name="invite_friend">Invite a friend</string>
+    <string name="invite_sub">Share HomeQuest with family and friends</string>
+    <string name="invite_text">I track our household spends with HomeQuest — points, badges and a cheeky avatar. Get it here: %1$s</string>
+    <string name="rate_app">Rate app</string>
+    <string name="rate_sub">Tell us how we\'re doing</string>
+    <string name="rate_title">Enjoying HomeQuest?</string>
+    <string name="rate_body">Tap the stars. 4 or 5 opens the project page so you can star it; fewer opens feedback so we can fix things.</string>
+    <string name="rate_submit">Submit</string>
+    <string name="feedback">Query / feedback</string>
+    <string name="feedback_sub">Report a bug or suggest a feature</string>
+    <string name="faqs">FAQs</string>
+    <string name="faqs_sub">Quick answers to common questions</string>
+    <string name="faq_q1">Is my data uploaded anywhere?</string>
+    <string name="faq_a1">No. Everything stays in this phone\'s database and is included in your Android backup. Nothing is sent to a server.</string>
+    <string name="faq_q2">Can family members use their own phones?</string>
+    <string name="faq_a2">Not yet. Every member logs in on this phone with their own avatar and PIN. Syncing across phones needs a cloud backend, which is planned separately.</string>
+    <string name="faq_q3">How do I earn points?</string>
+    <string name="faq_a3">Log expenses (+10 each), keep your daily streak, create groups, settle balances, add family members, finish months under budget and unlock badges.</string>
+    <string name="faq_q4">How do I add an expense by voice?</string>
+    <string name="faq_a4">Tap the mic and say something like “250 groceries by UPI note Diwali shopping”. Amount, category, payment mode and title are filled in; anything after “note” goes into the note.</string>
+    <string name="faq_q5">Can it read my GPay or bank SMS?</string>
+    <string name="faq_a5">Not yet. You can import a CSV from Me → Import CSV. Capturing payments automatically from notifications is on the roadmap.</string>
+    <string name="faq_q6">What does Pro give me?</string>
+    <string name="faq_a6">Pro packs add points instantly, so you can unlock any theme, outfit, hair style, accessory or feature without waiting.</string>
+    <string name="about_app">About app</string>
+    <string name="about_sub">Version and how your data is stored</string>
+    <string name="custom_colour">Custom colour</string>
+    <string name="custom_icon">Custom icon</string>
+    <string name="custom_icon_label">Type or paste any emoji</string>
+    <string name="edit_reminder">Edit reminder</string>
+    <string name="delete_reminder_q">Delete “%1$s”?</string>
+    <string name="delete_reminder_body">The reminder and its scheduled notifications will be removed.</string>
+    <string name="rw_glass">Glass</string>
+    <string name="rw_glass_d">Frosted cards over a glowing gradient</string>
+    <string name="rw_polo">Polo</string>
+    <string name="rw_polo_d">A crisp, sporty collar</string>
+    <string name="rw_jersey">Cricket jersey</string>
+    <string name="rw_jersey_d">Number 7 energy</string>
+    <string name="rw_leather">Leather jacket</string>
+    <string name="rw_leather_d">Too cool for the budget</string>
+    <string name="rw_nehru">Nehru jacket</string>
+    <string name="rw_nehru_d">Sharp and festive</string>
+    <string name="rw_lehenga">Lehenga</string>
+    <string name="rw_lehenga_d">Wedding-season ready</string>
+    <string name="rw_lab_coat">Lab coat</string>
+    <string name="rw_lab_coat_d">Doctor and scientist vibes</string>
+    <string name="rw_side_part">Side part</string>
+    <string name="rw_side_part_d">Office-ready and neat</string>
+    <string name="rw_pixie">Pixie cut</string>
+    <string name="rw_pixie_d">Short, sassy, effortless</string>
+    <string name="rw_spiky">Spiky</string>
+    <string name="rw_spiky_d">Gelled to the max</string>
+    <string name="rw_quiff">Quiff</string>
+    <string name="rw_quiff_d">Retro volume up top</string>
+    <string name="rw_man_bun">Man bun</string>
+    <string name="rw_man_bun_d">Tied up and chilled out</string>
+    <string name="rw_afro">Afro</string>
+    <string name="rw_afro_d">Big hair, bigger energy</string>
+    <string name="rw_flower">Hair flower</string>
+    <string name="rw_flower_d">A fresh bloom</string>
+    <string name="rw_nose_ring">Nose ring</string>
+    <string name="rw_nose_ring_d">A tiny golden sparkle</string>
+    <string name="rw_bow_tie">Bow tie</string>
+    <string name="rw_bow_tie_d">Dapper and dashing</string>
+    <string name="rw_beanie">Beanie</string>
+    <string name="rw_beanie_d">Winter mode: on</string>
+    <string name="rw_sunglasses">Sunglasses</string>
+    <string name="rw_sunglasses_d">Shades on, worries off</string>
+    <string name="rw_chain">Gold chain</string>
+    <string name="rw_chain_d">A little bling</string>
+    <string name="rw_turban">Pagdi</string>
+    <string name="rw_turban_d">Royal and festive</string>
+    <string-array name="mood_lines_happy">
+        <item>%1$s! Spending looks healthy this month.</item>
+        <item>%1$s, you and the budget? Total power couple 💑</item>
+        <item>%1$s! Wallet\'s calm, vibes are immaculate.</item>
+        <item>%1$s, money\'s behaving. Let\'s keep it that way.</item>
+        <item>%1$s! Smooth sailing — the ledger is glowing.</item>
+        <item>%1$s, look at you, adulting like a pro.</item>
+    </string-array>
+    <string-array name="mood_lines_love">
+        <item>%1$s, that streak is gorgeous. I\'m smitten.</item>
+        <item>%1$s, a whole week of logs? Marry me 💍</item>
+        <item>%1$s, this consistency is my love language.</item>
+        <item>%1$s, your streak is giving main-character energy.</item>
+        <item>%1$s, heart eyes for that streak 😍</item>
+        <item>%1$s, I\'d swipe right on this budget.</item>
+    </string-array>
+    <string-array name="mood_lines_excited">
+        <item>%1$s, you\'re on a roll! Keep that streak alive.</item>
+        <item>%1$s, three days strong — let\'s make it ten!</item>
+        <item>%1$s! The streak is hot and so are you 🔥</item>
+        <item>%1$s, momentum unlocked. Don\'t stop now.</item>
+        <item>%1$s, look at that streak go!</item>
+        <item>%1$s, logging machine mode: ON.</item>
+    </string-array>
+    <string-array name="mood_lines_smart">
+        <item>%1$s, way under budget halfway through. Genius move.</item>
+        <item>%1$s, big-brain budgeting detected 🧠</item>
+        <item>%1$s, half the month gone and most of the money stayed. Respect.</item>
+        <item>%1$s, CFO material right here.</item>
+        <item>%1$s, saving like it\'s a sport. Gold medal.</item>
+        <item>%1$s, Warren Buffett wants your number.</item>
+    </string-array>
+    <string-array name="mood_lines_neutral">
+        <item>%1$s. Nothing logged today yet — fancy adding one?</item>
+        <item>%1$s, quiet day? Log a zero and keep the streak.</item>
+        <item>%1$s. The ledger is waiting politely. For now.</item>
+        <item>%1$s, today\'s page is blank. Any spends?</item>
+        <item>%1$s. A quick log keeps the streak breathing.</item>
+        <item>%1$s, no entries yet. Suspiciously frugal 🤨</item>
+    </string-array>
+    <string-array name="mood_lines_confused">
+        <item>%1$s… where is it all going? Let\'s keep an eye on it.</item>
+        <item>%1$s, the budget is doing maths and looking confused.</item>
+        <item>%1$s, money is moving fast. Let\'s slow-mo this.</item>
+        <item>%1$s, is it me or are the spends multiplying?</item>
+        <item>%1$s, quick check: was that splurge really needed?</item>
+        <item>%1$s, let\'s peek at the categories before it gets spicy.</item>
+    </string-array>
+    <string-array name="mood_lines_sleepy">
+        <item>%1$s, late night? Log it and let\'s both get some sleep.</item>
+        <item>%1$s, midnight snack or midnight shopping? Log it 😴</item>
+        <item>%1$s, the ledger never sleeps. You should though.</item>
+        <item>%1$s, one quick log and then lights out.</item>
+        <item>%1$s, 2 AM add-to-cart is not a personality.</item>
+        <item>%1$s, yawn… log it so I can nap.</item>
+    </string-array>
+    <string-array name="mood_lines_sad">
+        <item>%1$s, it\'s been a few days. I miss our little updates.</item>
+        <item>%1$s, the streak flatlined. Bring it back? 🥺</item>
+        <item>%1$s, did you forget about me? The ledger did.</item>
+        <item>%1$s, days of silence. Even my emojis are sad.</item>
+        <item>%1$s, no logs lately. Let\'s restart with just one.</item>
+        <item>%1$s, come back, the budget misses you.</item>
+    </string-array>
+    <string-array name="mood_lines_worried">
+        <item>%1$s, we\'re getting close to the budget line…</item>
+        <item>%1$s, the budget is almost tapped out. Tread lightly.</item>
+        <item>%1$s, sweating a bit here. The limit is right there 😰</item>
+        <item>%1$s, careful — one more splurge and we\'re over.</item>
+        <item>%1$s, maybe a dal-chawal week? Just saying.</item>
+        <item>%1$s, the danger zone is in sight.</item>
+    </string-array>
+    <string-array name="mood_lines_angry">
+        <item>%1$s! We\'ve gone over budget this month.</item>
+        <item>%1$s! The budget is in pieces. Who did this? 😤</item>
+        <item>%1$s, over budget. Hide the cards, delete the apps.</item>
+        <item>%1$s! Budget: busted. Comeback arc starts now.</item>
+        <item>%1$s, we crossed the line. Damage control time.</item>
+        <item>%1$s! Not mad, just disappointed. Okay, a bit mad.</item>
+    </string-array>
     <string-array name="notif_nudge_titles">
         <item>Psst… 👀</item>
         <item>Your wallet called 📞</item>
-        <item>Quick one ✍️</item>
         <item>Streak check 🔥</item>
+        <item>Money diary time ✍️</item>
+        <item>Spill the chai ☕</item>
+        <item>Receipts, please 🧾</item>
+        <item>Knock knock 🚪</item>
+        <item>Plot twist incoming 🍿</item>
+        <item>Don\'t ghost me 👻</item>
+        <item>Your avatar is judging 😏</item>
+        <item>Quick confession 🙊</item>
+        <item>Budget gossip hour 🗣️</item>
+        <item>Two taps. That\'s it. 👆</item>
+        <item>Hey, big spender 💸</item>
+        <item>Nightly roll call 🌙</item>
         <item>Tiny task, big win 💪</item>
+        <item>The ledger is hungry 🍽️</item>
+        <item>Rupee radar 📡</item>
+        <item>Main character moment ✨</item>
+        <item>Not to be dramatic, but… 🎭</item>
     </string-array>
     <string-array name="notif_nudge_bodies">
         <item>%1$s — did money leave your pocket today? Log it before it becomes a mystery.</item>
@@ -705,20 +892,156 @@
         <item>Your avatar is pacing the room. Feed it an expense 🍽️ (%1$s)</item>
         <item>%1$s — keep that streak glowing. Future-you says thanks.</item>
         <item>No spends today? Log a zero-day and brag 😎 (%1$s)</item>
+        <item>%1$s. That chai didn\'t pay for itself. Spill ☕</item>
+        <item>%1$s — your money went somewhere. Find it before it files a missing report.</item>
+        <item>Swiggy saw it. UPI saw it. Your ledger didn\'t. Fix that? (%1$s)</item>
+        <item>%1$s: logging takes 10 seconds. Regret takes the whole month.</item>
+        <item>Plot twist: budgets only work if you write things down. (%1$s)</item>
+        <item>%1$s — be honest, how many “just one more” moments today?</item>
+        <item>Your streak is clinging on for dear life 🔥 Save it. (%1$s)</item>
+        <item>%1$s. Even superheroes log their gadget spends. Probably.</item>
+        <item>Every rupee deserves a name. Go name them. (%1$s)</item>
+        <item>%1$s: the 1st-of-the-month you will either thank you or roast you.</item>
+        <item>Unlogged expenses are how budgets get ghosted 👻 (%1$s)</item>
+        <item>%1$s — quick recap before bed? Your avatar can\'t sleep otherwise 😴</item>
+        <item>Spent nothing? Legend. Spent something? Also legend — just log it. (%1$s)</item>
+        <item>%1$s: points are waiting. Free XP, zero sweat.</item>
+        <item>The kirana bill won\'t log itself, boss. (%1$s)</item>
+        <item>%1$s — tap the mic and say it like a WhatsApp voice note. Done.</item>
+        <item>Your future self is staring at you with a calculator 🧮 (%1$s)</item>
+        <item>%1$s. We don\'t do surprise bank statements in this house.</item>
+        <item>Today\'s damage report, please 📋 (%1$s)</item>
+        <item>%1$s — log it now, flex the savings later 💅</item>
+        <item>Budget says hi. Budget also says “where are my numbers?” (%1$s)</item>
+        <item>%1$s: the badge you\'re eyeing won\'t unlock itself 🏅</item>
+        <item>Auto fare, snacks, that random online order… we know. Log it. (%1$s)</item>
+        <item>%1$s — be the household CFO you were born to be.</item>
+        <item>Psst, streak at risk. This is not a drill 🚨 (%1$s)</item>
+        <item>%1$s. Small logs, big glow-up. Let\'s go.</item>
+    </string-array>
+    <string-array name="notif_bill_titles">
+        <item>%1$s is due today 💸</item>
+        <item>%1$s says hello (and wants money) 👋</item>
+        <item>Heads up: %1$s 🔔</item>
+        <item>%1$s o\'clock ⏰</item>
+        <item>Pay day for %1$s 🧾</item>
+        <item>%1$s is knocking 🚪</item>
+        <item>Don\'t leave %1$s on read 📩</item>
+        <item>%1$s: today\'s the day 📅</item>
+        <item>Bill alert: %1$s 🚨</item>
+        <item>%1$s wants its moment ✨</item>
+        <item>Adulting reminder: %1$s 🫡</item>
+        <item>%1$s — clear it, flex it 💪</item>
     </string-array>
     <string-array name="notif_bill_bodies">
         <item>%1$s — pay it, log it, and your avatar stays smiling 😄</item>
         <item>%1$s on the line. Clear it before the landlord does the knocking 🚪</item>
         <item>Reminder from your future self: %1$s is due. Don\'t make me nag twice 😉</item>
+        <item>%1$s. Late fees are just a tax on forgetting. We don\'t pay those.</item>
+        <item>Your %1$s bill is giving “pay me” energy.</item>
+        <item>%1$s due. Pay now, enjoy a guilt-free chai later ☕</item>
+        <item>Settle %1$s today and earn the right to do nothing tonight.</item>
+        <item>%1$s — tap, pay, log. Three steps to adulting greatness.</item>
+        <item>Don\'t let %1$s become a sequel. Pay it today 🎬</item>
+        <item>%1$s waiting. Your credit score is watching 👀</item>
+        <item>%1$s. Rip the band-aid, then log it for points 🩹</item>
+        <item>Clearing %1$s today = one less thing in your 3 AM thoughts.</item>
+        <item>%1$s due. Paying on time is rare, and rare is hot 🔥</item>
     </string-array>
     <string-array name="notif_budget_warn_titles">
         <item>Whoa there, big spender 😅</item>
-        <item>80% club 🎟️</item>
+        <item>80 percent club 🎟️</item>
         <item>Slow down, champ 🐢</item>
+        <item>Easy, tiger 🐯</item>
+        <item>The budget is sweating 😰</item>
+        <item>Yellow light 🟡</item>
+        <item>Wallet check 👛</item>
+        <item>Almost at the edge 🧗</item>
+        <item>Brakes, please 🛑</item>
+        <item>Hold that cart 🛒</item>
+        <item>We need to talk 💬</item>
+        <item>Spicy month, huh? 🌶️</item>
+    </string-array>
+    <string-array name="notif_budget_warn_bodies">
+        <item>%1$s: %2$s of %3$s gone. The month isn\'t. Easy does it.</item>
+        <item>%1$s is at %2$s out of %3$s. Maybe skip the third coffee? ☕</item>
+        <item>%2$s spent on %1$s already. %3$s is the line — tiptoe, don\'t sprint.</item>
+        <item>%1$s budget: %2$s of %3$s. Your avatar is biting its nails 😬</item>
+        <item>Not panicking, just noting: %1$s is at %2$s of %3$s.</item>
+        <item>%1$s — %2$s used, %3$s total. Those cart items can wait till next month 🛒</item>
+        <item>Plot thickens: %1$s hit %2$s of %3$s. Choose wisely.</item>
+        <item>%1$s at %2$s. The %3$s limit can see you coming 👀</item>
+        <item>Friendly nudge: %1$s is %2$s deep into %3$s.</item>
+        <item>%1$s: %2$s of %3$s. One more splurge and we\'re in the danger zone.</item>
+        <item>%2$s on %1$s so far (limit %3$s). Be the saver you claim to be 😏</item>
     </string-array>
     <string-array name="notif_budget_over_titles">
         <item>Budget: officially busted 🚨</item>
         <item>Over the line 🙈</item>
         <item>Houston, we overspent 🚀</item>
+        <item>Well, that happened 🫠</item>
+        <item>Red alert 🔴</item>
+        <item>The budget has left the chat 💬</item>
+        <item>Oops, all spending 🙃</item>
+        <item>Mayday, mayday 📟</item>
+        <item>Budget? Never heard of her 💅</item>
+        <item>Plot twist: overspent 🎬</item>
+        <item>Damage control time 🧯</item>
+        <item>Ctrl+Z not available ⌨️</item>
+    </string-array>
+    <string-array name="notif_budget_over_bodies">
+        <item>%1$s: you\'ve crossed %3$s (now at %2$s). Your avatar is… not thrilled 😤</item>
+        <item>%1$s blew past %3$s — now %2$s. Time for a no-spend weekend?</item>
+        <item>%1$s is at %2$s. The %3$s limit called; it\'s hurt 💔</item>
+        <item>Over budget on %1$s: %2$s vs %3$s. Next month is the comeback arc.</item>
+        <item>%1$s just went %2$s on a %3$s budget. Bold strategy.</item>
+        <item>%1$s at %2$s (limit %3$s). Deep breath. Dal-chawal week? 🍛</item>
+        <item>We\'ve passed %3$s on %1$s — now %2$s. Lock the apps, hide the cards 🔒</item>
+        <item>%1$s: %2$s spent, %3$s planned. The maths isn\'t mathing.</item>
+        <item>%1$s crossed %3$s. Current damage: %2$s. Recovery starts now 💪</item>
+        <item>%2$s on %1$s against a %3$s cap. Your wallet would like a word.</item>
+        <item>%1$s overspent: %2$s of %3$s. No judgement. Okay, a little judgement 😅</item>
+    </string-array>
+    <string-array name="notif_badge_titles">
+        <item>Badge unlocked %1$s</item>
+        <item>New flex unlocked %1$s</item>
+        <item>Look who earned something %1$s</item>
+        <item>Shiny alert %1$s</item>
+        <item>Achievement get! %1$s</item>
+        <item>Trophy cabinet +1 %1$s</item>
+        <item>Ooh, fancy %1$s</item>
+        <item>You did the thing %1$s</item>
+    </string-array>
+    <string-array name="notif_badge_bodies">
+        <item>%1$s — nice one! +%2$d points</item>
+        <item>%1$s is yours. +%2$d points landed in your pocket 💰</item>
+        <item>Pinning %1$s on your chest. +%2$d points, show-off 😎</item>
+        <item>%1$s unlocked. +%2$d points. The household is impressed.</item>
+        <item>Who\'s got %1$s? You. +%2$d points.</item>
+        <item>%1$s earned, +%2$d points banked. Keep collecting!</item>
+        <item>%1$s — legend behaviour. +%2$d points.</item>
+        <item>+%2$d points for %1$s. Your avatar is doing a happy dance 💃</item>
+        <item>%1$s! +%2$d points. Screenshot it, we won\'t tell.</item>
+    </string-array>
+    <string-array name="notif_level_titles">
+        <item>Level %1$d! 🎉</item>
+        <item>Level %1$d unlocked 🔓</item>
+        <item>Hello, Level %1$d 👋</item>
+        <item>Up we go: Level %1$d 🚀</item>
+        <item>Level %1$d, baby ✨</item>
+        <item>Glow-up: Level %1$d 🌟</item>
+        <item>Promoted to Level %1$d 🎖️</item>
+        <item>Level %1$d achieved 🏆</item>
+    </string-array>
+    <string-array name="notif_level_bodies">
+        <item>You\'re now a %1$s. Keep climbing.</item>
+        <item>%1$s status: unlocked. Act accordingly 😎</item>
+        <item>New title, who dis? You\'re a %1$s now.</item>
+        <item>Officially a %1$s. The family WhatsApp group should know.</item>
+        <item>%1$s energy only from here on 💪</item>
+        <item>Say hi to the new %1$s in the house 👑</item>
+        <item>You levelled up to %1$s. Your wallet feels safer already.</item>
+        <item>%1$s! Tiny taps, big results.</item>
+        <item>Promotion alert: %1$s. Salary not included 😅</item>
     </string-array>
 </resources>

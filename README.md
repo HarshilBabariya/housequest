@@ -31,6 +31,7 @@ Push this folder to a GitHub repository (branch `main`). The included workflow `
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.6.0 | 2026-11-02 | Avatar actions, face shapes, beards and 19 new looks (DB v6); labelled XP bar; tappable charts; voice note; Calendar view; Pro plans sheet; More options; editable reminders; custom group emoji; rotating sassy notifications; Glass theme; notched 3D bottom bar; top-bar inset fix |
 | 1.5.0 | 2026-11-01 | Insights Week/Month/Year with charts and totals; Home month-pace chart; CSV import + per-month export; Erase all data; date quick chips; one-screen PIN step; logout-after-switch and square-ripple fixes; UPI id hidden |
 | 1.4.1 | 2026-11-01 | UPI top-up trial (point packs via upi:// deep link, trust-based confirmation) |
 | 1.4.0 | 2026-10-31 | 33 badges with retroactive engine (DB v5), Badges page, animated Rewards; member add/remove re-split choice; inline Paid by / payment mode; sheets no longer close on scroll; midnight rollover fix; flicker fix; icon within safe zone |

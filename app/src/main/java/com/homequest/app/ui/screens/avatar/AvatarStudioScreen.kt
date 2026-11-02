@@ -20,7 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -32,7 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,7 +51,10 @@ import androidx.lifecycle.viewModelScope
 import com.homequest.app.AppContainer
 import com.homequest.app.R
 import com.homequest.app.data.repository.avatar
+import com.homequest.app.domain.AvatarAction
 import com.homequest.app.domain.AvatarConfig
+import com.homequest.app.domain.Beard
+import com.homequest.app.domain.FaceShape
 import com.homequest.app.domain.Gender
 import com.homequest.app.domain.HairColors
 import com.homequest.app.domain.Mood
@@ -60,6 +63,7 @@ import com.homequest.app.domain.RewardItem
 import com.homequest.app.domain.RewardKind
 import com.homequest.app.domain.SkinTones
 import com.homequest.app.ui.appViewModel
+import com.homequest.app.ui.components.AvatarPlay
 import com.homequest.app.ui.components.AvatarView
 import com.homequest.app.ui.components.SectionHeader
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -115,14 +119,15 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
     val vm = appViewModel { AvatarStudioViewModel(it, memberId) }
     val state by vm.state.collectAsStateWithLifecycle()
     val scheme = MaterialTheme.colorScheme
-    var wave by remember { mutableIntStateOf(0) }
+    var play by remember { mutableStateOf<AvatarPlay?>(null) }
+    val perform = { action: AvatarAction -> play = AvatarPlay(action, (play?.nonce ?: 0) + 1) }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(if (state.memberName.isBlank()) stringResource(R.string.avatar_studio) else stringResource(R.string.avatar_of, state.memberName), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back)) } },
                 actions = { Text("⭐ ${state.points}", Modifier.padding(end = 16.dp), style = MaterialTheme.typography.titleMedium) }
             )
         },
@@ -135,17 +140,19 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
                 Modifier
                     .fillMaxWidth()
                     .background(Brush.verticalGradient(listOf(scheme.primaryContainer, scheme.background)))
-                    .padding(24.dp),
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    AvatarView(state.config, size = 200.dp, animated = true, mood = state.config.mood ?: Mood.HAPPY, waveTrigger = wave, modifier = Modifier.clip(CircleShape).clickable { wave++ }, background = scheme.surfaceContainerLowest)
+                    AvatarView(state.config, size = 180.dp, animated = true, mood = state.config.mood ?: Mood.HAPPY, play = play, idleActions = true, modifier = Modifier.clip(CircleShape).clickable { perform(AvatarAction.entries.random()) }, background = scheme.surfaceContainerLowest)
                     Text(
                         state.config.mood?.let { stringResource(it.labelRes) } ?: stringResource(R.string.mood_auto_hint),
                         style = MaterialTheme.typography.labelLarge, color = scheme.primary, modifier = Modifier.padding(top = 10.dp)
                     )
                     LazyRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        item { FilterChip(selected = false, onClick = { wave++ }, label = { Text(stringResource(R.string.say_hi)) }) }
+                        items(AvatarAction.entries) { a -> FilterChip(selected = false, onClick = { perform(a) }, label = { Text("${a.emoji} ${stringResource(a.labelRes)}", maxLines = 1) }) }
+                    }
+                    LazyRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item { FilterChip(selected = state.config.mood == null, onClick = { vm.update { copy(mood = null) } }, label = { Text(stringResource(R.string.mood_auto)) }) }
                         items(Mood.entries) { m -> FilterChip(selected = state.config.mood == m, onClick = { vm.update { copy(mood = m) } }, label = { Text(m.emoji) }) }
                     }
@@ -161,6 +168,12 @@ fun AvatarStudioScreen(memberId: Long, onBack: () -> Unit) {
             SwatchRow(SkinTones, state.config.skinTone) { vm.update { copy(skinTone = it) } }
             SectionHeader(stringResource(R.string.hair_colour))
             SwatchRow(HairColors, state.config.hairColor) { vm.update { copy(hairColor = it) } }
+            SectionHeader(stringResource(R.string.face_shape))
+            OptionRow(FaceShape.entries, { it.labelRes }, state.config.faceShape, { state.config.copy(faceShape = it) }) { vm.update { copy(faceShape = it) } }
+            if (state.config.gender == Gender.MALE) {
+                SectionHeader(stringResource(R.string.beard))
+                OptionRow(Beard.entries, { it.labelRes }, state.config.beard, { state.config.copy(beard = it) }) { vm.update { copy(beard = it) } }
+            }
 
             ItemRow(stringResource(R.string.hair_style), RewardKind.HAIR, state, selectedId = state.config.hairId, onSelect = { vm.update { copy(hairId = it) } }, onUnlock = vm::unlock)
             ItemRow(stringResource(R.string.outfit), RewardKind.OUTFIT, state, selectedId = state.config.outfitId, onSelect = { vm.update { copy(outfitId = it) } }, onUnlock = vm::unlock)
@@ -194,32 +207,61 @@ private fun ItemRow(title: String, kind: RewardKind, state: AvatarStudioState, s
             val unlocked = item.id in state.unlocked
             val selected = item.id == selectedId
             val affordable = state.points >= item.cost
-            Column(
-                Modifier
-                    .width(96.dp)
-                    .border(2.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                    .clickable { if (unlocked) onSelect(item.id) else if (affordable) onUnlock(item) }
-                    .padding(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(Modifier.alpha(if (unlocked) 1f else 0.5f)) {
-                    AvatarView(previewConfig(state.config, kind, item.id), size = 64.dp, background = MaterialTheme.colorScheme.surfaceContainerHigh)
-                }
-                Text(stringResource(item.nameRes), style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(
-                    when {
-                        unlocked -> stringResource(if (selected) R.string.wearing else R.string.owned)
-                        affordable -> stringResource(R.string.cost_tap, item.cost)
-                        else -> "⭐ ${item.cost}"
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (unlocked || affordable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 10.sp
-                )
-            }
+            PreviewTile(
+                config = previewConfig(state.config, kind, item.id),
+                name = stringResource(item.nameRes),
+                status = when {
+                    unlocked -> stringResource(if (selected) R.string.wearing else R.string.owned)
+                    affordable -> stringResource(R.string.cost_tap, item.cost)
+                    else -> "⭐ ${item.cost}"
+                },
+                selected = selected,
+                available = unlocked,
+                highlightStatus = unlocked || affordable
+            ) { if (unlocked) onSelect(item.id) else if (affordable) onUnlock(item) }
         }
+    }
+}
+
+@Composable
+private fun <T> OptionRow(options: List<T>, labelRes: (T) -> Int, selected: T, preview: (T) -> AvatarConfig, onSelect: (T) -> Unit) {
+    LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        items(options) { option ->
+            PreviewTile(
+                config = preview(option),
+                name = stringResource(labelRes(option)),
+                status = stringResource(if (option == selected) R.string.wearing else R.string.free),
+                selected = option == selected,
+                available = true,
+                highlightStatus = true
+            ) { onSelect(option) }
+        }
+    }
+}
+
+@Composable
+private fun PreviewTile(config: AvatarConfig, name: String, status: String, selected: Boolean, available: Boolean, highlightStatus: Boolean, onClick: () -> Unit) {
+    Column(
+        Modifier
+            .width(96.dp)
+            .border(2.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            .clickable(onClick = onClick)
+            .padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(Modifier.alpha(if (available) 1f else 0.5f)) {
+            AvatarView(config, size = 64.dp, background = MaterialTheme.colorScheme.surfaceContainerHigh)
+        }
+        Text(name, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(
+            status,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (highlightStatus) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 10.sp,
+            maxLines = 1
+        )
     }
 }
 

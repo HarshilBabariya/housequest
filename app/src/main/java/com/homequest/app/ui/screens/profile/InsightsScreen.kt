@@ -21,9 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -213,13 +213,14 @@ fun InsightsScreen(onBack: () -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
     val scheme = MaterialTheme.colorScheme
     val symbol = state.symbol
+    val dayTemplate = stringResource(R.string.day_n)
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.insights)) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } }
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back)) } }
             )
         }
     ) { padding ->
@@ -240,14 +241,14 @@ fun InsightsScreen(onBack: () -> Unit) {
 
             HqCard(Modifier.padding(horizontal = 20.dp, vertical = 12.dp).fillMaxWidth(), padding = 6) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { vm.shift(-1) }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.previous_period)) }
+                    IconButton(onClick = { vm.shift(-1) }) { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = stringResource(R.string.previous_period)) }
                     AnimatedContent(targetState = state.title, transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "period", modifier = Modifier.weight(1f)) { title ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                             Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Text(stringResource(R.string.n_transactions, state.count), style = MaterialTheme.typography.labelSmall, color = scheme.onSurfaceVariant, maxLines = 1)
                         }
                     }
-                    IconButton(onClick = { vm.shift(1) }, enabled = !state.isCurrent) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.next_period)) }
+                    IconButton(onClick = { vm.shift(1) }, enabled = !state.isCurrent) { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = stringResource(R.string.next_period)) }
                 }
             }
 
@@ -271,16 +272,16 @@ fun InsightsScreen(onBack: () -> Unit) {
             SectionHeader(stringResource(R.string.spending_trend))
             HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
                 if (state.period == InsightPeriod.MONTH) {
-                    AreaChart(state.trend, state.trendLabels, slots = state.trendSlots)
+                    AreaChart(state.trend, state.trendLabels, valueLabel = { it.money(symbol) }, pointLabel = { day -> dayTemplate.format(day + 1) }, slots = state.trendSlots)
                 } else {
-                    BarChart(state.trend, state.trendLabels, highlightIndex = state.trendHighlight, highlightLabel = state.trend.getOrNull(state.trendHighlight)?.money(symbol))
+                    BarChart(state.trend, state.trendLabels, valueLabel = { it.money(symbol) }, highlightIndex = state.trendHighlight)
                 }
             }
 
             SectionHeader(stringResource(R.string.categories))
             HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    DonutChart(state.categories.map { CategoryAmount(it.category, it.total) }, centerLabel = state.total.money(symbol))
+                    DonutChart(state.categories.map { CategoryAmount(it.category, it.total) }, valueLabel = { it.money(symbol) }, centerLabel = state.total.money(symbol))
                 }
                 Spacer(Modifier.height(12.dp))
                 state.categories.forEach { CategoryShareRow(it, state.total, symbol) }

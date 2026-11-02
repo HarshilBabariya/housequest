@@ -1,6 +1,7 @@
 package com.homequest.app.ui.components
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -14,7 +15,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
@@ -27,21 +30,34 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.homequest.app.domain.Accessories
+import com.homequest.app.domain.AvatarAction
 import com.homequest.app.domain.AvatarConfig
+import com.homequest.app.domain.Beard
+import com.homequest.app.domain.FaceShape
 import com.homequest.app.domain.Gender
 import com.homequest.app.domain.HairColors
 import com.homequest.app.domain.HairStyles
 import com.homequest.app.domain.Mood
 import com.homequest.app.domain.Outfits
 import com.homequest.app.domain.SkinTones
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.sin
 import kotlin.random.Random
 import kotlinx.coroutines.delay
+
+data class AvatarPlay(val action: AvatarAction, val nonce: Int)
+
+private val IdleGestures = listOf(AvatarAction.WINK, AvatarAction.JUMP, AvatarAction.WAVE, AvatarAction.LAUGH, AvatarAction.DANCE)
 
 @Composable
 fun AvatarView(
@@ -49,7 +65,8 @@ fun AvatarView(
     size: Dp = 96.dp,
     animated: Boolean = false,
     mood: Mood = config.mood ?: Mood.HAPPY,
-    waveTrigger: Int = 0,
+    play: AvatarPlay? = null,
+    idleActions: Boolean = false,
     modifier: Modifier = Modifier,
     background: Color = MaterialTheme.colorScheme.primaryContainer
 ) {
@@ -58,7 +75,8 @@ fun AvatarView(
     val sway by transition.animateFloat(-1f, 1f, infiniteRepeatable(tween(if (mood == Mood.SLEEPY) 4200 else 3200), RepeatMode.Reverse), label = "sway")
 
     val blink = remember { Animatable(1f) }
-    val wave = remember { Animatable(0f) }
+    val progress = remember { Animatable(0f) }
+    var action by remember { mutableStateOf<AvatarAction?>(null) }
     LaunchedEffect(animated) {
         while (animated) {
             delay(2400L + Random.nextLong(2600))
@@ -66,15 +84,20 @@ fun AvatarView(
             blink.animateTo(1f, tween(100))
         }
     }
-    LaunchedEffect(waveTrigger, animated) {
-        if (animated && waveTrigger > 0) {
-            wave.snapTo(0f)
-            wave.animateTo(1f, tween(260))
-            repeat(3) {
-                wave.animateTo(0.78f, tween(160))
-                wave.animateTo(1f, tween(160))
-            }
-            wave.animateTo(0f, tween(300))
+    LaunchedEffect(animated, play, idleActions) {
+        action = null
+        progress.snapTo(0f)
+        if (!animated) return@LaunchedEffect
+        suspend fun perform(a: AvatarAction) {
+            action = a
+            progress.snapTo(0f)
+            progress.animateTo(1f, tween(a.durationMs, easing = LinearEasing))
+            action = null
+        }
+        play?.let { perform(it.action) }
+        while (idleActions) {
+            delay(9000L + Random.nextLong(6000))
+            perform(IdleGestures.random())
         }
     }
 
@@ -88,11 +111,52 @@ fun AvatarView(
             .background(Brush.verticalGradient(listOf(background.lighten(0.12f), background)))
     ) {
         val u = this.size.width / 100f
-        translate(top = bob * 1.6f * u) {
-            rotate(tilt, pivot = Offset(50f * u, 100f * u)) {
-                drawAvatar(config, mood, u, blink.value, wave.value, breath)
+        val pose = if (animated) poseFor(action, progress.value) else Pose()
+        val pivot = Offset(50f * u, 100f * u)
+        translate(left = pose.dx * u, top = (bob * 1.6f + pose.dy) * u) {
+            rotate(tilt + pose.rotation, pivot = pivot) {
+                scale(pose.scaleX, pose.scaleY, pivot = pivot) {
+                    drawAvatar(config, mood, u, blink.value, pose, breath)
+                }
             }
         }
+        if (pose.burst > 0f) drawBurst(action, pose.burst, u)
+    }
+}
+
+private class Pose(
+    val dx: Float = 0f,
+    val dy: Float = 0f,
+    val rotation: Float = 0f,
+    val scaleX: Float = 1f,
+    val scaleY: Float = 1f,
+    val rightArm: Float = 0f,
+    val leftArm: Float = 0f,
+    val wink: Boolean = false,
+    val laugh: Boolean = false,
+    val burst: Float = 0f
+)
+
+private fun ramp(t: Float) = min(1f, t / 0.15f) * min(1f, (1f - t) / 0.15f)
+
+private fun poseFor(action: AvatarAction?, t: Float): Pose {
+    val tau = 2f * PI.toFloat()
+    val r = ramp(t)
+    return when (action) {
+        null -> Pose()
+        AvatarAction.WAVE -> Pose(rightArm = r * (1f - 0.22f * abs(sin(t * 3f * tau))), rotation = 3f * sin(t * tau) * r)
+        AvatarAction.JUMP -> {
+            val h = abs(sin(t * tau))
+            Pose(dy = -14f * h, scaleX = 1f - 0.04f * h, scaleY = 1f + 0.06f * h, rightArm = 0.35f * h, leftArm = 0.35f * h)
+        }
+        AvatarAction.SPIN -> Pose(dy = -6f * sin(t * PI.toFloat()), scaleX = cos(t * tau))
+        AvatarAction.DANCE -> {
+            val beat = sin(t * 2f * tau)
+            Pose(dx = 5f * beat * r, dy = -4f * abs(sin(t * 4f * tau)) * r, rotation = 9f * beat * r, rightArm = (0.55f + 0.4f * beat) * r, leftArm = (0.55f - 0.4f * beat) * r)
+        }
+        AvatarAction.WINK -> Pose(rotation = 5f * sin(t * PI.toFloat()), wink = t in 0.15f..0.85f, burst = r)
+        AvatarAction.CHEER -> Pose(dy = -8f * abs(sin(t * 1.5f * tau)) * r, rightArm = r, leftArm = r, burst = r)
+        AvatarAction.LAUGH -> Pose(dy = -2f * abs(sin(t * 5f * tau)) * r, rotation = 3f * sin(t * 5f * tau) * r, laugh = true)
     }
 }
 
@@ -131,7 +195,7 @@ private fun faceFor(mood: Mood): Face = when (mood) {
     Mood.ANGRY -> Face(1f, -0.2f, 0f, 0.78f, 1f, Mouth.FROWN, 0.85f, Extra.STEAM)
 }
 
-private fun DrawScope.drawAvatar(config: AvatarConfig, mood: Mood, u: Float, eyeOpen: Float, wave: Float, breath: Float) {
+private fun DrawScope.drawAvatar(config: AvatarConfig, mood: Mood, u: Float, eyeOpen: Float, pose: Pose, breath: Float) {
     val skin = SkinTones.getOrElse(config.skinTone) { SkinTones.first() }
     val hair = HairColors.getOrElse(config.hairColor) { HairColors.first() }
     val (cloth, accent) = outfitColors(config.outfitId)
@@ -141,20 +205,42 @@ private fun DrawScope.drawAvatar(config: AvatarConfig, mood: Mood, u: Float, eye
     val female = config.gender == Gender.FEMALE
     drawHairBack(config.hairId, p, u, outline)
     drawBody(config.outfitId, p, u, outline, female)
-    if (wave > 0f) {
-        rotate(-115f * wave, pivot = Offset(74f * u, 70f * u)) {
-            drawLine(p.cloth, Offset(74f * u, 70f * u), Offset(78f * u, 92f * u), 11f * u, StrokeCap.Round)
-            drawCircle(p.skin, 6.5f * u, Offset(79f * u, 94f * u))
-        }
-    }
+    drawArm(pose.rightArm, 74f, 1f, p, u)
+    drawArm(pose.leftArm, 26f, -1f, p, u)
     listOf(25.5f, 74.5f).forEach { x ->
         drawOval(p.skin, Offset((x - 4.8f) * u, 37.2f * u), Size(9.6f * u, 11.6f * u))
         drawOval(Outline, Offset((x - 4.8f) * u, 37.2f * u), Size(9.6f * u, 11.6f * u), style = outline)
         drawOval(p.skinShade.copy(alpha = 0.7f), Offset((x - 2.2f) * u, 40f * u), Size(4.4f * u, 6f * u))
     }
-    drawFace(faceFor(mood), p, u, eyeOpen, breath, config.hairColor, female)
+    val beard = if (female) Beard.NONE else config.beard
+    drawFace(faceFor(mood), config.faceShape, beard, p, u, eyeOpen, breath, config.hairColor, female, pose)
     drawHairFront(config.hairId, p, u, outline)
     drawAccessory(config.accessoryId, u)
+}
+
+private fun DrawScope.drawArm(raise: Float, shoulderX: Float, side: Float, p: Palette, u: Float) {
+    if (raise <= 0f) return
+    rotate(-115f * raise * side, pivot = Offset(shoulderX * u, 70f * u)) {
+        drawLine(p.cloth, Offset(shoulderX * u, 70f * u), Offset((shoulderX + 4f * side) * u, 92f * u), 11f * u, StrokeCap.Round)
+        drawCircle(p.skin, 6.5f * u, Offset((shoulderX + 5f * side) * u, 94f * u))
+    }
+}
+
+private fun DrawScope.drawBurst(action: AvatarAction?, amount: Float, u: Float) {
+    val confetti = listOf(Color(0xFFF43F5E), Color(0xFFFBBF24), Color(0xFF22C55E), Color(0xFF3B82F6), Color(0xFFA855F7))
+    when (action) {
+        AvatarAction.CHEER -> repeat(10) { i ->
+            val angle = i / 10f * 2f * PI.toFloat()
+            val radius = 18f + 26f * amount
+            drawCircle(confetti[i % confetti.size].copy(alpha = amount), 2.2f * u, Offset((50f + cos(angle) * radius) * u, (40f + sin(angle) * radius * 0.8f) * u))
+        }
+        AvatarAction.WINK -> drawSparkle(72f, 30f, 5f * amount, u, Color(0xFFFBBF24).copy(alpha = amount))
+        else -> Unit
+    }
+}
+
+private fun DrawScope.drawSparkle(x: Float, y: Float, size: Float, u: Float, color: Color) {
+    drawPath(pen(u) { m(x, y - size).q(x + size * 0.3f, y - size * 0.3f, x + size, y).q(x + size * 0.3f, y + size * 0.3f, x, y + size).q(x - size * 0.3f, y + size * 0.3f, x - size, y).q(x - size * 0.3f, y - size * 0.3f, x, y - size).z() }, color)
 }
 
 private fun outfitColors(id: String): Pair<Color, Color> = when (id) {
@@ -169,6 +255,12 @@ private fun outfitColors(id: String): Pair<Color, Color> = when (id) {
     Outfits.DRESS -> Color(0xFF10B981) to Color(0xFFFDE68A)
     Outfits.SAREE -> Color(0xFFC026D3) to Color(0xFFFBBF24)
     Outfits.SHERWANI -> Color(0xFF1F2937) to Color(0xFFD4AF37)
+    Outfits.POLO -> Color(0xFF0EA5E9) to Color(0xFFF8FAFC)
+    Outfits.JERSEY -> Color(0xFF1D4ED8) to Color(0xFFF59E0B)
+    Outfits.LEATHER -> Color(0xFF292524) to Color(0xFF9CA3AF)
+    Outfits.NEHRU -> Color(0xFF0F766E) to Color(0xFFFDE68A)
+    Outfits.LEHENGA -> Color(0xFFBE185D) to Color(0xFFFACC15)
+    Outfits.LAB_COAT -> Color(0xFFF8FAFC) to Color(0xFF0EA5E9)
     else -> Color(0xFF3B82F6) to Color(0xFF1D4ED8)
 }
 
@@ -178,7 +270,7 @@ private fun DrawScope.drawBody(id: String, p: Palette, u: Float, outline: Stroke
     val base = if (id == Outfits.SAREE) Color(0xFF7E22CE) else p.cloth
     drawPath(torso, Brush.verticalGradient(listOf(base.lighten(0.14f), base, base.darken(0.14f)), startY = 65f * u, endY = 100f * u))
     drawPath(pen(u) { m(w, 100f).l(w, 86f).c(w, 76f, w + 7f, 71f, w + 15f, 68f).l(w + 15f, 100f).z() }, base.darken(0.1f).copy(alpha = 0.5f))
-    drawPath(torso, if (id == Outfits.SHIRT) Color(0xFFD1D5DB) else Outline, style = outline)
+    drawPath(torso, if (id == Outfits.SHIRT || id == Outfits.LAB_COAT) Color(0xFFD1D5DB) else Outline, style = outline)
     drawPath(pen(u) { m(43f, 55f).l(57f, 55f).l(57f, 68f).q(50f, 73f, 43f, 68f).z() }, p.skinShade)
     when (id) {
         Outfits.HOODIE -> {
@@ -252,39 +344,90 @@ private fun DrawScope.drawBody(id: String, p: Palette, u: Float, outline: Stroke
             drawPath(pen(u) { m(28f, 76f).q(32f, 73f, 36f, 76f) }, p.accent, style = Stroke(1.2f * u))
             drawPath(pen(u) { m(64f, 76f).q(68f, 73f, 72f, 76f) }, p.accent, style = Stroke(1.2f * u))
         }
+        Outfits.POLO -> {
+            drawPath(pen(u) { m(40f, 66f).l(46f, 75f).l(50f, 68f).z() }, p.accent)
+            drawPath(pen(u) { m(60f, 66f).l(54f, 75f).l(50f, 68f).z() }, p.accent)
+            drawRect(p.cloth.darken(0.15f), Offset(48.5f * u, 68f * u), Size(3f * u, 12f * u))
+            listOf(72f, 77f).forEach { y -> drawCircle(p.accent, 1f * u, Offset(50f * u, y * u)) }
+        }
+        Outfits.JERSEY -> {
+            drawPath(pen(u) { m(40f, 66f).l(50f, 78f).l(60f, 66f) }, p.accent, style = Stroke(2.4f * u))
+            drawLine(p.accent, Offset((w + 3f) * u, 80f * u), Offset((w + 9f) * u, 74f * u), 2.4f * u)
+            drawLine(p.accent, Offset((97f - w) * u, 80f * u), Offset((91f - w) * u, 74f * u), 2.4f * u)
+            drawPath(pen(u) { m(44f, 82f).l(56f, 82f).l(49f, 97f) }, Color.White, style = Stroke(3f * u, cap = StrokeCap.Round))
+        }
+        Outfits.LEATHER -> {
+            drawPath(pen(u) { m(42f, 66f).l(58f, 66f).l(56f, 100f).l(44f, 100f).z() }, Color(0xFFF3F4F6))
+            drawPath(pen(u) { m(40f, 66f).l(34f, 78f).l(44f, 100f).l(42f, 70f).z() }, p.cloth.lighten(0.12f))
+            drawPath(pen(u) { m(60f, 66f).l(66f, 78f).l(56f, 100f).l(58f, 70f).z() }, p.cloth.lighten(0.12f))
+            drawLine(p.accent, Offset(57f * u, 72f * u), Offset(55.5f * u, 100f * u), 1.2f * u)
+            drawCircle(p.accent, 1.1f * u, Offset(33f * u, 88f * u))
+        }
+        Outfits.NEHRU -> {
+            drawPath(pen(u) { m(41f, 65f).q(50f, 69f, 59f, 65f).l(59f, 69f).q(50f, 73f, 41f, 69f).z() }, p.accent)
+            drawLine(p.accent, Offset(50f * u, 71f * u), Offset(50f * u, 100f * u), 1.2f * u)
+            listOf(77f, 84f, 91f).forEach { y -> drawCircle(p.accent, 1.3f * u, Offset(50f * u, y * u)) }
+            drawPath(pen(u) { m(60f, 80f).l(67f, 80f).l(63.5f, 76f).z() }, Color(0xFFF472B6))
+        }
+        Outfits.LEHENGA -> {
+            drawPath(pen(u) { m(40f, 66f).q(50f, 74f, 60f, 66f) }, p.accent, style = Stroke(2f * u))
+            drawPath(pen(u) { m(30f, 72f).c(45f, 80f, 60f, 86f, 72f, 100f).l(62f, 100f).c(52f, 90f, 40f, 84f, 26f, 80f).z() }, p.accent.copy(alpha = 0.75f))
+            listOf(36f to 90f, 44f to 94f, 70f to 84f, 76f to 92f).forEach { (x, y) -> drawCircle(p.accent, 1.2f * u, Offset(x * u, y * u)) }
+        }
+        Outfits.LAB_COAT -> {
+            drawPath(pen(u) { m(42f, 66f).l(50f, 82f).l(58f, 66f).z() }, p.accent)
+            drawPath(pen(u) { m(40f, 66f).l(37f, 80f).l(50f, 100f) }, Color(0xFFD1D5DB), style = Stroke(1.4f * u))
+            drawPath(pen(u) { m(60f, 66f).l(63f, 80f).l(50f, 100f) }, Color(0xFFD1D5DB), style = Stroke(1.4f * u))
+            drawRoundRect(Color(0xFFD1D5DB), Offset(60f * u, 84f * u), Size(9f * u, 8f * u), CornerRadius(1f * u), style = Stroke(1f * u))
+            drawLine(p.accent, Offset(62f * u, 81f * u), Offset(62f * u, 87f * u), 1.4f * u, StrokeCap.Round)
+        }
         else -> drawPath(pen(u) { m(41f, 66f).q(50f, 75f, 59f, 66f) }, p.accent, style = Stroke(2.4f * u))
     }
 }
 
-private fun DrawScope.drawFace(f: Face, p: Palette, u: Float, blink: Float, breath: Float, hairColorIndex: Int, female: Boolean) {
-    val face = pen(u) {
-        m(26f, 38f).c(26f, 12f, 74f, 12f, 74f, 38f).c(74f, 52f, 67f, 62f, 57f, 64.5f).q(50f, 66f, 43f, 64.5f).c(33f, 62f, 26f, 52f, 26f, 38f).z()
+private fun facePath(shape: FaceShape, u: Float): Path = pen(u) {
+    m(26f, 38f).c(26f, 12f, 74f, 12f, 74f, 38f)
+    when (shape) {
+        FaceShape.OVAL -> c(74f, 52f, 67f, 62f, 57f, 64.5f).q(50f, 66f, 43f, 64.5f).c(33f, 62f, 26f, 52f, 26f, 38f)
+        FaceShape.ROUND -> c(75f, 56f, 66f, 65f, 56f, 66f).q(50f, 67.5f, 44f, 66f).c(34f, 65f, 25f, 56f, 26f, 38f)
+        FaceShape.SQUARE -> c(74f, 54f, 72f, 61f, 62f, 64f).q(50f, 67f, 38f, 64f).c(28f, 61f, 26f, 54f, 26f, 38f)
+        FaceShape.HEART -> c(74f, 48f, 62f, 60f, 54f, 65f).q(50f, 67f, 46f, 65f).c(38f, 60f, 26f, 48f, 26f, 38f)
+        FaceShape.LONG -> c(74f, 56f, 67f, 66f, 57f, 68f).q(50f, 69.5f, 43f, 68f).c(33f, 66f, 26f, 56f, 26f, 38f)
     }
+    z()
+}
+
+private fun DrawScope.drawFace(f: Face, shape: FaceShape, beard: Beard, p: Palette, u: Float, blink: Float, breath: Float, hairColorIndex: Int, female: Boolean, pose: Pose) {
+    val face = facePath(shape, u)
     drawPath(face, Brush.radialGradient(listOf(p.skin.lighten(0.1f), p.skin, p.skin.darken(0.14f)), center = Offset(43f * u, 32f * u), radius = 42f * u))
     drawPath(face, Outline, style = Stroke(0.9f * u))
 
     val blush = if (female) f.blush else f.blush * 0.6f
     drawOval(Color(0xFFF28B82).copy(alpha = blush), Offset(30.5f * u, 47f * u), Size(11f * u, 6.5f * u))
     drawOval(Color(0xFFF28B82).copy(alpha = blush), Offset(58.5f * u, 47f * u), Size(11f * u, 6.5f * u))
+    drawBeard(beard, face, p, u)
 
     val eyeOpen = minOf(blink, f.eyeOpen)
     val iris = if (hairColorIndex <= 2) p.hair.darken(0.1f) else Color(0xFF3F5F7A)
     listOf(40.5f to -1f, 59.5f to 1f).forEach { (x, d) ->
-        if (f.heartEyes) {
-            drawHeart(x, 41.5f, 7.5f, u, Color(0xFFEF4466))
-        } else {
-            scale(scaleX = f.eyeScale, scaleY = eyeOpen * f.eyeScale, pivot = Offset(x * u, 41.5f * u)) {
-                drawPath(pen(u) { m(x - 7f, 41.5f).q(x, 33.5f, x + 7f, 41.5f).q(x, 48.5f, x - 7f, 41.5f).z() }, Color.White)
-                drawCircle(iris, 4.3f * u, Offset((x + 0.6f * d) * u, 42f * u))
-                drawCircle(Ink, 2.4f * u, Offset((x + 0.6f * d) * u, 42f * u))
-                drawCircle(Color.White, 1.4f * u, Offset((x - 1.4f) * u, 40.2f * u))
-                drawCircle(Color.White, 0.7f * u, Offset((x + 1.8f) * u, 43.8f * u))
-                drawPath(pen(u) { m(x - 7f, 41.5f).q(x, 48.5f, x + 7f, 41.5f) }, Outline, style = Stroke(0.9f * u))
-            }
-            drawPath(pen(u) { m(x - 7.2f, 41.5f).q(x, 32.8f, x + 7.2f, 41.5f) }, Ink, style = Stroke(if (female) 2f * u else 1.5f * u, cap = StrokeCap.Round))
-            if (female) {
-                drawLine(Ink, Offset((x + 6.8f * d) * u, 40f * u), Offset((x + 8.3f * d) * u, 38.8f * u), 1.3f * u, StrokeCap.Round)
-                drawLine(Ink, Offset((x + 5.2f * d) * u, 36.2f * u), Offset((x + 6.2f * d) * u, 34.6f * u), 1.1f * u, StrokeCap.Round)
+        when {
+            pose.laugh || (pose.wink && d < 0) ->
+                drawPath(pen(u) { m(x - 6f, 43f).q(x, 36f, x + 6f, 43f) }, Ink, style = Stroke(2.2f * u, cap = StrokeCap.Round))
+            f.heartEyes -> drawHeart(x, 41.5f, 7.5f, u, Color(0xFFEF4466))
+            else -> {
+                scale(scaleX = f.eyeScale, scaleY = eyeOpen * f.eyeScale, pivot = Offset(x * u, 41.5f * u)) {
+                    drawPath(pen(u) { m(x - 7f, 41.5f).q(x, 33.5f, x + 7f, 41.5f).q(x, 48.5f, x - 7f, 41.5f).z() }, Color.White)
+                    drawCircle(iris, 4.3f * u, Offset((x + 0.6f * d) * u, 42f * u))
+                    drawCircle(Ink, 2.4f * u, Offset((x + 0.6f * d) * u, 42f * u))
+                    drawCircle(Color.White, 1.4f * u, Offset((x - 1.4f) * u, 40.2f * u))
+                    drawCircle(Color.White, 0.7f * u, Offset((x + 1.8f) * u, 43.8f * u))
+                    drawPath(pen(u) { m(x - 7f, 41.5f).q(x, 48.5f, x + 7f, 41.5f) }, Outline, style = Stroke(0.9f * u))
+                }
+                drawPath(pen(u) { m(x - 7.2f, 41.5f).q(x, 32.8f, x + 7.2f, 41.5f) }, Ink, style = Stroke(if (female) 2f * u else 1.5f * u, cap = StrokeCap.Round))
+                if (female) {
+                    drawLine(Ink, Offset((x + 6.8f * d) * u, 40f * u), Offset((x + 8.3f * d) * u, 38.8f * u), 1.3f * u, StrokeCap.Round)
+                    drawLine(Ink, Offset((x + 5.2f * d) * u, 36.2f * u), Offset((x + 6.2f * d) * u, 34.6f * u), 1.1f * u, StrokeCap.Round)
+                }
             }
         }
     }
@@ -294,8 +437,28 @@ private fun DrawScope.drawFace(f: Face, p: Palette, u: Float, blink: Float, brea
     drawPath(pen(u) { m(47.5f, 50f).q(50f, 52.5f, 52.5f, 50f) }, p.skin.darken(0.3f), style = Stroke(1.6f * u, cap = StrokeCap.Round))
     drawCircle(Color.White.copy(alpha = 0.35f), 1.2f * u, Offset(48.6f * u, 48.2f * u))
 
-    drawMouth(f.mouth, u)
+    drawMouth(if (pose.laugh) Mouth.OPEN else f.mouth, u)
+    if (beard == Beard.MUSTACHE || beard == Beard.GOATEE || beard == Beard.FULL) {
+        drawPath(pen(u) { m(41f, 53.8f).q(45f, 50.2f, 50f, 52.2f).q(55f, 50.2f, 59f, 53.8f).q(55f, 55.2f, 50f, 54f).q(45f, 55.2f, 41f, 53.8f).z() }, p.hairDark)
+    }
     drawExtra(f.extra, u, breath)
+}
+
+private fun DrawScope.drawBeard(beard: Beard, face: Path, p: Palette, u: Float) {
+    when (beard) {
+        Beard.NONE, Beard.MUSTACHE -> Unit
+        Beard.STUBBLE -> clipPath(face) {
+            drawPath(pen(u) { m(24f, 44f).c(28f, 60f, 40f, 72f, 50f, 72f).c(60f, 72f, 72f, 60f, 76f, 44f).c(70f, 54f, 62f, 58f, 57f, 58f).q(50f, 62f, 43f, 58f).c(38f, 58f, 30f, 54f, 24f, 44f).z() }, p.hairDark.copy(alpha = 0.28f))
+        }
+        Beard.CHIN_STRAP -> clipPath(face) {
+            drawPath(pen(u) { m(26f, 40f).c(27f, 58f, 38f, 68f, 50f, 69f).c(62f, 68f, 73f, 58f, 74f, 40f) }, p.hairDark, style = Stroke(3.2f * u, cap = StrokeCap.Round))
+        }
+        Beard.GOATEE -> drawPath(pen(u) { m(44f, 61f).q(50f, 58.5f, 56f, 61f).q(57f, 68f, 50f, 70.5f).q(43f, 68f, 44f, 61f).z() }, Brush.verticalGradient(listOf(p.hair, p.hairDark), startY = 58f * u, endY = 71f * u))
+        Beard.FULL -> drawPath(
+            pen(u) { m(26f, 42f).c(26f, 62f, 38f, 74f, 50f, 75f).c(62f, 74f, 74f, 62f, 74f, 42f).l(71f, 44f).c(68f, 54f, 62f, 58f, 57f, 58f).q(50f, 61.5f, 43f, 58f).c(38f, 58f, 32f, 54f, 29f, 44f).z() },
+            Brush.verticalGradient(listOf(p.hair, p.hairDark), startY = 42f * u, endY = 75f * u)
+        )
+    }
 }
 
 private fun DrawScope.drawBrows(f: Face, p: Palette, u: Float, female: Boolean) {
@@ -352,8 +515,7 @@ private fun DrawScope.drawExtra(extra: Extra, u: Float, breath: Float) {
             drawHeart(18f, 28f - dy * 0.8f, 3.5f, u, Color(0xFFEF4466))
         }
         Extra.SPARKLES -> listOf(Triple(80f, 20f, 4f), Triple(88f, 36f, 2.5f), Triple(16f, 24f, 3f)).forEach { (x, y, r) ->
-            val size = r * (0.8f + breath * 0.4f)
-            drawPath(pen(u) { m(x, y - size).q(x + size * 0.3f, y - size * 0.3f, x + size, y).q(x + size * 0.3f, y + size * 0.3f, x, y + size).q(x - size * 0.3f, y + size * 0.3f, x - size, y).q(x - size * 0.3f, y - size * 0.3f, x, y - size).z() }, Color(0xFFFBBF24))
+            drawSparkle(x, y, r * (0.8f + breath * 0.4f), u, Color(0xFFFBBF24))
         }
         Extra.SWEAT -> drawPath(pen(u) { m(77f, 20f + dy).q(81f, 27f + dy, 77f, 29f + dy).q(73f, 27f + dy, 77f, 20f + dy).z() }, Color(0xFF60A5FA))
         Extra.TEAR -> {
@@ -424,6 +586,15 @@ private fun DrawScope.drawHairBack(id: String, p: Palette, u: Float, outline: St
             }
             fill(pen(u) { m(23f, 42f).c(21f, 8f, 79f, 8f, 77f, 42f).l(77f, 52f).l(23f, 52f).z() })
         }
+        HairStyles.AFRO -> {
+            drawCircle(Brush.radialGradient(listOf(p.hairLight.copy(alpha = 0.6f), p.hair, p.hairDark), center = Offset(44f * u, 22f * u), radius = 40f * u), 34f * u, Offset(50f * u, 32f * u))
+            drawCircle(Outline, 34f * u, Offset(50f * u, 32f * u), style = outline)
+        }
+        HairStyles.PIXIE -> fill(pen(u) { m(24f, 40f).c(22f, 20f, 78f, 20f, 76f, 40f).l(76f, 50f).q(74f, 54f, 70f, 52f).l(30f, 52f).q(26f, 54f, 24f, 50f).z() })
+        HairStyles.MAN_BUN -> {
+            drawCircle(Brush.radialGradient(listOf(p.hair.lighten(0.15f), p.hair, p.hairDark), center = Offset(48f * u, 6f * u), radius = 10f * u), 7.5f * u, Offset(50f * u, 9f * u))
+            drawCircle(Outline, 7.5f * u, Offset(50f * u, 9f * u), style = outline)
+        }
     }
 }
 
@@ -474,6 +645,36 @@ private fun DrawScope.drawHairFront(id: String, p: Palette, u: Float, outline: S
             })
             drawLine(p.hairLight.copy(alpha = 0.5f), Offset(48f * u, 6f * u), Offset(48f * u, 22f * u), 1.6f * u)
         }
+        HairStyles.SPIKY -> {
+            fill(pen(u) {
+                m(26f, 36f).l(27f, 22f).l(32f, 25f).l(35f, 11f).l(41f, 21f).l(46f, 5f).l(51f, 19f).l(56f, 6f).l(60f, 20f).l(66f, 10f).l(67f, 24f).l(73f, 20f).l(74f, 36f)
+                c(70f, 28f, 60f, 24f, 50f, 25f).c(40f, 24f, 30f, 28f, 26f, 36f).z()
+            })
+            drawPath(pen(u) { m(36f, 22f).q(46f, 14f, 56f, 16f) }, p.hairLight.copy(alpha = 0.5f), style = shine)
+        }
+        HairStyles.SIDE_PART -> {
+            fill(pen(u) { m(26f, 37f).c(25f, 12f, 48f, 6f, 60f, 9f).c(72f, 12f, 75f, 24f, 74f, 37f).c(72f, 30f, 68f, 26f, 62f, 24f).c(54f, 21f, 44f, 22f, 38f, 24f).c(32f, 27f, 28f, 31f, 26f, 37f).z() })
+            drawPath(pen(u) { m(40f, 11f).q(41f, 17f, 39f, 23f) }, p.hairDark.copy(alpha = 0.7f), style = Stroke(1.3f * u, cap = StrokeCap.Round))
+            drawPath(pen(u) { m(44f, 16f).q(54f, 11f, 64f, 15f) }, p.hairLight.copy(alpha = 0.55f), style = shine)
+        }
+        HairStyles.QUIFF -> {
+            fill(pen(u) { m(26f, 36f).c(26f, 18f, 34f, 10f, 44f, 8f).c(50f, 0f, 66f, 2f, 70f, 12f).c(76f, 20f, 75f, 28f, 74f, 36f).c(70f, 28f, 62f, 24f, 54f, 25f).c(46f, 23f, 36f, 27f, 26f, 36f).z() })
+            drawPath(pen(u) { m(46f, 9f).q(56f, 3f, 66f, 9f) }, p.hairLight.copy(alpha = 0.55f), style = shine)
+        }
+        HairStyles.AFRO -> {
+            fill(pen(u) { m(26f, 36f).c(26f, 16f, 74f, 16f, 74f, 36f).c(66f, 28f, 56f, 26f, 50f, 27f).c(44f, 26f, 34f, 28f, 26f, 36f).z() })
+            listOf(30f to 14f, 44f to 6f, 58f to 7f, 70f to 15f, 20f to 26f, 80f to 26f).forEach { (x, y) -> drawCircle(p.hairLight.copy(alpha = 0.3f), 3.5f * u, Offset(x * u, y * u)) }
+        }
+        HairStyles.PIXIE -> {
+            fill(pen(u) { m(25f, 40f).c(22f, 10f, 78f, 10f, 75f, 40f).c(73f, 30f, 68f, 26f, 62f, 26f).c(52f, 30f, 40f, 28f, 34f, 22f).c(31f, 28f, 28f, 32f, 25f, 40f).z() })
+            drawPath(pen(u) { m(40f, 18f).q(52f, 14f, 64f, 20f) }, p.hairLight.copy(alpha = 0.55f), style = shine)
+        }
+        HairStyles.MAN_BUN -> {
+            fill(cap)
+            drawPath(pen(u) { m(34f, 24f).q(42f, 16f, 50f, 15f) }, p.hairDark.copy(alpha = 0.5f), style = Stroke(1.2f * u))
+            drawPath(pen(u) { m(52f, 15f).q(60f, 16f, 66f, 24f) }, p.hairDark.copy(alpha = 0.5f), style = Stroke(1.2f * u))
+            drawPath(capShine, p.hairLight.copy(alpha = 0.55f), style = shine)
+        }
     }
 }
 
@@ -511,6 +712,45 @@ private fun DrawScope.drawAccessory(id: String, u: Float) {
             drawCircle(Color(0xFFFBBF24), 2f * u, Offset(74.5f * u, 50f * u))
         }
         Accessories.BINDI -> drawCircle(Color(0xFFDC2626), 1.6f * u, Offset(50f * u, 30f * u))
+        Accessories.SUNGLASSES -> {
+            val lens = Brush.verticalGradient(listOf(Color(0xFF374151), Color(0xFF0F172A)), startY = 36f * u, endY = 47f * u)
+            drawRoundRect(lens, Offset(33f * u, 36f * u), Size(15f * u, 10.5f * u), CornerRadius(4f * u))
+            drawRoundRect(lens, Offset(52f * u, 36f * u), Size(15f * u, 10.5f * u), CornerRadius(4f * u))
+            drawLine(Ink, Offset(48f * u, 39f * u), Offset(52f * u, 39f * u), 1.8f * u)
+            drawLine(Ink, Offset(33f * u, 39f * u), Offset(28f * u, 37.5f * u), 1.8f * u)
+            drawLine(Ink, Offset(67f * u, 39f * u), Offset(72f * u, 37.5f * u), 1.8f * u)
+            drawLine(Color.White.copy(alpha = 0.45f), Offset(36f * u, 38.5f * u), Offset(40f * u, 38.5f * u), 1.2f * u, StrokeCap.Round)
+            drawLine(Color.White.copy(alpha = 0.45f), Offset(55f * u, 38.5f * u), Offset(59f * u, 38.5f * u), 1.2f * u, StrokeCap.Round)
+        }
+        Accessories.BEANIE -> {
+            drawPath(pen(u) { m(25f, 33f).c(25f, 6f, 75f, 6f, 75f, 33f).z() }, Brush.verticalGradient(listOf(Color(0xFFEF4444), Color(0xFFB91C1C)), startY = 6f * u, endY = 33f * u))
+            drawRoundRect(Color(0xFF991B1B), Offset(24f * u, 28f * u), Size(52f * u, 7f * u), CornerRadius(3f * u))
+            listOf(32f, 40f, 48f, 56f, 64f).forEach { x -> drawLine(Color(0xFF7F1D1D), Offset(x * u, 29f * u), Offset(x * u, 34f * u), 1f * u) }
+            drawCircle(Color.White, 5f * u, Offset(50f * u, 7f * u))
+        }
+        Accessories.TURBAN -> {
+            drawPath(pen(u) { m(24f, 36f).c(22f, 4f, 78f, 4f, 76f, 36f).c(66f, 30f, 58f, 28f, 50f, 30f).c(42f, 28f, 34f, 30f, 24f, 36f).z() }, Brush.verticalGradient(listOf(Color(0xFFFBBF24), Color(0xFFEA580C)), startY = 4f * u, endY = 36f * u))
+            listOf(14f, 20f, 26f).forEach { y -> drawPath(pen(u) { m(28f, y + 6f).q(50f, y - 4f, 72f, y + 6f) }, Color(0xFFC2410C).copy(alpha = 0.6f), style = Stroke(1.2f * u)) }
+            drawCircle(Color(0xFFDC2626), 2.4f * u, Offset(50f * u, 22f * u))
+            drawCircle(Color(0xFFFDE68A), 1f * u, Offset(50f * u, 22f * u))
+        }
+        Accessories.FLOWER -> {
+            listOf(0f, 72f, 144f, 216f, 288f).forEach { deg ->
+                val a = deg / 180f * PI.toFloat()
+                drawCircle(Color(0xFFF472B6), 2.8f * u, Offset((70f + cos(a) * 3.2f) * u, (26f + sin(a) * 3.2f) * u))
+            }
+            drawCircle(Color(0xFFFBBF24), 2f * u, Offset(70f * u, 26f * u))
+        }
+        Accessories.BOW_TIE -> {
+            drawPath(pen(u) { m(50f, 69f).l(42f, 65f).l(42f, 73f).z() }, Color(0xFFDC2626))
+            drawPath(pen(u) { m(50f, 69f).l(58f, 65f).l(58f, 73f).z() }, Color(0xFFDC2626))
+            drawCircle(Color(0xFF991B1B), 1.8f * u, Offset(50f * u, 69f * u))
+        }
+        Accessories.NOSE_RING -> drawCircle(Color(0xFFFBBF24), 1.6f * u, Offset(53.2f * u, 51.5f * u), style = Stroke(0.8f * u))
+        Accessories.CHAIN -> {
+            drawPath(pen(u) { m(40f, 67f).q(50f, 82f, 60f, 67f) }, Color(0xFFFBBF24), style = Stroke(1.5f * u, pathEffect = PathEffect.dashPathEffect(floatArrayOf(2f * u, 1f * u))))
+            drawCircle(Color(0xFFF59E0B), 2.6f * u, Offset(50f * u, 76f * u))
+        }
     }
 }
 

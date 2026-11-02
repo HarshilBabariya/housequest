@@ -13,6 +13,7 @@ import com.homequest.app.domain.Category
 import com.homequest.app.domain.PaymentMode
 import com.homequest.app.domain.SplitType
 import com.homequest.app.util.VoiceParser
+import com.homequest.app.util.titleCased
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -124,7 +125,8 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
                 amountText = parsed.amount?.let { trimAmount(it) } ?: amountText,
                 title = parsed.title.ifBlank { title },
                 categoryId = parsed.categoryId ?: categoryId,
-                paymentMode = parsed.paymentMode ?: paymentMode
+                paymentMode = parsed.paymentMode ?: paymentMode,
+                note = parsed.note ?: if (note.isBlank() || note == heardText?.titleCased()) text.titleCased() else note
             )
         }
     }

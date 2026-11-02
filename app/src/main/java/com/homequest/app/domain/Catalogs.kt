@@ -14,10 +14,14 @@ data class RewardItem(
     val isFree: Boolean get() = cost == 0
 }
 
-data class PointPack(val id: String, val rupees: Int, val points: Int)
+data class PointPack(val id: String, @StringRes val nameRes: Int, val rupees: Int, val points: Int)
 
 object PointPacks {
-    val packs = listOf(PointPack("pack_s", 49, 500), PointPack("pack_m", 99, 1200), PointPack("pack_l", 199, 3000))
+    val packs = listOf(
+        PointPack("pack_s", R.string.plan_starter, 49, 500),
+        PointPack("pack_m", R.string.plan_plus, 99, 1200),
+        PointPack("pack_l", R.string.plan_pro, 199, 3000)
+    )
     fun find(id: String): PointPack? = packs.firstOrNull { it.id == id }
 }
 
@@ -29,6 +33,7 @@ object RewardCatalog {
         RewardItem(ThemeIds.MIDNIGHT, RewardKind.THEME, R.string.rw_midnight, R.string.rw_midnight_d, 300, "🌙"),
         RewardItem(ThemeIds.CANDY, RewardKind.THEME, R.string.rw_candy, R.string.rw_candy_d, 350, "🍬"),
         RewardItem(ThemeIds.ROYAL, RewardKind.THEME, R.string.rw_royal, R.string.rw_royal_d, 500, "👑"),
+        RewardItem(ThemeIds.GLASS, RewardKind.THEME, R.string.rw_glass, R.string.rw_glass_d, 600, "🫧"),
 
         RewardItem(Outfits.TEE, RewardKind.OUTFIT, R.string.rw_tee, R.string.rw_tee_d, 0, "👕"),
         RewardItem(Outfits.SHIRT, RewardKind.OUTFIT, R.string.rw_shirt, R.string.rw_shirt_d, 0, "👔"),
@@ -42,6 +47,12 @@ object RewardCatalog {
         RewardItem(Outfits.SHERWANI, RewardKind.OUTFIT, R.string.rw_sherwani, R.string.rw_sherwani_d, 300, "👘"),
         RewardItem(Outfits.SPACESUIT, RewardKind.OUTFIT, R.string.rw_spacesuit, R.string.rw_spacesuit_d, 400, "🚀"),
         RewardItem(Outfits.HERO, RewardKind.OUTFIT, R.string.rw_hero, R.string.rw_hero_d, 500, "🦸"),
+        RewardItem(Outfits.POLO, RewardKind.OUTFIT, R.string.rw_polo, R.string.rw_polo_d, 0, "🎽"),
+        RewardItem(Outfits.JERSEY, RewardKind.OUTFIT, R.string.rw_jersey, R.string.rw_jersey_d, 180, "🏏"),
+        RewardItem(Outfits.LEATHER, RewardKind.OUTFIT, R.string.rw_leather, R.string.rw_leather_d, 280, "🏍️"),
+        RewardItem(Outfits.NEHRU, RewardKind.OUTFIT, R.string.rw_nehru, R.string.rw_nehru_d, 260, "🧥"),
+        RewardItem(Outfits.LEHENGA, RewardKind.OUTFIT, R.string.rw_lehenga, R.string.rw_lehenga_d, 320, "💃"),
+        RewardItem(Outfits.LAB_COAT, RewardKind.OUTFIT, R.string.rw_lab_coat, R.string.rw_lab_coat_d, 220, "🥼"),
 
         RewardItem(HairStyles.SHORT, RewardKind.HAIR, R.string.rw_short, R.string.rw_short_d, 0, "💇"),
         RewardItem(HairStyles.BUZZ, RewardKind.HAIR, R.string.rw_buzz, R.string.rw_buzz_d, 0, "✂️"),
@@ -53,6 +64,12 @@ object RewardCatalog {
         RewardItem(HairStyles.BUN, RewardKind.HAIR, R.string.rw_bun, R.string.rw_bun_d, 120, "🍡"),
         RewardItem(HairStyles.BRAIDS, RewardKind.HAIR, R.string.rw_braids, R.string.rw_braids_d, 150, "🪢"),
         RewardItem(HairStyles.MOHAWK, RewardKind.HAIR, R.string.rw_mohawk, R.string.rw_mohawk_d, 180, "🎸"),
+        RewardItem(HairStyles.SIDE_PART, RewardKind.HAIR, R.string.rw_side_part, R.string.rw_side_part_d, 0, "💼"),
+        RewardItem(HairStyles.PIXIE, RewardKind.HAIR, R.string.rw_pixie, R.string.rw_pixie_d, 0, "🧚"),
+        RewardItem(HairStyles.SPIKY, RewardKind.HAIR, R.string.rw_spiky, R.string.rw_spiky_d, 100, "⚡"),
+        RewardItem(HairStyles.QUIFF, RewardKind.HAIR, R.string.rw_quiff, R.string.rw_quiff_d, 140, "🕺"),
+        RewardItem(HairStyles.MAN_BUN, RewardKind.HAIR, R.string.rw_man_bun, R.string.rw_man_bun_d, 140, "🧘"),
+        RewardItem(HairStyles.AFRO, RewardKind.HAIR, R.string.rw_afro, R.string.rw_afro_d, 160, "🌳"),
 
         RewardItem(Accessories.NONE, RewardKind.ACCESSORY, R.string.rw_none, R.string.rw_none_d, 0, "✨"),
         RewardItem(Accessories.BINDI, RewardKind.ACCESSORY, R.string.rw_bindi, R.string.rw_bindi_d, 50, "🔴"),
@@ -61,6 +78,13 @@ object RewardCatalog {
         RewardItem(Accessories.CAP, RewardKind.ACCESSORY, R.string.rw_cap, R.string.rw_cap_d, 150, "🧢"),
         RewardItem(Accessories.HEADPHONES, RewardKind.ACCESSORY, R.string.rw_headphones, R.string.rw_headphones_d, 200, "🎧"),
         RewardItem(Accessories.CROWN, RewardKind.ACCESSORY, R.string.rw_crown, R.string.rw_crown_d, 400, "👑"),
+        RewardItem(Accessories.FLOWER, RewardKind.ACCESSORY, R.string.rw_flower, R.string.rw_flower_d, 60, "🌸"),
+        RewardItem(Accessories.NOSE_RING, RewardKind.ACCESSORY, R.string.rw_nose_ring, R.string.rw_nose_ring_d, 90, "💍"),
+        RewardItem(Accessories.BOW_TIE, RewardKind.ACCESSORY, R.string.rw_bow_tie, R.string.rw_bow_tie_d, 90, "🎀"),
+        RewardItem(Accessories.BEANIE, RewardKind.ACCESSORY, R.string.rw_beanie, R.string.rw_beanie_d, 120, "🧶"),
+        RewardItem(Accessories.SUNGLASSES, RewardKind.ACCESSORY, R.string.rw_sunglasses, R.string.rw_sunglasses_d, 150, "🕶️"),
+        RewardItem(Accessories.CHAIN, RewardKind.ACCESSORY, R.string.rw_chain, R.string.rw_chain_d, 220, "⛓️"),
+        RewardItem(Accessories.TURBAN, RewardKind.ACCESSORY, R.string.rw_turban, R.string.rw_turban_d, 250, "👳"),
 
         RewardItem(Features.INSIGHTS, RewardKind.FEATURE, R.string.rw_insights, R.string.rw_insights_d, 300, "📈"),
         RewardItem(Features.EXPORT_CSV, RewardKind.FEATURE, R.string.rw_export, R.string.rw_export_d, 250, "📤")

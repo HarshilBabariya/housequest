@@ -4,7 +4,11 @@ import com.homequest.app.domain.BuiltInCategories
 import com.homequest.app.domain.PaymentMode
 
 object VoiceParser {
-    data class Result(val amount: Double?, val title: String, val categoryId: String?, val paymentMode: PaymentMode?)
+    data class Result(val amount: Double?, val title: String, val categoryId: String?, val paymentMode: PaymentMode?, val note: String?)
+
+    private val noteMarker = Regex("""(\S+)\s+(note|नोट|નોંધ|નોટ)[:,]?\s+\S""")
+
+    private val currencyNoteWords = setOf("ka", "ke", "ki", "का", "के", "की", "no", "ni", "na", "નો", "ની", "ના")
 
     private val amountPattern = Regex("""(\d+(?:[.,]\d{1,2})?)""")
 
@@ -34,7 +38,12 @@ object VoiceParser {
     )
 
     fun parse(text: String, customCategories: Map<String, String>): Result {
-        var working = text.lowercase().replace("₹", " ").replace("$", " ").replace("€", " ")
+        val lower = text.lowercase()
+        val source = if (lower.length == text.length) text else lower
+        val marker = noteMarker.findAll(lower).firstOrNull { it.groupValues[1] !in currencyNoteWords }
+        val noteStart = marker?.groups?.get(2)?.range
+        val note = noteStart?.let { source.substring(it.last + 1).trim().trimStart(':', ',').trim().titleCased() }
+        var working = (noteStart?.let { source.substring(0, it.first) } ?: text).lowercase().replace("₹", " ").replace("$", " ").replace("€", " ")
         val amount = amountPattern.find(working)?.let { m ->
             working = working.replaceFirst(m.value, " ")
             m.value.replace(",", ".").toDoubleOrNull()
@@ -50,7 +59,7 @@ object VoiceParser {
             .joinToString(" ")
             .ifBlank { custom?.value.orEmpty() }
             .titleCased()
-        return Result(amount, title, categoryId, paymentMode)
+        return Result(amount, title, categoryId, paymentMode, note)
     }
 
     private fun String.containsWord(word: String) = Regex("(^|\\s)${Regex.escape(word)}(\\s|$)").containsMatchIn(this)

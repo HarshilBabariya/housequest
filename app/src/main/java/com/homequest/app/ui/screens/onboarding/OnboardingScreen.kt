@@ -45,11 +45,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.homequest.app.R
 import com.homequest.app.domain.AppLanguage
+import com.homequest.app.domain.AvatarAction
 import com.homequest.app.domain.AvatarConfig
 import com.homequest.app.domain.Currencies
 import com.homequest.app.domain.Gender
 import com.homequest.app.domain.HairStyles
 import com.homequest.app.domain.Mood
+import com.homequest.app.ui.components.AvatarPlay
 import com.homequest.app.ui.components.AvatarView
 import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.ui.components.PinEntry
@@ -96,7 +98,7 @@ fun OnboardingScreen(
             }
         }
         Box(Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
-            AvatarView(AvatarConfig(gender = gender, hairId = if (gender == Gender.FEMALE) HairStyles.LONG else HairStyles.SHORT), size = avatarSize, animated = true, mood = if (step == PIN_STEP) Mood.SMART else Mood.EXCITED, waveTrigger = wave, background = scheme.surfaceContainerLowest)
+            AvatarView(AvatarConfig(gender = gender, hairId = if (gender == Gender.FEMALE) HairStyles.LONG else HairStyles.SHORT), size = avatarSize, animated = true, mood = if (step == PIN_STEP) Mood.SMART else Mood.EXCITED, play = AvatarPlay(if (step == 0) AvatarAction.WAVE else AvatarAction.CHEER, wave), background = scheme.surfaceContainerLowest)
         }
         AnimatedContent(
             targetState = step,

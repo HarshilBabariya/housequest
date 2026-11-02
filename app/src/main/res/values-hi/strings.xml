@@ -63,7 +63,7 @@
     <string name="pay_cash">नकद</string>
     <string name="pay_upi">UPI</string>
     <string name="pay_card">कार्ड</string>
-    <string name="pay_bank">बैंक ट्रांसफर</string>
+    <string name="pay_bank">बैंक</string>
     <string name="repeat_once">एक बार</string>
     <string name="repeat_daily">रोज़</string>
     <string name="repeat_weekly">साप्ताहिक</string>
@@ -79,16 +79,6 @@
     <string name="mood_sad">उदास</string>
     <string name="mood_worried">चिंतित</string>
     <string name="mood_angry">गुस्सा</string>
-    <string name="mood_line_happy">%1$s! इस महीने खर्च बिलकुल ठीक चल रहा है।</string>
-    <string name="mood_line_love">%1$s, आपकी स्ट्रीक कमाल की है। मैं तो फ़िदा हूँ।</string>
-    <string name="mood_line_excited">%1$s, आप तो छा गए! स्ट्रीक को ऐसे ही चलाते रहिए।</string>
-    <string name="mood_line_smart">%1$s, आधा महीना बीत गया और बजट से बहुत नीचे। जीनियस!</string>
-    <string name="mood_line_neutral">%1$s। आज अभी तक कुछ दर्ज नहीं हुआ — एक जोड़ें?</string>
-    <string name="mood_line_confused">%1$s… ये पैसे जा कहाँ रहे हैं? नज़र रखते हैं।</string>
-    <string name="mood_line_sleepy">%1$s, देर रात? खर्च लिखिए और चलिए सो जाते हैं।</string>
-    <string name="mood_line_sad">%1$s, कई दिन हो गए। मुझे हमारी छोटी-छोटी अपडेट याद आती हैं।</string>
-    <string name="mood_line_worried">%1$s, हम बजट की सीमा के बहुत करीब पहुँच रहे हैं…</string>
-    <string name="mood_line_angry">%1$s! इस महीने बजट पार हो गया।</string>
     <string name="good_morning">सुप्रभात,</string>
     <string name="good_afternoon">नमस्ते,</string>
     <string name="good_evening">शुभ संध्या,</string>
@@ -212,13 +202,6 @@
     <string name="toast_level_body">आपका लेवल बढ़ गया!</string>
     <string name="toast_streak">%1$d दिन की स्ट्रीक</string>
     <string name="toast_streak_body">हर दिन दर्ज करते रहें</string>
-    <string name="notif_bill_title">%1$s आज देय है 💸</string>
-    <string name="notif_budget_warn_body">%1$s: %3$s में से %2$s खर्च हो गया। महीना अभी बाकी है। ज़रा संभलकर।</string>
-    <string name="notif_budget_over_body">%1$s: आपने %3$s पार कर लिया (अब %2$s)। आपका अवतार… खुश नहीं है 😤</string>
-    <string name="notif_badge_title">बैज अनलॉक %1$s</string>
-    <string name="notif_badge_body">%1$s — शाबाश! +%2$d पॉइंट</string>
-    <string name="notif_level_title">लेवल %1$d! 🎉</string>
-    <string name="notif_level_body">अब आप %1$s हैं। चढ़ते रहिए।</string>
     <string name="welcome_title">HomeQuest में स्वागत है</string>
     <string name="welcome_body">घर का खर्च ट्रैक करें, उसे बराबर बाँटें, और बजट में रहने के इनाम कमाएँ।</string>
     <string name="your_name">आपका नाम</string>
@@ -281,7 +264,6 @@
     <string name="due_tomorrow">कल देय</string>
     <string name="due_in_days">%1$d दिन में · %2$s</string>
     <string name="recent_transactions">हाल के लेन-देन</string>
-    <string name="level_n">लेवल %1$d</string>
     <string name="voice_title">बोलें या टाइप करें</string>
     <string name="voice_subtitle">एक वाक्य और दर्ज — जैसे \"250 किराना UPI से\"</string>
     <string name="voice_prompt">रकम और किस चीज़ के लिए, बोलें</string>
@@ -360,7 +342,6 @@
     <string name="avatar_studio">अवतार स्टूडियो</string>
     <string name="avatar_of">%1$s का अवतार</string>
     <string name="save_look">लुक सहेजें</string>
-    <string name="say_hi">👋 हाय बोलो</string>
     <string name="skin_tone">त्वचा का रंग</string>
     <string name="hair_colour">बालों का रंग</string>
     <string name="hair_style">हेयर स्टाइल</string>
@@ -643,7 +624,7 @@
     <string name="badges_hard">कठिन · %1$d</string>
     <string name="badge_points_total">%1$d पॉइंट</string>
     <string name="topup_title">UPI से पॉइंट भरें</string>
-    <string name="topup_sub">ट्रायल: किसी भी UPI ऐप से भुगतान करें। भुगतान अभी अपने-आप सत्यापित नहीं होता, इसलिए पॉइंट आपकी पुष्टि पर जुड़ते हैं।</string>
+    <string name="topup_sub">किसी भी UPI ऐप से पे करें। ऐप पेमेंट कन्फ़र्म करते ही, या आप बताएँ कि पेमेंट हो गया, तुरंत पॉइंट जुड़ जाएँगे।</string>
     <string name="pack_points">%1$d पॉइंट</string>
     <string name="pack_price">₹%1$d</string>
     <string name="upi_note">HomeQuest पॉइंट</string>
@@ -669,7 +650,7 @@
     <string name="erase_all_q">नई शुरुआत करें?</string>
     <string name="erase_all_body">इससे इस फ़ोन पर हर सदस्य, खर्च, ग्रुप, रिमाइंडर, बजट, पॉइंट, बैज और सेटिंग हमेशा के लिए मिट जाएगी और आप स्वागत स्क्रीन पर लौट आएँगे। इसे वापस नहीं किया जा सकता। कॉपी चाहिए तो CSV एक्सपोर्ट आपके खर्च (ग्रुप बँटवारा नहीं) रख लेता है।</string>
     <string name="erase_all_confirm">सब मिटाएँ</string>
-    <string name="tomorrow">कल (आने वाला)</string>
+    <string name="tomorrow">अगला दिन</string>
     <string name="tomorrow_with_date">आने वाला कल · %1$s</string>
     <string name="month_so_far">इस महीने अब तक</string>
     <string name="on_pace_for">इस रफ़्तार से महीने का खर्च</string>
@@ -692,33 +673,375 @@
     <string name="daily_average">रोज़ का औसत</string>
     <string name="transactions">एंट्री</string>
     <string name="biggest">सबसे बड़ा</string>
+    <string name="face_shape">चेहरे का आकार</string>
+    <string name="face_oval">अंडाकार</string>
+    <string name="face_round">गोल</string>
+    <string name="face_square">चौकोर</string>
+    <string name="face_heart">दिल</string>
+    <string name="face_long">लंबा</string>
+    <string name="beard">दाढ़ी</string>
+    <string name="beard_none">कोई नहीं</string>
+    <string name="beard_stubble">हल्की दाढ़ी</string>
+    <string name="beard_mustache">मूँछ</string>
+    <string name="beard_goatee">गोटी</string>
+    <string name="beard_chin_strap">चिन स्ट्रैप</string>
+    <string name="beard_full">पूरी दाढ़ी</string>
+    <string name="act_wave">हाथ हिलाओ</string>
+    <string name="act_jump">कूदो</string>
+    <string name="act_spin">घूमो</string>
+    <string name="act_dance">नाचो</string>
+    <string name="act_wink">आँख मारो</string>
+    <string name="act_cheer">चीयर</string>
+    <string name="act_laugh">हँसो</string>
+    <string name="free">फ़्री</string>
+    <string name="xp_level_label">लेवल %1$d · %2$s</string>
+    <string name="xp_to_next">लेवल %2$d तक %1$d XP</string>
+    <string name="day_n">दिन %1$d</string>
+    <string name="calendar">कैलेंडर</string>
+    <string name="avg_daily_budget">औसत रोज़ का बजट: %1$s</string>
+    <string name="calendar_no_budget">मासिक बजट सेट करें, फिर देखें किन दिनों में खर्च हद से बाहर गया।</string>
+    <string name="over_budget">बजट से ऊपर</string>
+    <string name="within_budget">बजट के अंदर</string>
+    <string name="calendar_quiet_day">इस दिन कोई खर्च नहीं</string>
+    <string name="views">व्यू</string>
+    <string name="view_day">दिन</string>
+    <string name="pro_title">Pro से सब कुछ अनलॉक करें</string>
+    <string name="pro_sub">पॉइंट्स पैक लें और थीम, लुक और फ़ीचर्स जल्दी अनलॉक करें।</string>
+    <string name="plan_starter">स्टार्टर</string>
+    <string name="plan_plus">प्लस</string>
+    <string name="plan_pro">Pro</string>
+    <string name="best_value">बेस्ट डील</string>
+    <string name="more_options">और विकल्प</string>
+    <string name="invite_friend">दोस्त को बुलाएँ</string>
+    <string name="invite_sub">HomeQuest परिवार और दोस्तों के साथ शेयर करें</string>
+    <string name="invite_text">हमारे घर का हर खर्च अब HomeQuest पर ट्रैक होता है — पॉइंट, बैज और एक नटखट अवतार। यहाँ से लो: %1$s</string>
+    <string name="rate_app">ऐप को रेट करें</string>
+    <string name="rate_sub">बताइए हम कैसा कर रहे हैं</string>
+    <string name="rate_title">HomeQuest पसंद आ रहा है?</string>
+    <string name="rate_body">स्टार पर टैप करें। 4 या 5 पर प्रोजेक्ट पेज खुलेगा ताकि आप उसे स्टार कर सकें; कम पर फ़ीडबैक खुलेगा ताकि हम चीज़ें ठीक कर सकें।</string>
+    <string name="rate_submit">भेजें</string>
+    <string name="feedback">सवाल / फ़ीडबैक</string>
+    <string name="feedback_sub">बग बताएँ या कोई फ़ीचर सुझाएँ</string>
+    <string name="faqs">FAQs</string>
+    <string name="faqs_sub">आम सवालों के झटपट जवाब</string>
+    <string name="faq_q1">क्या मेरा डेटा कहीं अपलोड होता है?</string>
+    <string name="faq_a1">नहीं। सब कुछ इसी फ़ोन के डेटाबेस में रहता है और आपके Android बैकअप में शामिल होता है। किसी सर्वर पर कुछ नहीं भेजा जाता।</string>
+    <string name="faq_q2">क्या परिवार वाले अपने-अपने फ़ोन से चला सकते हैं?</string>
+    <string name="faq_a2">अभी नहीं। हर सदस्य इसी फ़ोन पर अपने अवतार और PIN से लॉग इन करता है। फ़ोनों के बीच सिंक के लिए क्लाउड बैकएंड चाहिए, जिसकी योजना अलग से है।</string>
+    <string name="faq_q3">पॉइंट कैसे कमाऊँ?</string>
+    <string name="faq_a3">खर्च दर्ज करें (हर एक पर +10), रोज़ की स्ट्रीक बनाए रखें, ग्रुप बनाएँ, हिसाब चुकता करें, परिवार के सदस्य जोड़ें, महीने बजट के अंदर पूरे करें और बैज अनलॉक करें।</string>
+    <string name="faq_q4">बोलकर खर्च कैसे जोड़ूँ?</string>
+    <string name="faq_a4">माइक पर टैप करें और कुछ ऐसा बोलें “250 किराना UPI से नोट दिवाली शॉपिंग”। रकम, श्रेणी, भुगतान का तरीका और शीर्षक अपने-आप भर जाते हैं; “नोट” के बाद जो भी बोलें वह नोट में जाता है।</string>
+    <string name="faq_q5">क्या यह मेरे GPay या बैंक SMS पढ़ सकता है?</string>
+    <string name="faq_a5">अभी नहीं। आप “मैं → CSV इम्पोर्ट करें” से CSV ला सकते हैं। नोटिफ़िकेशन से पेमेंट अपने-आप पकड़ना रोडमैप पर है।</string>
+    <string name="faq_q6">Pro से मुझे क्या मिलता है?</string>
+    <string name="faq_a6">Pro पैक तुरंत पॉइंट जोड़ देते हैं, ताकि आप बिना इंतज़ार कोई भी थीम, पोशाक, हेयर स्टाइल, एक्सेसरी या फ़ीचर अनलॉक कर सकें।</string>
+    <string name="about_app">ऐप के बारे में</string>
+    <string name="about_sub">वर्ज़न और आपका डेटा कैसे सेव होता है</string>
+    <string name="custom_colour">अपना रंग</string>
+    <string name="custom_icon">अपना आइकन</string>
+    <string name="custom_icon_label">कोई भी इमोजी टाइप या पेस्ट करें</string>
+    <string name="edit_reminder">रिमाइंडर बदलें</string>
+    <string name="delete_reminder_q">“%1$s” हटाएँ?</string>
+    <string name="delete_reminder_body">रिमाइंडर और उसकी तय सूचनाएँ हटा दी जाएँगी।</string>
+    <string name="rw_glass">ग्लास</string>
+    <string name="rw_glass_d">चमकते ग्रेडिएंट पर धुंधले कार्ड</string>
+    <string name="rw_polo">पोलो</string>
+    <string name="rw_polo_d">कड़क, स्पोर्टी कॉलर</string>
+    <string name="rw_jersey">क्रिकेट जर्सी</string>
+    <string name="rw_jersey_d">नंबर 7 वाली एनर्जी</string>
+    <string name="rw_leather">लेदर जैकेट</string>
+    <string name="rw_leather_d">बजट से भी ज़्यादा कूल</string>
+    <string name="rw_nehru">नेहरू जैकेट</string>
+    <string name="rw_nehru_d">शार्प और त्योहारी</string>
+    <string name="rw_lehenga">लहंगा</string>
+    <string name="rw_lehenga_d">शादी के सीज़न के लिए तैयार</string>
+    <string name="rw_lab_coat">लैब कोट</string>
+    <string name="rw_lab_coat_d">डॉक्टर और साइंटिस्ट वाली वाइब</string>
+    <string name="rw_side_part">साइड मांग</string>
+    <string name="rw_side_part_d">ऑफ़िस-रेडी और सलीकेदार</string>
+    <string name="rw_pixie">पिक्सी कट</string>
+    <string name="rw_pixie_d">छोटा, नखरीला, बेफ़िक्र</string>
+    <string name="rw_spiky">स्पाइकी</string>
+    <string name="rw_spiky_d">जेल फुल ऑन</string>
+    <string name="rw_quiff">क्विफ़</string>
+    <string name="rw_quiff_d">ऊपर रेट्रो वॉल्यूम</string>
+    <string name="rw_man_bun">मैन बन</string>
+    <string name="rw_man_bun_d">बँधे बाल, ठंडा दिमाग</string>
+    <string name="rw_afro">एफ़्रो</string>
+    <string name="rw_afro_d">बड़े बाल, उससे बड़ी एनर्जी</string>
+    <string name="rw_flower">बालों में फूल</string>
+    <string name="rw_flower_d">ताज़ा खिला फूल</string>
+    <string name="rw_nose_ring">नथ</string>
+    <string name="rw_nose_ring_d">छोटी-सी सुनहरी चमक</string>
+    <string name="rw_bow_tie">बो टाई</string>
+    <string name="rw_bow_tie_d">स्मार्ट और शानदार</string>
+    <string name="rw_beanie">बीनी</string>
+    <string name="rw_beanie_d">विंटर मोड: ऑन</string>
+    <string name="rw_sunglasses">सनग्लासेस</string>
+    <string name="rw_sunglasses_d">चश्मा ऑन, टेंशन ऑफ़</string>
+    <string name="rw_chain">सोने की चेन</string>
+    <string name="rw_chain_d">थोड़ी-सी चमक-दमक</string>
+    <string name="rw_turban">पगड़ी</string>
+    <string name="rw_turban_d">शाही और त्योहारी</string>
+    <string-array name="mood_lines_happy">
+        <item>%1$s! इस महीने खर्च एकदम हेल्दी है।</item>
+        <item>%1$s, तुम और बजट? पक्की पावर कपल 💑</item>
+        <item>%1$s! वॉलेट शांत है, वाइब्स एकदम बढ़िया।</item>
+        <item>%1$s, पैसा तमीज़ में है। ऐसे ही चलने दो।</item>
+        <item>%1$s! सब मक्खन जैसा — हिसाब चमक रहा है।</item>
+        <item>%1$s, वाह, एकदम प्रो की तरह बड़े हो गए।</item>
+    </string-array>
+    <string-array name="mood_lines_love">
+        <item>%1$s, ये स्ट्रीक कितनी प्यारी है। मैं तो फ़िदा हूँ।</item>
+        <item>%1$s, पूरा हफ़्ता लगातार? शादी कर लो मुझसे 💍</item>
+        <item>%1$s, ये कंसिस्टेंसी ही मेरी लव लैंग्वेज है।</item>
+        <item>%1$s, तुम्हारी स्ट्रीक हीरो वाली एंट्री दे रही है।</item>
+        <item>%1$s, इस स्ट्रीक पर दिल आ गया 😍</item>
+        <item>%1$s, इस बजट पर तो मैं राइट स्वाइप कर दूँ।</item>
+    </string-array>
+    <string-array name="mood_lines_excited">
+        <item>%1$s, तुम तो छा गए! स्ट्रीक ज़िंदा रखो।</item>
+        <item>%1$s, तीन दिन पक्के — अब दस करते हैं!</item>
+        <item>%1$s! स्ट्रीक भी हॉट, तुम भी 🔥</item>
+        <item>%1$s, मोमेंटम अनलॉक। अब रुकना मत।</item>
+        <item>%1$s, देखो स्ट्रीक कैसे भाग रही है!</item>
+        <item>%1$s, लॉगिंग मशीन मोड: ऑन।</item>
+    </string-array>
+    <string-array name="mood_lines_smart">
+        <item>%1$s, आधा महीना गया और बजट से काफ़ी नीचे। जीनियस चाल।</item>
+        <item>%1$s, बड़े दिमाग वाली बजटिंग पकड़ी गई 🧠</item>
+        <item>%1$s, आधा महीना गया और ज़्यादातर पैसा बचा रहा। रिस्पेक्ट।</item>
+        <item>%1$s, ये तो पक्का CFO मटीरियल है।</item>
+        <item>%1$s, बचत ऐसे जैसे कोई खेल हो। गोल्ड मेडल।</item>
+        <item>%1$s, वॉरेन बफ़ेट तुम्हारा नंबर माँग रहे हैं।</item>
+    </string-array>
+    <string-array name="mood_lines_neutral">
+        <item>%1$s। आज अभी तक कुछ दर्ज नहीं — एक जोड़ें?</item>
+        <item>%1$s, शांत दिन? ज़ीरो दर्ज करो और स्ट्रीक बचाओ।</item>
+        <item>%1$s। हिसाब तमीज़ से इंतज़ार कर रहा है। अभी के लिए।</item>
+        <item>%1$s, आज का पन्ना खाली है। कुछ खर्च हुआ?</item>
+        <item>%1$s। एक छोटा-सा एंट्री और स्ट्रीक की साँस चलती रहेगी।</item>
+        <item>%1$s, अभी तक कोई एंट्री नहीं। कुछ ज़्यादा ही कंजूसी 🤨</item>
+    </string-array>
+    <string-array name="mood_lines_confused">
+        <item>%1$s… ये सारा पैसा जा कहाँ रहा है? नज़र रखते हैं।</item>
+        <item>%1$s, बजट हिसाब लगा रहा है और कन्फ़्यूज़ दिख रहा है।</item>
+        <item>%1$s, पैसा बहुत तेज़ भाग रहा है। थोड़ा स्लो-मो करते हैं।</item>
+        <item>%1$s, मुझे लग रहा है या खर्चे बढ़ते जा रहे हैं?</item>
+        <item>%1$s, ज़रा सोचो: वो शौक वाला खर्च सच में ज़रूरी था?</item>
+        <item>%1$s, मामला तीखा होने से पहले श्रेणियाँ देख लेते हैं।</item>
+    </string-array>
+    <string-array name="mood_lines_sleepy">
+        <item>%1$s, देर रात? दर्ज करो और दोनों सो जाते हैं।</item>
+        <item>%1$s, आधी रात का नाश्ता या आधी रात की शॉपिंग? दर्ज करो 😴</item>
+        <item>%1$s, हिसाब कभी नहीं सोता। पर तुम सो जाओ।</item>
+        <item>%1$s, बस एक एंट्री और फिर लाइट बंद।</item>
+        <item>%1$s, रात 2 बजे का ऐड-टू-कार्ट कोई पर्सनैलिटी नहीं है।</item>
+        <item>%1$s, उबासी… दर्ज करो ताकि मैं झपकी ले सकूँ।</item>
+    </string-array>
+    <string-array name="mood_lines_sad">
+        <item>%1$s, कई दिन हो गए। हमारी छोटी-छोटी अपडेट याद आती हैं।</item>
+        <item>%1$s, स्ट्रीक की धड़कन रुक गई। वापस लाओगे? 🥺</item>
+        <item>%1$s, मुझे भूल गए क्या? हिसाब तो भूल गया।</item>
+        <item>%1$s, कई दिनों से चुप्पी। मेरे इमोजी भी उदास हैं।</item>
+        <item>%1$s, कुछ दिनों से कोई एंट्री नहीं। बस एक से फिर शुरू करें।</item>
+        <item>%1$s, लौट आओ, बजट तुम्हें मिस कर रहा है।</item>
+    </string-array>
+    <string-array name="mood_lines_worried">
+        <item>%1$s, हम बजट की लाइन के बहुत करीब पहुँच रहे हैं…</item>
+        <item>%1$s, बजट लगभग खत्म। ज़रा संभलकर।</item>
+        <item>%1$s, यहाँ थोड़ा पसीना आ रहा है। लिमिट बस सामने है 😰</item>
+        <item>%1$s, ध्यान से — एक और शौक और हम बाहर।</item>
+        <item>%1$s, इस हफ़्ते दाल-चावल? बस कह रहे हैं।</item>
+        <item>%1$s, डेंजर ज़ोन नज़र आ रहा है।</item>
+    </string-array>
+    <string-array name="mood_lines_angry">
+        <item>%1$s! इस महीने बजट पार हो गया।</item>
+        <item>%1$s! बजट के टुकड़े-टुकड़े। किसने किया ये? 😤</item>
+        <item>%1$s, बजट से ऊपर। कार्ड छुपाओ, ऐप डिलीट करो।</item>
+        <item>%1$s! बजट: फुस्स। कमबैक अब शुरू।</item>
+        <item>%1$s, लाइन पार हो गई। अब डैमेज कंट्रोल।</item>
+        <item>%1$s! गुस्सा नहीं, बस निराश हूँ। अच्छा, थोड़ा गुस्सा भी।</item>
+    </string-array>
     <string-array name="notif_nudge_titles">
-        <item>पीएसटी… 👀</item>
-        <item>आपके बटुए का फ़ोन आया 📞</item>
-        <item>बस एक मिनट ✍️</item>
+        <item>सुनो… 👀</item>
+        <item>तुम्हारे वॉलेट का फ़ोन आया 📞</item>
         <item>स्ट्रीक चेक 🔥</item>
+        <item>पैसों की डायरी का टाइम ✍️</item>
+        <item>चाय पे चर्चा ☕</item>
+        <item>रसीदें दिखाओ 🧾</item>
+        <item>खट-खट 🚪</item>
+        <item>कहानी में ट्विस्ट 🍿</item>
+        <item>घोस्ट मत करो 👻</item>
+        <item>अवतार घूर रहा है 😏</item>
+        <item>छोटा-सा कबूलनामा 🙊</item>
+        <item>बजट गॉसिप का टाइम 🗣️</item>
+        <item>दो टैप। बस। 👆</item>
+        <item>अरे ओ खर्चीले 💸</item>
+        <item>रात की हाज़िरी 🌙</item>
         <item>छोटा काम, बड़ी जीत 💪</item>
+        <item>हिसाब भूखा है 🍽️</item>
+        <item>रुपया रडार 📡</item>
+        <item>हीरो वाला मोमेंट ✨</item>
+        <item>ड्रामा नहीं, पर… 🎭</item>
     </string-array>
     <string-array name="notif_nudge_bodies">
-        <item>%1$s — आज जेब से पैसे निकले? रहस्य बनने से पहले दर्ज कर लें।</item>
-        <item>%1$s: अभी दो टैप, 30 तारीख का सिरदर्द नहीं।</item>
-        <item>आपका अवतार कमरे में चक्कर काट रहा है। उसे एक खर्च खिलाइए 🍽️ (%1$s)</item>
-        <item>%1$s — स्ट्रीक चमकती रहे। भविष्य के आप धन्यवाद कहेंगे।</item>
-        <item>आज कुछ खर्च नहीं? ज़ीरो-डे दर्ज करें और शान से बताएँ 😎 (%1$s)</item>
+        <item>%1$s — आज जेब से पैसा निकला? रहस्य बनने से पहले दर्ज कर दो।</item>
+        <item>%1$s: अभी दो टैप, 30 तारीख के सिरदर्द से बेहतर।</item>
+        <item>तुम्हारा अवतार चक्कर काट रहा है। उसे एक खर्च खिलाओ 🍽️ (%1$s)</item>
+        <item>%1$s — स्ट्रीक चमकती रहे। आगे वाला तुम थैंक्स बोलेगा।</item>
+        <item>आज कोई खर्च नहीं? ज़ीरो-डे दर्ज करो और शान से बताओ 😎 (%1$s)</item>
+        <item>%1$s। वो चाय मुफ़्त में नहीं आई थी। बताओ ☕</item>
+        <item>%1$s — पैसा कहीं तो गया है। गुमशुदगी की रिपोर्ट से पहले ढूँढ लो।</item>
+        <item>Swiggy ने देखा। UPI ने देखा। तुम्हारे हिसाब ने नहीं। ठीक करें? (%1$s)</item>
+        <item>%1$s: दर्ज करने में 10 सेकंड। पछताने में पूरा महीना।</item>
+        <item>ट्विस्ट: बजट तभी चलता है जब लिखा जाए। (%1$s)</item>
+        <item>%1$s — सच बताना, आज कितनी बार “बस एक और” हुआ?</item>
+        <item>तुम्हारी स्ट्रीक जान बचाकर लटकी है 🔥 बचा लो। (%1$s)</item>
+        <item>%1$s। सुपरहीरो भी अपने गैजेट का खर्च लिखते हैं। शायद।</item>
+        <item>हर रुपये का एक नाम होना चाहिए। जाओ नाम दो। (%1$s)</item>
+        <item>%1$s: महीने की 1 तारीख वाला तुम या तो थैंक्स बोलेगा या रोस्ट करेगा।</item>
+        <item>बिना लिखे खर्चों से ही बजट घोस्ट होता है 👻 (%1$s)</item>
+        <item>%1$s — सोने से पहले छोटा-सा रिकैप? वरना अवतार को नींद नहीं आएगी 😴</item>
+        <item>कुछ खर्च नहीं किया? लेजेंड। कुछ किया? वो भी लेजेंड — बस दर्ज कर दो। (%1$s)</item>
+        <item>%1$s: पॉइंट इंतज़ार कर रहे हैं। फ़्री XP, ज़ीरो मेहनत।</item>
+        <item>किराने का बिल खुद दर्ज नहीं होगा, बॉस। (%1$s)</item>
+        <item>%1$s — माइक दबाओ और WhatsApp वॉइस नोट की तरह बोल दो। हो गया।</item>
+        <item>आगे वाला तुम कैलकुलेटर लेकर घूर रहा है 🧮 (%1$s)</item>
+        <item>%1$s। इस घर में सरप्राइज़ बैंक स्टेटमेंट नहीं चलते।</item>
+        <item>आज की डैमेज रिपोर्ट, प्लीज़ 📋 (%1$s)</item>
+        <item>%1$s — अभी दर्ज करो, बाद में बचत पर इतराओ 💅</item>
+        <item>बजट हाय बोल रहा है। साथ में ये भी: “मेरे नंबर कहाँ हैं?” (%1$s)</item>
+        <item>%1$s: जिस बैज पर नज़र है, वो खुद अनलॉक नहीं होगा 🏅</item>
+        <item>ऑटो का किराया, स्नैक्स, वो रैंडम ऑनलाइन ऑर्डर… हमें पता है। दर्ज करो। (%1$s)</item>
+        <item>%1$s — बनो वो घर के CFO जो तुम पैदाइशी हो।</item>
+        <item>सुनो, स्ट्रीक खतरे में है। ये ड्रिल नहीं है 🚨 (%1$s)</item>
+        <item>%1$s। छोटी एंट्री, बड़ा ग्लो-अप। चलो।</item>
+    </string-array>
+    <string-array name="notif_bill_titles">
+        <item>%1$s आज देय है 💸</item>
+        <item>%1$s हाय बोल रहा है (और पैसे माँग रहा है) 👋</item>
+        <item>ध्यान दें: %1$s 🔔</item>
+        <item>%1$s का टाइम ⏰</item>
+        <item>%1$s भरने का दिन 🧾</item>
+        <item>%1$s दरवाज़ा खटखटा रहा है 🚪</item>
+        <item>%1$s को सीन पर मत छोड़ो 📩</item>
+        <item>%1$s: आज ही है वो दिन 📅</item>
+        <item>बिल अलर्ट: %1$s 🚨</item>
+        <item>%1$s को उसका मोमेंट चाहिए ✨</item>
+        <item>बड़ों वाली याद: %1$s 🫡</item>
+        <item>%1$s — चुकाओ और इतराओ 💪</item>
     </string-array>
     <string-array name="notif_bill_bodies">
-        <item>%1$s — चुकाएँ, दर्ज करें, और आपका अवतार मुस्कुराता रहेगा 😄</item>
-        <item>%1$s बाकी है। मकान मालिक के दरवाज़ा खटखटाने से पहले निपटा लें 🚪</item>
-        <item>भविष्य के आपकी ओर से याद: %1$s देय है। दोबारा टोकने पर मजबूर न करें 😉</item>
+        <item>%1$s — भरो, दर्ज करो, और अवतार मुस्कुराता रहेगा 😄</item>
+        <item>%1$s सामने है। मकान-मालिक के खटखटाने से पहले चुका दो 🚪</item>
+        <item>आगे वाले तुम की याद: %1$s देय है। दोबारा टोकना मत पड़वाना 😉</item>
+        <item>%1$s। लेट फ़ीस बस भूलने का टैक्स है। हम वो नहीं भरते।</item>
+        <item>तुम्हारा %1$s बिल “मुझे भरो” वाली एनर्जी दे रहा है।</item>
+        <item>%1$s देय है। अभी भरो, बाद में बिना टेंशन चाय पियो ☕</item>
+        <item>आज %1$s चुकाओ और रात को आराम से कुछ मत करो।</item>
+        <item>%1$s — टैप, पे, दर्ज। समझदारी के तीन कदम।</item>
+        <item>%1$s का सीक्वल मत बनने दो। आज ही भरो 🎬</item>
+        <item>%1$s इंतज़ार में है। तुम्हारा क्रेडिट स्कोर देख रहा है 👀</item>
+        <item>%1$s। बैंड-एड खींचो, फिर पॉइंट के लिए दर्ज करो 🩹</item>
+        <item>आज %1$s चुकाया = रात 3 बजे की टेंशन में एक चीज़ कम।</item>
+        <item>%1$s देय है। टाइम पर भरना रेयर है, और रेयर हॉट है 🔥</item>
     </string-array>
     <string-array name="notif_budget_warn_titles">
-        <item>अरे वाह, बड़े खर्चीले 😅</item>
-        <item>80% क्लब 🎟️</item>
-        <item>ज़रा धीरे, चैंपियन 🐢</item>
+        <item>अरे रुको, बड़े खर्चीले 😅</item>
+        <item>80 पर्सेंट क्लब 🎟️</item>
+        <item>धीरे चलो, चैंपियन 🐢</item>
+        <item>आराम से, शेर 🐯</item>
+        <item>बजट को पसीना आ रहा है 😰</item>
+        <item>पीली बत्ती 🟡</item>
+        <item>वॉलेट चेक 👛</item>
+        <item>बस किनारे पर 🧗</item>
+        <item>ब्रेक लगाओ 🛑</item>
+        <item>कार्ट रोको 🛒</item>
+        <item>हमें बात करनी है 💬</item>
+        <item>तीखा महीना, हाँ? 🌶️</item>
+    </string-array>
+    <string-array name="notif_budget_warn_bodies">
+        <item>%1$s: %3$s में से %2$s खत्म। महीना नहीं। आराम से।</item>
+        <item>%1$s अभी %3$s में से %2$s पर है। तीसरी कॉफ़ी छोड़ दें? ☕</item>
+        <item>%1$s पर पहले ही %2$s खर्च। %3$s लाइन है — दबे पाँव चलो, दौड़ो मत।</item>
+        <item>%1$s बजट: %3$s में से %2$s। तुम्हारा अवतार नाखून चबा रहा है 😬</item>
+        <item>घबरा नहीं रहे, बस बता रहे हैं: %1$s %3$s में से %2$s पर है।</item>
+        <item>%1$s — %2$s इस्तेमाल, कुल %3$s। कार्ट वाली चीज़ें अगले महीने तक रुक सकती हैं 🛒</item>
+        <item>कहानी गहरी हुई: %1$s %3$s में से %2$s पर पहुँचा। सोच-समझकर।</item>
+        <item>%1$s %2$s पर। %3$s की लिमिट तुम्हें आते देख रही है 👀</item>
+        <item>दोस्ताना याद: %1$s, %3$s में से %2$s तक जा चुका है।</item>
+        <item>%1$s: %3$s में से %2$s। एक और शौक और हम डेंजर ज़ोन में।</item>
+        <item>अब तक %1$s पर %2$s (लिमिट %3$s)। वैसे ही बचत करो जैसा दावा करते हो 😏</item>
     </string-array>
     <string-array name="notif_budget_over_titles">
-        <item>बजट: आधिकारिक रूप से टूटा 🚨</item>
+        <item>बजट: ऑफ़िशियली फुस्स 🚨</item>
         <item>लाइन पार 🙈</item>
-        <item>ह्यूस्टन, हमने ज़्यादा खर्च कर दिया 🚀</item>
+        <item>ह्यूस्टन, ज़्यादा खर्च हो गया 🚀</item>
+        <item>चलो, हो गया 🫠</item>
+        <item>रेड अलर्ट 🔴</item>
+        <item>बजट ने चैट छोड़ दी 💬</item>
+        <item>उफ़्फ़, सब खर्च 🙃</item>
+        <item>मेडे, मेडे 📟</item>
+        <item>बजट? कौन बजट? 💅</item>
+        <item>ट्विस्ट: ज़्यादा खर्च 🎬</item>
+        <item>डैमेज कंट्रोल टाइम 🧯</item>
+        <item>Ctrl+Z उपलब्ध नहीं ⌨️</item>
+    </string-array>
+    <string-array name="notif_budget_over_bodies">
+        <item>%1$s: तुमने %3$s पार कर दिया (अब %2$s)। तुम्हारा अवतार… खुश नहीं है 😤</item>
+        <item>%1$s ने %3$s उड़ा दिया — अब %2$s। नो-स्पेंड वीकेंड करें?</item>
+        <item>%1$s %2$s पर है। %3$s की लिमिट का फ़ोन आया था; दिल टूट गया 💔</item>
+        <item>%1$s पर बजट से ऊपर: %2$s बनाम %3$s। अगला महीना कमबैक वाला।</item>
+        <item>%1$s ने %3$s के बजट में %2$s कर दिए। बड़ी हिम्मत है।</item>
+        <item>%1$s %2$s पर (लिमिट %3$s)। गहरी साँस। दाल-चावल वाला हफ़्ता? 🍛</item>
+        <item>%1$s पर %3$s पार — अब %2$s। ऐप लॉक करो, कार्ड छुपाओ 🔒</item>
+        <item>%1$s: खर्च %2$s, प्लान %3$s। हिसाब का हिसाब नहीं बैठ रहा।</item>
+        <item>%1$s ने %3$s पार किया। अभी का नुकसान: %2$s। रिकवरी अब शुरू 💪</item>
+        <item>%3$s की लिमिट पर %1$s में %2$s। तुम्हारा वॉलेट बात करना चाहता है।</item>
+        <item>%1$s ओवरस्पेंड: %3$s में से %2$s। कोई जजमेंट नहीं। अच्छा, थोड़ा सा 😅</item>
+    </string-array>
+    <string-array name="notif_badge_titles">
+        <item>बैज अनलॉक %1$s</item>
+        <item>नया फ़्लेक्स अनलॉक %1$s</item>
+        <item>देखो किसने कुछ जीता %1$s</item>
+        <item>चमकीला अलर्ट %1$s</item>
+        <item>अचीवमेंट मिला! %1$s</item>
+        <item>ट्रॉफ़ी कैबिनेट +1 %1$s</item>
+        <item>ओहो, क्या बात %1$s</item>
+        <item>तुमने कर दिखाया %1$s</item>
+    </string-array>
+    <string-array name="notif_badge_bodies">
+        <item>%1$s — शाबाश! +%2$d पॉइंट</item>
+        <item>%1$s तुम्हारा हुआ। +%2$d पॉइंट जेब में आ गए 💰</item>
+        <item>%1$s तुम्हारे सीने पर। +%2$d पॉइंट, दिखावेबाज़ 😎</item>
+        <item>%1$s अनलॉक। +%2$d पॉइंट। पूरा घर इम्प्रेस है।</item>
+        <item>%1$s किसके पास है? तुम्हारे। +%2$d पॉइंट।</item>
+        <item>%1$s मिला, +%2$d पॉइंट जमा। इकट्ठा करते रहो!</item>
+        <item>%1$s — लेजेंड वाली हरकत। +%2$d पॉइंट।</item>
+        <item>%1$s के लिए +%2$d पॉइंट। तुम्हारा अवतार खुशी में नाच रहा है 💃</item>
+        <item>%1$s! +%2$d पॉइंट। स्क्रीनशॉट ले लो, हम किसी को नहीं बताएँगे।</item>
+    </string-array>
+    <string-array name="notif_level_titles">
+        <item>लेवल %1$d! 🎉</item>
+        <item>लेवल %1$d अनलॉक 🔓</item>
+        <item>हैलो, लेवल %1$d 👋</item>
+        <item>ऊपर चले: लेवल %1$d 🚀</item>
+        <item>लेवल %1$d, बेबी ✨</item>
+        <item>ग्लो-अप: लेवल %1$d 🌟</item>
+        <item>लेवल %1$d पर प्रमोशन 🎖️</item>
+        <item>लेवल %1$d हासिल 🏆</item>
+    </string-array>
+    <string-array name="notif_level_bodies">
+        <item>अब तुम %1$s हो। चढ़ते रहो।</item>
+        <item>%1$s स्टेटस: अनलॉक। अब वैसा ही बर्ताव करो 😎</item>
+        <item>नया टाइटल, कौन हो तुम? अब तुम %1$s हो।</item>
+        <item>ऑफ़िशियली %1$s। फ़ैमिली WhatsApp ग्रुप को बता दो।</item>
+        <item>अब से सिर्फ़ %1$s वाली एनर्जी 💪</item>
+        <item>घर के नए %1$s को हाय बोलो 👑</item>
+        <item>तुम लेवल-अप होकर %1$s बन गए। वॉलेट अभी से सुरक्षित महसूस कर रहा है।</item>
+        <item>%1$s! छोटे टैप, बड़े नतीजे।</item>
+        <item>प्रमोशन अलर्ट: %1$s। सैलरी शामिल नहीं 😅</item>
     </string-array>
 </resources>

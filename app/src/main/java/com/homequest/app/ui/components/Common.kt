@@ -18,18 +18,27 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.homequest.app.domain.Category
+import com.homequest.app.domain.Mood
 import com.homequest.app.domain.Relations
+import java.time.LocalDate
 
 @Composable
 fun Category.label(): String = nameRes?.let { stringResource(it) } ?: customName
 
 fun Category.label(context: Context): String = nameRes?.let { context.getString(it) } ?: customName
+
+@Composable
+fun moodLine(mood: Mood, day: LocalDate, name: String): String {
+    val lines = stringArrayResource(mood.linesRes)
+    return lines[Math.floorMod(day.toEpochDay(), lines.size.toLong()).toInt()].format(name)
+}
 
 @Composable
 fun relationLabel(key: String): String = Relations.labelRes(key)?.let { stringResource(it) } ?: key

@@ -1,6 +1,7 @@
 package com.homequest.app.ui.screens.reminders
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,13 +16,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
@@ -31,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +46,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -113,18 +122,20 @@ fun RemindersScreen(onBack: () -> Unit) {
     val vm = appViewModel { RemindersViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
     val categoryMap = remember(state.categories) { state.categories.byId() }
+    var editing by remember { mutableStateOf<ReminderEntity?>(null) }
     var showAdd by remember { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<ReminderEntity?>(null) }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.reminders_bills)) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } }
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back)) } }
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { showAdd = true }, icon = { Icon(Icons.Filled.Add, contentDescription = null) }, text = { Text(stringResource(R.string.new_reminder)) })
+            ExtendedFloatingActionButton(onClick = { showAdd = true }, icon = { Icon(Icons.Rounded.Add, contentDescription = null) }, text = { Text(stringResource(R.string.new_reminder)) })
         }
     ) { padding ->
         if (state.reminders.isEmpty()) {
@@ -132,19 +143,32 @@ fun RemindersScreen(onBack: () -> Unit) {
         } else {
             LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 100.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(state.reminders, key = { it.id }) { r ->
-                    ReminderCard(r, r.category?.let { categoryMap.resolve(it) }, state.symbol, onToggle = { vm.toggle(r, it) }, onDelete = { vm.delete(r) })
+                    ReminderCard(r, r.category?.let { categoryMap.resolve(it) }, state.symbol, onToggle = { vm.toggle(r, it) }, onEdit = { editing = r }, onDelete = { pendingDelete = r })
                 }
             }
         }
     }
 
     if (showAdd) {
-        AddReminderSheet(symbol = state.symbol, categories = state.categories, onDismiss = { showAdd = false }) { vm.save(it); showAdd = false }
+        ReminderSheet(initial = null, symbol = state.symbol, categories = state.categories, onDismiss = { showAdd = false }) { vm.save(it); showAdd = false }
+    }
+    editing?.let { r ->
+        ReminderSheet(initial = r, symbol = state.symbol, categories = state.categories, onDismiss = { editing = null }) { vm.save(it); editing = null }
+    }
+    pendingDelete?.let { r ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            icon = { Icon(Icons.Rounded.DeleteOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            title = { Text(stringResource(R.string.delete_reminder_q, r.title)) },
+            text = { Text(stringResource(R.string.delete_reminder_body)) },
+            confirmButton = { TextButton(onClick = { vm.delete(r); pendingDelete = null }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text(stringResource(R.string.delete)) } },
+            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.cancel)) } }
+        )
     }
 }
 
 @Composable
-private fun ReminderCard(r: ReminderEntity, category: Category?, symbol: String, onToggle: (Boolean) -> Unit, onDelete: () -> Unit) {
+private fun ReminderCard(r: ReminderEntity, category: Category?, symbol: String, onToggle: (Boolean) -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
     val next = r.nextOccurrence()
     val days = ChronoUnit.DAYS.between(LocalDateTime.now().toLocalDate(), next.toLocalDate())
     val dueText = when {
@@ -154,11 +178,11 @@ private fun ReminderCard(r: ReminderEntity, category: Category?, symbol: String,
         days < 7 -> stringResource(R.string.in_days, days)
         else -> next.format(DateTimeFormatter.ofPattern("d MMM", Locale.getDefault()))
     }
-    HqCard(Modifier.fillMaxWidth(), padding = 14) {
+    HqCard(Modifier.fillMaxWidth(), onClick = onEdit, padding = 14) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (category != null) CategoryIcon(category, 44) else {
                 Box(Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Rounded.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 }
             }
             Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -174,12 +198,27 @@ private fun ReminderCard(r: ReminderEntity, category: Category?, symbol: String,
                     r.amount?.let { Text(" · ${it.money(symbol)}", style = MaterialTheme.typography.labelLarge, maxLines = 1) }
                 }
             }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Switch(checked = r.enabled, onCheckedChange = onToggle)
-                IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    CardAction(Icons.Rounded.Edit, stringResource(R.string.edit), MaterialTheme.colorScheme.primary, onEdit)
+                    CardAction(Icons.Rounded.DeleteOutline, stringResource(R.string.delete), MaterialTheme.colorScheme.error, onDelete)
+                }
             }
         }
     }
+}
+
+@Composable
+private fun CardAction(icon: ImageVector, label: String, tint: Color, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(34.dp)
+            .clip(CircleShape)
+            .background(tint.copy(alpha = 0.12f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) { Icon(icon, contentDescription = label, tint = tint, modifier = Modifier.size(18.dp)) }
 }
 
 @Composable
@@ -196,21 +235,21 @@ private fun scheduleLabel(r: ReminderEntity): String {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun AddReminderSheet(symbol: String, categories: List<Category>, onDismiss: () -> Unit, onSave: (ReminderEntity) -> Unit) {
-    var title by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
-    var repeat by remember { mutableStateOf(RepeatRule.MONTHLY) }
-    var categoryId by remember { mutableStateOf<String?>(null) }
-    var weekday by remember { mutableStateOf(DayOfWeek.MONDAY) }
-    var dayOfMonth by remember { mutableIntStateOf(1) }
-    var month by remember { mutableStateOf(Month.JANUARY) }
-    var hour by remember { mutableIntStateOf(9) }
-    var minute by remember { mutableIntStateOf(0) }
+private fun ReminderSheet(initial: ReminderEntity?, symbol: String, categories: List<Category>, onDismiss: () -> Unit, onSave: (ReminderEntity) -> Unit) {
+    var title by remember { mutableStateOf(initial?.title.orEmpty()) }
+    var amount by remember { mutableStateOf(initial?.amount?.let { if (it % 1.0 == 0.0) it.toLong().toString() else it.toString() }.orEmpty()) }
+    var repeat by remember { mutableStateOf(initial?.repeat ?: RepeatRule.MONTHLY) }
+    var categoryId by remember { mutableStateOf(initial?.category) }
+    var weekday by remember { mutableStateOf(initial?.let { DayOfWeek.of(it.weekday) } ?: DayOfWeek.MONDAY) }
+    var dayOfMonth by remember { mutableIntStateOf(initial?.dayOfMonth ?: 1) }
+    var month by remember { mutableStateOf(initial?.let { Month.of(it.month) } ?: Month.JANUARY) }
+    var hour by remember { mutableIntStateOf(initial?.hour ?: 9) }
+    var minute by remember { mutableIntStateOf(initial?.minute ?: 0) }
     val presetTitles = presets.map { stringResource(it.titleRes) }
 
-    OptionSheet(stringResource(R.string.new_reminder), onDismiss, dismissByDrag = false) {
+    OptionSheet(stringResource(if (initial == null) R.string.new_reminder else R.string.edit_reminder), onDismiss, dismissByDrag = false) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (initial == null) LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(presets.indices.toList()) { i ->
                     val p = presets[i]
                     FilterChip(selected = title == presetTitles[i], onClick = { title = presetTitles[i]; repeat = p.repeat; categoryId = p.categoryId }, label = { Text(presetTitles[i], maxLines = 1) })
@@ -254,7 +293,7 @@ private fun AddReminderSheet(symbol: String, categories: List<Category>, onDismi
                 stringResource(R.string.save_reminder),
                 onClick = {
                     onSave(
-                        ReminderEntity(
+                        (initial ?: ReminderEntity(title = title, hour = hour, minute = minute, repeat = repeat)).copy(
                             title = title, hour = hour, minute = minute, repeat = repeat,
                             weekday = weekday.value, dayOfMonth = dayOfMonth, month = month.value,
                             amount = amount.toDoubleOrNull()?.takeIf { it > 0 }, category = categoryId

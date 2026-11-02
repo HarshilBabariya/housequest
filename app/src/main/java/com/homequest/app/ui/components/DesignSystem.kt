@@ -1,6 +1,7 @@
 package com.homequest.app.ui.components
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,8 +31,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Backspace
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.Backspace
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,6 +69,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.homequest.app.R
+import com.homequest.app.domain.LevelInfo
 import com.homequest.app.util.Pin
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -98,17 +102,69 @@ fun SectionCard(title: String, modifier: Modifier = Modifier, trailing: @Composa
 }
 
 @Composable
-fun StatTile(label: String, value: String, modifier: Modifier = Modifier, hint: String? = null, emoji: String? = null, accent: Color = MaterialTheme.colorScheme.primary, onClick: (() -> Unit)? = null) {
+fun StatTile(label: String, value: String, icon: ImageVector, modifier: Modifier = Modifier, hint: String? = null, accent: Color = MaterialTheme.colorScheme.primary, onClick: (() -> Unit)? = null) {
     HqCard(modifier, onClick = onClick, padding = 14) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (emoji != null) {
-                Box(Modifier.size(30.dp).background(accent.copy(alpha = 0.14f), RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) { Text(emoji) }
-                Spacer(Modifier.size(8.dp))
+            Box(Modifier.size(30.dp).background(accent.copy(alpha = 0.14f), RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
+                Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(18.dp))
             }
+            Spacer(Modifier.size(8.dp))
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Text(value, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (hint != null) Text(hint, style = MaterialTheme.typography.labelSmall, color = accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
+fun ProCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val scheme = MaterialTheme.colorScheme
+    val gold = Color(0xFFD99A1E)
+    Row(
+        modifier
+            .fillMaxWidth()
+            .clip(CardShape)
+            .background(Brush.linearGradient(listOf(scheme.primary.copy(alpha = 0.14f), gold.copy(alpha = 0.2f))))
+            .border(1.dp, gold.copy(alpha = 0.55f), CardShape)
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(Modifier.size(48.dp).background(gold.copy(alpha = 0.2f), RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+            Icon(Icons.Rounded.WorkspacePremium, contentDescription = null, tint = gold, modifier = Modifier.size(28.dp))
+        }
+        Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+            Text(stringResource(R.string.pro_title), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(R.string.pro_sub), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = gold)
+    }
+}
+
+@Composable
+fun LevelProgress(level: LevelInfo, lifetimeXp: Int, modifier: Modifier = Modifier) {
+    val scheme = MaterialTheme.colorScheme
+    val progress by animateFloatAsState(level.progress(lifetimeXp), tween(900), label = "xp")
+    Column(modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.xp_level_label, level.level, stringResource(level.titleRes)),
+                style = MaterialTheme.typography.labelMedium,
+                color = scheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                stringResource(R.string.xp_to_next, (level.nextLevelAt - lifetimeXp).coerceAtLeast(0), level.level + 1),
+                style = MaterialTheme.typography.labelMedium,
+                color = scheme.primary,
+                maxLines = 1
+            )
+        }
+        Box(Modifier.padding(top = 6.dp).fillMaxWidth().height(8.dp).clip(RoundedCornerShape(50)).background(scheme.surfaceContainerHigh)) {
+            Box(Modifier.fillMaxWidth(progress).fillMaxHeight().clip(RoundedCornerShape(50)).background(Brush.horizontalGradient(listOf(scheme.tertiary, scheme.primary))))
+        }
     }
 }
 
@@ -134,7 +190,7 @@ fun PickerRow(
             Text(label, style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(value, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
+        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
     }
     if (!last) Box(Modifier.padding(start = 70.dp).fillMaxWidth().height(1.dp).background(scheme.outlineVariant.copy(alpha = 0.6f)))
 }
@@ -297,7 +353,7 @@ fun PinPad(onDigit: (Char) -> Unit, onBackspace: () -> Unit, modifier: Modifier 
                     ) {
                         when (key) {
                             ' ' -> Unit
-                            '⌫' -> Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = stringResource(R.string.delete))
+                            '⌫' -> Icon(Icons.AutoMirrored.Rounded.Backspace, contentDescription = stringResource(R.string.delete))
                             else -> Text(key.toString(), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold), textAlign = TextAlign.Center)
                         }
                     }

@@ -31,13 +31,13 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
@@ -71,6 +71,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -134,8 +135,8 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(if (form.isEdit) R.string.edit_expense else R.string.add_transaction), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                navigationIcon = { IconButton(onClick = onDone) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } },
-                actions = { if (form.isEdit) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete)) } }
+                navigationIcon = { IconButton(onClick = onDone) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back)) } },
+                actions = { if (form.isEdit) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete)) } }
             )
         },
         bottomBar = {
@@ -158,12 +159,12 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Filled.Mic, contentDescription = null, tint = scheme.tertiary)
+                Icon(Icons.Rounded.Mic, contentDescription = null, tint = scheme.tertiary)
                 Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
                     Text(stringResource(R.string.voice_title), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(voiceMessage ?: form.heardText?.let { "“$it”" } ?: stringResource(R.string.voice_subtitle), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
+                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
             }
 
             HqCard(padding = 0) {
@@ -219,7 +220,7 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
             val today = LocalDate.now()
             HqCard(padding = 0) {
                 PickerRow(
-                    icon = Icons.Filled.CalendarToday,
+                    icon = Icons.Rounded.CalendarToday,
                     label = stringResource(R.string.date),
                     value = when (form.date) {
                         today -> stringResource(R.string.today_with_date, Dates.longLabel(form.date.toEpochDay()))
@@ -231,12 +232,17 @@ fun AddExpenseScreen(expenseId: Long, groupId: Long, startWithVoice: Boolean, on
                 )
                 Row(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(today.minusDays(1) to R.string.yesterday, today to R.string.today, today.plusDays(1) to R.string.tomorrow).forEach { (day, labelRes) ->
-                        FilterChip(selected = form.date == day, onClick = { vm.update { copy(date = day) } }, label = { Text(stringResource(labelRes), maxLines = 1) })
+                        FilterChip(
+                            selected = form.date == day,
+                            onClick = { vm.update { copy(date = day) } },
+                            label = { Text(stringResource(labelRes), maxLines = 1, softWrap = false, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
                 PickerRow(icon = state.category.icon, tint = state.category.color, label = stringResource(R.string.category), value = state.category.label(), onClick = { sheet = Sheet.CATEGORY })
                 PickerRow(
-                    icon = Icons.Filled.Groups,
+                    icon = Icons.Rounded.Groups,
                     label = stringResource(R.string.split_with_group),
                     value = state.groups.firstOrNull { it.group.id == form.groupId }?.let { "${it.group.emoji} ${it.group.name}" } ?: stringResource(R.string.not_shared),
                     onClick = { sheet = Sheet.GROUP },
@@ -346,7 +352,7 @@ fun OptionSheet(title: String, onDismiss: () -> Unit, dismissByDrag: Boolean = t
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 28.dp)) {
             Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (!dismissByDrag) IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel)) }
+                if (!dismissByDrag) IconButton(onClick = onDismiss) { Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.cancel)) }
             }
             content()
         }

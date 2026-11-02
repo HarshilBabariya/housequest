@@ -1,5 +1,6 @@
 package com.homequest.app.ui.screens.groups
 
+import android.icu.text.BreakIterator
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -18,7 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -69,7 +70,7 @@ fun GroupsScreen(onOpenGroup: (Long) -> Unit) {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { TopAppBar(title = { Text(stringResource(R.string.tab_groups)) }) },
-        floatingActionButton = { ExtendedFloatingActionButton(onClick = { showCreate = true }, icon = { Icon(Icons.Filled.Add, contentDescription = null) }, text = { Text(stringResource(R.string.new_group)) }) }
+        floatingActionButton = { ExtendedFloatingActionButton(onClick = { showCreate = true }, icon = { Icon(Icons.Rounded.Add, contentDescription = null) }, text = { Text(stringResource(R.string.new_group)) }) }
     ) { padding ->
         if (state.groups.isEmpty()) {
             EmptyState("🤝", stringResource(R.string.no_groups_title), stringResource(R.string.no_groups_body), Modifier.padding(padding))
@@ -118,13 +119,16 @@ fun GroupsScreen(onOpenGroup: (Long) -> Unit) {
 fun CreateGroupSheet(members: List<MemberEntity>, onDismiss: () -> Unit, onCreate: (String, String, List<Long>) -> Unit) {
     var name by remember { mutableStateOf("") }
     var emoji by remember { mutableStateOf(groupEmojis.first()) }
+    var customEmoji by remember { mutableStateOf<String?>(null) }
+    var typingEmoji by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf(members.map { it.id }.toSet()) }
     OptionSheet(stringResource(R.string.new_group), onDismiss, dismissByDrag = false) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             HqTextField(name, { name = it }, stringResource(R.string.group_name), placeholder = stringResource(R.string.group_name_hint))
             Text(stringResource(R.string.icon), style = MaterialTheme.typography.labelLarge)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                groupEmojis.forEach { e -> FilterChip(selected = emoji == e, onClick = { emoji = e }, label = { Text(e, fontSize = 20.sp) }) }
+                (groupEmojis + listOfNotNull(customEmoji)).forEach { e -> FilterChip(selected = emoji == e, onClick = { emoji = e }, label = { Text(e, fontSize = 20.sp) }) }
+                FilterChip(selected = false, onClick = { typingEmoji = true }, label = { Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.custom_icon)) })
             }
             Text(stringResource(R.string.members), style = MaterialTheme.typography.labelLarge)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -133,4 +137,24 @@ fun CreateGroupSheet(members: List<MemberEntity>, onDismiss: () -> Unit, onCreat
             PrimaryButton(stringResource(R.string.create_group), onClick = { onCreate(name, emoji, selected.toList()) }, enabled = name.isNotBlank() && selected.size >= 2)
         }
     }
+    if (typingEmoji) {
+        var typed by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { typingEmoji = false },
+            title = { Text(stringResource(R.string.custom_icon)) },
+            text = { HqTextField(typed, { typed = firstSymbol(it) }, stringResource(R.string.custom_icon_label), placeholder = "🏏", textStyle = MaterialTheme.typography.headlineMedium) },
+            confirmButton = {
+                TextButton(onClick = { customEmoji = typed; emoji = typed; typingEmoji = false }, enabled = typed.isNotBlank()) { Text(stringResource(R.string.ok)) }
+            },
+            dismissButton = { TextButton(onClick = { typingEmoji = false }) { Text(stringResource(R.string.cancel)) } }
+        )
+    }
+}
+
+private fun firstSymbol(text: String): String {
+    val trimmed = text.trim()
+    if (trimmed.isEmpty()) return ""
+    val it = BreakIterator.getCharacterInstance().apply { setText(trimmed) }
+    val end = it.last()
+    return trimmed.substring(it.previous(), end)
 }

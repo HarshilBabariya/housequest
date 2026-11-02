@@ -4,6 +4,8 @@ import com.homequest.app.data.local.MemberDao
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.domain.Accessories
 import com.homequest.app.domain.AvatarConfig
+import com.homequest.app.domain.Beard
+import com.homequest.app.domain.FaceShape
 import com.homequest.app.domain.Gender
 import com.homequest.app.domain.HairColors
 import com.homequest.app.domain.HairStyles
@@ -58,7 +60,9 @@ class MemberRepository(
                 outfitId = avatar.outfitId,
                 accessoryId = avatar.accessoryId,
                 gender = avatar.gender,
-                mood = avatar.mood?.name.orEmpty()
+                mood = avatar.mood?.name.orEmpty(),
+                faceShape = avatar.faceShape,
+                beard = avatar.beard
             )
         )
     }
@@ -85,11 +89,13 @@ class MemberRepository(
 
     private fun randomAvatar(gender: Gender) = AvatarConfig(
         skinTone = Random.nextInt(SkinTones.size),
-        hairId = if (gender == Gender.FEMALE) listOf(HairStyles.LONG, HairStyles.CURLY).random() else listOf(HairStyles.SHORT, HairStyles.BUZZ).random(),
+        hairId = if (gender == Gender.FEMALE) listOf(HairStyles.LONG, HairStyles.CURLY, HairStyles.PIXIE).random() else listOf(HairStyles.SHORT, HairStyles.BUZZ, HairStyles.SIDE_PART).random(),
         hairColor = Random.nextInt(HairColors.size),
-        outfitId = listOf(Outfits.TEE, Outfits.SHIRT).random(),
+        outfitId = listOf(Outfits.TEE, Outfits.SHIRT, Outfits.POLO).random(),
         accessoryId = Accessories.NONE,
-        gender = gender
+        gender = gender,
+        faceShape = FaceShape.entries.random(),
+        beard = if (gender == Gender.MALE) listOf(Beard.NONE, Beard.STUBBLE, Beard.MUSTACHE).random() else Beard.NONE
     )
 
     private fun newMember(name: String, relation: String, isOwner: Boolean = false, phone: String = "", avatar: AvatarConfig) =
@@ -103,7 +109,9 @@ class MemberRepository(
             hairColor = avatar.hairColor,
             outfitId = avatar.outfitId,
             accessoryId = avatar.accessoryId,
-            gender = avatar.gender
+            gender = avatar.gender,
+            faceShape = avatar.faceShape,
+            beard = avatar.beard
         )
 }
 
@@ -114,7 +122,9 @@ fun MemberEntity.avatar(): AvatarConfig = AvatarConfig(
     outfitId = outfitId.ifBlank { Outfits.TEE },
     accessoryId = accessoryId.ifBlank { Accessories.NONE },
     gender = gender,
-    mood = Mood.entries.firstOrNull { it.name == mood }
+    mood = Mood.entries.firstOrNull { it.name == mood },
+    faceShape = faceShape,
+    beard = beard
 )
 
 val MemberEntity.hasPin: Boolean get() = pinHash.isNotEmpty()

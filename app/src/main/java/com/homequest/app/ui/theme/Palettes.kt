@@ -13,7 +13,8 @@ data class Palette(
     val lightBackground: Color,
     val lightSurface: Color,
     val darkBackground: Color,
-    val darkSurface: Color
+    val darkSurface: Color,
+    val glass: Boolean = false
 ) {
     fun scheme(dark: Boolean): ColorScheme = if (dark) {
         darkColorScheme(
@@ -72,6 +73,21 @@ data class Palette(
     }
 }
 
+fun ColorScheme.glassy(dark: Boolean): ColorScheme {
+    val frost = Color.White
+    return copy(
+        background = Color.Transparent,
+        surface = Color.Transparent,
+        surfaceContainerLowest = frost.copy(alpha = if (dark) 0.08f else 0.62f),
+        surfaceContainerLow = surfaceContainerLow.copy(alpha = 0.94f),
+        surfaceContainer = surfaceContainer.copy(alpha = 0.94f),
+        surfaceContainerHigh = surfaceContainerHigh.copy(alpha = 0.96f),
+        surfaceContainerHighest = surfaceContainerHighest.copy(alpha = 0.96f),
+        surfaceVariant = frost.copy(alpha = if (dark) 0.1f else 0.45f),
+        outlineVariant = frost.copy(alpha = if (dark) 0.18f else 0.75f)
+    )
+}
+
 private fun Color.darken(amount: Float) = Color(red * (1 - amount), green * (1 - amount), blue * (1 - amount), alpha)
 private fun Color.lighten(amount: Float) = Color(red + (1 - red) * amount, green + (1 - green) * amount, blue + (1 - blue) * amount, alpha)
 
@@ -106,6 +122,12 @@ object Palettes {
             primary = Color(0xFF6D28D9), secondary = Color(0xFFF59E0B), tertiary = Color(0xFF14B8A6),
             lightBackground = Color(0xFFF7F3FB), lightSurface = Color(0xFFFFFFFF),
             darkBackground = Color(0xFF130B1C), darkSurface = Color(0xFF21142C)
+        ),
+        ThemeIds.GLASS to Palette(
+            primary = Color(0xFF6366F1), secondary = Color(0xFF06B6D4), tertiary = Color(0xFFEC4899),
+            lightBackground = Color(0xFFEEF0FF), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF110E2B), darkSurface = Color(0xFF1C1842),
+            glass = true
         )
     )
 

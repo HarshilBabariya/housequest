@@ -1,37 +1,38 @@
 package com.homequest.app.domain
 
+import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.CardGiftcard
-import androidx.compose.material.icons.filled.Celebration
-import androidx.compose.material.icons.filled.Checkroom
-import androidx.compose.material.icons.filled.ChildCare
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Flight
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.LocalCafe
-import androidx.compose.material.icons.filled.LocalGasStation
-import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.Pets
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Savings
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Spa
-import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material.icons.filled.Train
-import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.rounded.AccountBalance
+import androidx.compose.material.icons.rounded.Build
+import androidx.compose.material.icons.rounded.CardGiftcard
+import androidx.compose.material.icons.rounded.Celebration
+import androidx.compose.material.icons.rounded.Checkroom
+import androidx.compose.material.icons.rounded.ChildCare
+import androidx.compose.material.icons.rounded.CreditCard
+import androidx.compose.material.icons.rounded.DirectionsCar
+import androidx.compose.material.icons.rounded.FitnessCenter
+import androidx.compose.material.icons.rounded.Flight
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.Lightbulb
+import androidx.compose.material.icons.rounded.LocalCafe
+import androidx.compose.material.icons.rounded.LocalGasStation
+import androidx.compose.material.icons.rounded.MedicalServices
+import androidx.compose.material.icons.rounded.Movie
+import androidx.compose.material.icons.rounded.Payments
+import androidx.compose.material.icons.rounded.Pets
+import androidx.compose.material.icons.rounded.PhoneAndroid
+import androidx.compose.material.icons.rounded.QrCode
+import androidx.compose.material.icons.rounded.Restaurant
+import androidx.compose.material.icons.rounded.Savings
+import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.ShoppingBag
+import androidx.compose.material.icons.rounded.ShoppingCart
+import androidx.compose.material.icons.rounded.Spa
+import androidx.compose.material.icons.rounded.SportsEsports
+import androidx.compose.material.icons.rounded.Train
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.homequest.app.R
@@ -51,43 +52,48 @@ data class CategoryAmount(val category: Category, val total: Double)
 
 object CategoryIcons {
     private val byKey: Map<String, ImageVector> = linkedMapOf(
-        "cart" to Icons.Filled.ShoppingCart,
-        "bulb" to Icons.Filled.Lightbulb,
-        "home" to Icons.Filled.Home,
-        "car" to Icons.Filled.DirectionsCar,
-        "restaurant" to Icons.Filled.Restaurant,
-        "medical" to Icons.Filled.MedicalServices,
-        "school" to Icons.Filled.School,
-        "movie" to Icons.Filled.Movie,
-        "bag" to Icons.Filled.ShoppingBag,
-        "box" to Icons.Filled.Inventory2,
-        "phone" to Icons.Filled.PhoneAndroid,
-        "gift" to Icons.Filled.CardGiftcard,
-        "pets" to Icons.Filled.Pets,
-        "flight" to Icons.Filled.Flight,
-        "train" to Icons.Filled.Train,
-        "fuel" to Icons.Filled.LocalGasStation,
-        "fitness" to Icons.Filled.FitnessCenter,
-        "cafe" to Icons.Filled.LocalCafe,
-        "baby" to Icons.Filled.ChildCare,
-        "wifi" to Icons.Filled.Wifi,
-        "repair" to Icons.Filled.Build,
-        "savings" to Icons.Filled.Savings,
-        "clothes" to Icons.Filled.Checkroom,
-        "party" to Icons.Filled.Celebration,
-        "games" to Icons.Filled.SportsEsports,
-        "spa" to Icons.Filled.Spa
+        "cart" to Icons.Rounded.ShoppingCart,
+        "bulb" to Icons.Rounded.Lightbulb,
+        "home" to Icons.Rounded.Home,
+        "car" to Icons.Rounded.DirectionsCar,
+        "restaurant" to Icons.Rounded.Restaurant,
+        "medical" to Icons.Rounded.MedicalServices,
+        "school" to Icons.Rounded.School,
+        "movie" to Icons.Rounded.Movie,
+        "bag" to Icons.Rounded.ShoppingBag,
+        "box" to Icons.Rounded.Inventory2,
+        "phone" to Icons.Rounded.PhoneAndroid,
+        "gift" to Icons.Rounded.CardGiftcard,
+        "pets" to Icons.Rounded.Pets,
+        "flight" to Icons.Rounded.Flight,
+        "train" to Icons.Rounded.Train,
+        "fuel" to Icons.Rounded.LocalGasStation,
+        "fitness" to Icons.Rounded.FitnessCenter,
+        "cafe" to Icons.Rounded.LocalCafe,
+        "baby" to Icons.Rounded.ChildCare,
+        "wifi" to Icons.Rounded.Wifi,
+        "repair" to Icons.Rounded.Build,
+        "savings" to Icons.Rounded.Savings,
+        "clothes" to Icons.Rounded.Checkroom,
+        "party" to Icons.Rounded.Celebration,
+        "games" to Icons.Rounded.SportsEsports,
+        "spa" to Icons.Rounded.Spa
     )
 
     val keys: List<String> = byKey.keys.toList()
 
-    fun of(key: String): ImageVector = byKey[key] ?: Icons.Filled.Inventory2
+    fun of(key: String): ImageVector = byKey[key] ?: Icons.Rounded.Inventory2
 }
 
 val CategoryColors = listOf(
     Color(0xFF43A047), Color(0xFFF9A825), Color(0xFF3949AB), Color(0xFF039BE5), Color(0xFFF4511E),
     Color(0xFFD81B60), Color(0xFF8E24AA), Color(0xFF00ACC1), Color(0xFFFB8C00), Color(0xFF757575),
-    Color(0xFF6D4C41), Color(0xFF00897B), Color(0xFFC0CA33), Color(0xFF5E35B1), Color(0xFFE53935)
+    Color(0xFF6D4C41), Color(0xFF00897B), Color(0xFFC0CA33), Color(0xFF5E35B1), Color(0xFFE53935),
+    Color(0xFF1E88E5), Color(0xFF7CB342), Color(0xFFFFB300), Color(0xFFEC407A), Color(0xFF26A69A),
+    Color(0xFFAB47BC), Color(0xFF5C6BC0), Color(0xFFFF7043), Color(0xFF8D6E63), Color(0xFF78909C),
+    Color(0xFF0D47A1), Color(0xFF1B5E20), Color(0xFFB71C1C), Color(0xFF4A148C), Color(0xFF006064),
+    Color(0xFFFF4081), Color(0xFF00E5FF), Color(0xFF76FF03), Color(0xFFFFD600), Color(0xFF455A64),
+    Color(0xFFF48FB1), Color(0xFF80CBC4), Color(0xFFB39DDB), Color(0xFFFFCC80), Color(0xFF90CAF9)
 )
 
 object BuiltInCategories {
@@ -123,10 +129,10 @@ object BuiltInCategories {
 }
 
 enum class PaymentMode(@StringRes val labelRes: Int, val icon: ImageVector, val color: Color) {
-    CASH(R.string.pay_cash, Icons.Filled.Payments, Color(0xFF43A047)),
-    UPI(R.string.pay_upi, Icons.Filled.QrCode, Color(0xFF5E35B1)),
-    CARD(R.string.pay_card, Icons.Filled.CreditCard, Color(0xFFFB8C00)),
-    BANK(R.string.pay_bank, Icons.Filled.AccountBalance, Color(0xFF039BE5))
+    CASH(R.string.pay_cash, Icons.Rounded.Payments, Color(0xFF43A047)),
+    UPI(R.string.pay_upi, Icons.Rounded.QrCode, Color(0xFF5E35B1)),
+    CARD(R.string.pay_card, Icons.Rounded.CreditCard, Color(0xFFFB8C00)),
+    BANK(R.string.pay_bank, Icons.Rounded.AccountBalance, Color(0xFF039BE5))
 }
 
 enum class SplitType { EQUAL, CUSTOM, NONE }
@@ -139,17 +145,17 @@ enum class RepeatRule(@StringRes val labelRes: Int) {
     YEARLY(R.string.repeat_yearly)
 }
 
-enum class Mood(val emoji: String, @StringRes val labelRes: Int, @StringRes val lineRes: Int) {
-    HAPPY("😄", R.string.mood_happy, R.string.mood_line_happy),
-    LOVE("😍", R.string.mood_love, R.string.mood_line_love),
-    EXCITED("🤩", R.string.mood_excited, R.string.mood_line_excited),
-    SMART("🤓", R.string.mood_smart, R.string.mood_line_smart),
-    NEUTRAL("🙂", R.string.mood_neutral, R.string.mood_line_neutral),
-    CONFUSED("😕", R.string.mood_confused, R.string.mood_line_confused),
-    SLEEPY("😴", R.string.mood_sleepy, R.string.mood_line_sleepy),
-    SAD("😢", R.string.mood_sad, R.string.mood_line_sad),
-    WORRIED("😟", R.string.mood_worried, R.string.mood_line_worried),
-    ANGRY("😤", R.string.mood_angry, R.string.mood_line_angry)
+enum class Mood(val emoji: String, @StringRes val labelRes: Int, @ArrayRes val linesRes: Int) {
+    HAPPY("😄", R.string.mood_happy, R.array.mood_lines_happy),
+    LOVE("😍", R.string.mood_love, R.array.mood_lines_love),
+    EXCITED("🤩", R.string.mood_excited, R.array.mood_lines_excited),
+    SMART("🤓", R.string.mood_smart, R.array.mood_lines_smart),
+    NEUTRAL("🙂", R.string.mood_neutral, R.array.mood_lines_neutral),
+    CONFUSED("😕", R.string.mood_confused, R.array.mood_lines_confused),
+    SLEEPY("😴", R.string.mood_sleepy, R.array.mood_lines_sleepy),
+    SAD("😢", R.string.mood_sad, R.array.mood_lines_sad),
+    WORRIED("😟", R.string.mood_worried, R.array.mood_lines_worried),
+    ANGRY("😤", R.string.mood_angry, R.array.mood_lines_angry)
 }
 
 data class Currency(val code: String, val symbol: String)
@@ -192,8 +198,37 @@ data class AvatarConfig(
     val outfitId: String = Outfits.TEE,
     val accessoryId: String = Accessories.NONE,
     val gender: Gender = Gender.MALE,
-    val mood: Mood? = null
+    val mood: Mood? = null,
+    val faceShape: FaceShape = FaceShape.OVAL,
+    val beard: Beard = Beard.NONE
 )
+
+enum class FaceShape(@StringRes val labelRes: Int) {
+    OVAL(R.string.face_oval),
+    ROUND(R.string.face_round),
+    SQUARE(R.string.face_square),
+    HEART(R.string.face_heart),
+    LONG(R.string.face_long)
+}
+
+enum class Beard(@StringRes val labelRes: Int) {
+    NONE(R.string.beard_none),
+    STUBBLE(R.string.beard_stubble),
+    MUSTACHE(R.string.beard_mustache),
+    GOATEE(R.string.beard_goatee),
+    CHIN_STRAP(R.string.beard_chin_strap),
+    FULL(R.string.beard_full)
+}
+
+enum class AvatarAction(@StringRes val labelRes: Int, val emoji: String, val durationMs: Int) {
+    WAVE(R.string.act_wave, "👋", 1500),
+    JUMP(R.string.act_jump, "🦘", 1100),
+    SPIN(R.string.act_spin, "🌀", 1000),
+    DANCE(R.string.act_dance, "💃", 2000),
+    WINK(R.string.act_wink, "😉", 1200),
+    CHEER(R.string.act_cheer, "🙌", 1600),
+    LAUGH(R.string.act_laugh, "😂", 1500)
+}
 
 object HairStyles {
     const val SHORT = "hair_short"
@@ -206,6 +241,12 @@ object HairStyles {
     const val BUN = "hair_bun"
     const val BRAIDS = "hair_braids"
     const val MOHAWK = "hair_mohawk"
+    const val SPIKY = "hair_spiky"
+    const val SIDE_PART = "hair_side_part"
+    const val QUIFF = "hair_quiff"
+    const val AFRO = "hair_afro"
+    const val PIXIE = "hair_pixie"
+    const val MAN_BUN = "hair_man_bun"
 }
 
 object Outfits {
@@ -221,6 +262,12 @@ object Outfits {
     const val DRESS = "outfit_dress"
     const val SPACESUIT = "outfit_spacesuit"
     const val HERO = "outfit_hero"
+    const val POLO = "outfit_polo"
+    const val JERSEY = "outfit_jersey"
+    const val LEATHER = "outfit_leather"
+    const val NEHRU = "outfit_nehru"
+    const val LEHENGA = "outfit_lehenga"
+    const val LAB_COAT = "outfit_lab_coat"
 }
 
 object Accessories {
@@ -231,6 +278,13 @@ object Accessories {
     const val CAP = "acc_cap"
     const val HEADPHONES = "acc_headphones"
     const val CROWN = "acc_crown"
+    const val SUNGLASSES = "acc_sunglasses"
+    const val BEANIE = "acc_beanie"
+    const val TURBAN = "acc_turban"
+    const val FLOWER = "acc_flower"
+    const val BOW_TIE = "acc_bow_tie"
+    const val NOSE_RING = "acc_nose_ring"
+    const val CHAIN = "acc_chain"
 }
 
 object Features {
@@ -245,6 +299,7 @@ object ThemeIds {
     const val MIDNIGHT = "theme_midnight"
     const val CANDY = "theme_candy"
     const val ROYAL = "theme_royal"
+    const val GLASS = "theme_glass"
 }
 
 val SkinTones = listOf(

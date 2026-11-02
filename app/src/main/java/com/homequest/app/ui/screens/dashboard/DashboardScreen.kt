@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,7 +22,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.automirrored.rounded.TrendingDown
+import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import androidx.compose.material.icons.rounded.Handshake
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.Sell
+import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -33,18 +37,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homequest.app.R
+import com.homequest.app.domain.AvatarAction
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.data.repository.resolve
 import com.homequest.app.notifications.nextOccurrence
@@ -52,6 +58,7 @@ import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AnimatedCount
 import com.homequest.app.ui.components.AnimatedMoney
 import com.homequest.app.ui.components.AreaChart
+import com.homequest.app.ui.components.AvatarPlay
 import com.homequest.app.ui.components.AvatarView
 import com.homequest.app.ui.components.BarChart
 import com.homequest.app.ui.components.CategoryIcon
@@ -59,10 +66,12 @@ import com.homequest.app.ui.components.DonutChart
 import com.homequest.app.ui.components.EmptyState
 import com.homequest.app.ui.components.ExpenseRow
 import com.homequest.app.ui.components.HqCard
+import com.homequest.app.ui.components.LevelProgress
 import com.homequest.app.ui.components.ProgressRing
 import com.homequest.app.ui.components.SectionHeader
 import com.homequest.app.ui.components.StatTile
 import com.homequest.app.ui.components.label
+import com.homequest.app.ui.components.moodLine
 import com.homequest.app.util.Dates
 import com.homequest.app.util.money
 import java.time.LocalDateTime
@@ -90,7 +99,7 @@ fun DashboardScreen(
     val scheme = MaterialTheme.colorScheme
 
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { padding ->
-        LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 24.dp)) {
+        LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 40.dp)) {
             item { Header(state, onOpenProfile, onVoiceExpense, onOpenRewards) }
 
             item {
@@ -122,13 +131,13 @@ fun DashboardScreen(
             item {
                 val change = state.monthChangePercent
                 Row(Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatTile(stringResource(R.string.today), state.todayTotal.money(symbol), Modifier.weight(1f), hint = Dates.shortLabel(state.today.toEpochDay()), emoji = "☀️", onClick = onAddExpense)
+                    StatTile(stringResource(R.string.today), state.todayTotal.money(symbol), Icons.Rounded.WbSunny, Modifier.weight(1f), hint = Dates.shortLabel(state.today.toEpochDay()), accent = Color(0xFFF59E0B), onClick = onAddExpense)
                     StatTile(
                         stringResource(R.string.vs_last_month),
                         change?.let { "${if (it >= 0) "+" else ""}${"%.0f".format(it)}%" } ?: "—",
+                        if (change != null && change > 0) Icons.AutoMirrored.Rounded.TrendingUp else Icons.AutoMirrored.Rounded.TrendingDown,
                         Modifier.weight(1f),
                         hint = stringResource(if (change == null) R.string.no_data_yet else if (change <= 0) R.string.spending_less else R.string.spending_more),
-                        emoji = if (change != null && change > 0) "📈" else "📉",
                         accent = if (change != null && change > 0) scheme.error else scheme.primary
                     )
                 }
@@ -140,9 +149,9 @@ fun DashboardScreen(
                             state.groupNet < -0.005 -> (-state.groupNet).money(symbol)
                             else -> stringResource(R.string.settled)
                         },
+                        Icons.Rounded.Handshake,
                         Modifier.weight(1f),
                         hint = stringResource(when { state.groupNet > 0.005 -> R.string.owed_to_you; state.groupNet < -0.005 -> R.string.you_owe; else -> R.string.nothing_pending }),
-                        emoji = "🤝",
                         accent = if (state.groupNet < -0.005) scheme.error else scheme.tertiary,
                         onClick = onOpenGroups
                     )
@@ -150,9 +159,9 @@ fun DashboardScreen(
                     StatTile(
                         stringResource(R.string.top_category),
                         top?.category?.label() ?: "—",
+                        top?.category?.icon ?: Icons.Rounded.Sell,
                         Modifier.weight(1f),
                         hint = top?.let { stringResource(R.string.amount_this_month, it.total.money(symbol)) } ?: stringResource(R.string.nothing_logged),
-                        emoji = "🏷️",
                         accent = top?.category?.color ?: scheme.primary,
                         onClick = onOpenExpenses
                     )
@@ -172,6 +181,8 @@ fun DashboardScreen(
                         AreaChart(
                             values = state.monthCumulative,
                             axisLabels = listOf(1, 8, 15, 22, month.lengthOfMonth()).map { Dates.shortLabel(month.atDay(it).toEpochDay()) },
+                            valueLabel = { it.money(symbol) },
+                            pointLabel = { Dates.shortLabel(month.atDay(it + 1).toEpochDay()) },
                             slots = month.lengthOfMonth(),
                             pace = state.settings.monthlyBudget.takeIf { it > 0 },
                             modifier = Modifier.padding(top = 8.dp)
@@ -191,7 +202,7 @@ fun DashboardScreen(
                         }
                         Text(stringResource(R.string.avg_per_day, (weekTotal / 7).money(symbol)), style = MaterialTheme.typography.labelMedium, color = scheme.primary, maxLines = 1)
                     }
-                    BarChart(state.weekValues, state.weekLabels, highlightLabel = state.todayTotal.money(symbol))
+                    BarChart(state.weekValues, state.weekLabels, valueLabel = { it.money(symbol) })
                 }
             }
 
@@ -202,7 +213,7 @@ fun DashboardScreen(
                         EmptyState("🧾", stringResource(R.string.nothing_logged), stringResource(R.string.first_expense_hint))
                     } else {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            DonutChart(state.categoryTotals, centerLabel = state.monthTotal.money(symbol))
+                            DonutChart(state.categoryTotals, valueLabel = { it.money(symbol) }, centerLabel = state.monthTotal.money(symbol))
                             Column(Modifier.padding(start = 16.dp).weight(1f)) {
                                 state.categoryTotals.take(5).forEach { t ->
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 3.dp)) {
@@ -276,61 +287,54 @@ fun DashboardScreen(
 private fun Header(state: DashboardState, onOpenProfile: () -> Unit, onVoice: () -> Unit, onOpenRewards: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     val mood = state.mood
-    var wave by remember { mutableIntStateOf(0) }
-    LaunchedEffect(state.member?.id) { if (state.member != null) { delay(400); wave++ } }
+    var play by remember { mutableStateOf<AvatarPlay?>(null) }
+    LaunchedEffect(state.member?.id) { if (state.member != null) { delay(400); play = AvatarPlay(AvatarAction.entries.random(), (play?.nonce ?: 0) + 1) } }
     val hour = LocalTime.now().hour
     val greeting = stringResource(when (hour) { in 5..11 -> R.string.good_morning; in 12..16 -> R.string.good_afternoon; in 17..21 -> R.string.good_evening; else -> R.string.still_up })
 
-    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp)) {
+    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 20.dp, end = 20.dp, top = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.border(2.dp, scheme.primary.copy(alpha = 0.35f), CircleShape).padding(3.dp).clip(CircleShape).clickable(onClick = onOpenProfile)) {
-                state.member?.let { AvatarView(it.avatar(), size = 64.dp, animated = true, mood = mood, waveTrigger = wave) }
+                state.member?.let { AvatarView(it.avatar(), size = 56.dp, animated = true, mood = mood, play = play, idleActions = true) }
             }
-            Column(Modifier.weight(1f).padding(start = 14.dp)) {
-                Text(state.member?.name.orEmpty(), style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                Text(state.member?.name.orEmpty(), style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Row(
                     Modifier
                         .padding(top = 4.dp)
                         .clip(RoundedCornerShape(50))
                         .background(scheme.primaryContainer)
                         .clickable(onClick = onOpenRewards)
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                        .padding(horizontal = 10.dp, vertical = 3.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(stringResource(R.string.level_n, state.level.level), style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer, maxLines = 1)
-                    Text(" · ⭐ ", style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer)
+                    Text("⭐ ", style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer)
                     AnimatedCount(state.profile.points, MaterialTheme.typography.labelMedium, scheme.onPrimaryContainer)
                     Text(" · 🔥 ${state.profile.streakDays}", style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer, maxLines = 1)
                 }
             }
-            IconButton(onClick = onVoice, modifier = Modifier.size(46.dp).border(1.dp, scheme.tertiary.copy(alpha = 0.5f), CircleShape).background(scheme.tertiaryContainer.copy(alpha = 0.5f), CircleShape)) {
-                Icon(Icons.Filled.Mic, contentDescription = stringResource(R.string.voice_title), tint = scheme.tertiary)
+            IconButton(onClick = onVoice, modifier = Modifier.size(44.dp).border(1.dp, scheme.tertiary.copy(alpha = 0.5f), CircleShape).background(scheme.tertiaryContainer.copy(alpha = 0.5f), CircleShape)) {
+                Icon(Icons.Rounded.Mic, contentDescription = stringResource(R.string.voice_title), tint = scheme.tertiary)
             }
         }
-        Spacer(Modifier.height(4.dp))
-        LinearProgressIndicator(
-            progress = { state.level.progress(state.profile.lifetimePoints) },
-            modifier = Modifier.fillMaxWidth().height(6.dp).padding(top = 8.dp),
-            color = scheme.primary,
-            trackColor = scheme.surfaceContainerHigh
-        )
+        LevelProgress(state.level, state.profile.lifetimePoints, Modifier.padding(top = 12.dp).clip(RoundedCornerShape(8.dp)).clickable(onClick = onOpenRewards))
         AnimatedVisibility(visible = state.member != null, enter = fadeIn() + slideInVertically { it / 2 }) {
             Row(
                 Modifier
-                    .padding(top = 12.dp)
+                    .padding(top = 10.dp)
                     .fillMaxWidth()
                     .background(scheme.surfaceContainerLowest, RoundedCornerShape(topStart = 6.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
                     .border(1.dp, scheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(topStart = 6.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(mood.emoji, fontSize = 22.sp, modifier = Modifier.padding(end = 10.dp))
+                Text(mood.emoji, fontSize = 20.sp, modifier = Modifier.padding(end = 10.dp))
                 Text(
-                    "$greeting ${stringResource(mood.lineRes, state.member?.name.orEmpty())}",
+                    "$greeting ${moodLine(mood, state.today, state.member?.name.orEmpty())}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = scheme.onSurface,
                     modifier = Modifier.weight(1f),
-                    maxLines = 3,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }

@@ -14,9 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
@@ -118,7 +118,7 @@ fun BudgetsScreen(onBack: () -> Unit) {
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.budgets)) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } }
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back)) } }
             )
         }
     ) { padding ->
@@ -148,7 +148,7 @@ fun BudgetsScreen(onBack: () -> Unit) {
                         }
                     }
                     FilledTonalButton(onClick = { editMonthly = true }, modifier = Modifier.padding(top = 14.dp).fillMaxWidth()) {
-                        Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.height(18.dp))
+                        Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.height(18.dp))
                         Text(stringResource(if (state.monthlyBudget > 0) R.string.change_budget else R.string.set_monthly_budget), modifier = Modifier.padding(start = 8.dp), maxLines = 1)
                     }
                 }
@@ -179,7 +179,7 @@ fun BudgetsScreen(onBack: () -> Unit) {
                             Text(spent.money(state.symbol), style = MaterialTheme.typography.titleSmall, color = if (fraction > 1f) scheme.error else scheme.onSurface, maxLines = 1)
                             if (limit > 0) Text(stringResource(R.string.of_limit, limit.money(state.symbol)), style = MaterialTheme.typography.labelSmall, color = scheme.onSurfaceVariant, maxLines = 1)
                         }
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
+                        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
                     }
                 }
             }

@@ -8,6 +8,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -18,6 +19,7 @@ import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.domain.Badge
 import com.homequest.app.util.LocaleHelper
 import com.homequest.app.util.money
+import java.time.LocalDate
 
 class NotificationHelper(private val context: Context) {
 
@@ -47,37 +49,46 @@ class NotificationHelper(private val context: Context) {
 
     fun showReminder(language: String, reminder: ReminderEntity, symbol: String) {
         val res = LocaleHelper.localized(context, language).resources
+        val seed = today() + reminder.id
         val amount = reminder.amount
         val (title, body) = if (amount != null) {
-            res.getString(R.string.notif_bill_title, reminder.title) to res.pick(R.array.notif_bill_bodies).format(amount.money(symbol))
+            res.rotate(R.array.notif_bill_titles, seed).format(reminder.title) to res.rotate(R.array.notif_bill_bodies, seed).format(amount.money(symbol))
         } else {
-            res.pick(R.array.notif_nudge_titles) to res.pick(R.array.notif_nudge_bodies).format(reminder.title)
+            res.rotate(R.array.notif_nudge_titles, seed) to res.rotate(R.array.notif_nudge_bodies, seed).format(reminder.title)
         }
         post(ID_REMINDER_BASE + reminder.id.toInt(), CHANNEL_REMINDERS, title, body)
     }
 
     fun showBudgetAlert(language: String, label: String, spent: String, limit: String, exceeded: Boolean) {
         val res = LocaleHelper.localized(context, language).resources
-        val title = res.pick(if (exceeded) R.array.notif_budget_over_titles else R.array.notif_budget_warn_titles)
-        val body = res.getString(if (exceeded) R.string.notif_budget_over_body else R.string.notif_budget_warn_body, label, spent, limit)
+        val seed = today() + label.hashCode()
+        val title = res.rotate(if (exceeded) R.array.notif_budget_over_titles else R.array.notif_budget_warn_titles, seed)
+        val body = res.rotate(if (exceeded) R.array.notif_budget_over_bodies else R.array.notif_budget_warn_bodies, seed).format(label, spent, limit)
         post(ID_BUDGET, CHANNEL_BUDGET, title, body)
     }
 
     fun showBadge(language: String, badge: Badge) {
         val res = LocaleHelper.localized(context, language).resources
+        val seed = today() + badge.id.hashCode()
         post(
             ID_REWARD, CHANNEL_REWARDS,
-            res.getString(R.string.notif_badge_title, badge.emoji),
-            res.getString(R.string.notif_badge_body, res.getString(badge.nameRes), badge.bonusPoints)
+            res.rotate(R.array.notif_badge_titles, seed).format(badge.emoji),
+            res.rotate(R.array.notif_badge_bodies, seed).format(res.getString(badge.nameRes), badge.bonusPoints)
         )
     }
 
     fun showLevelUp(language: String, level: Int, titleRes: Int) {
         val res = LocaleHelper.localized(context, language).resources
-        post(ID_REWARD, CHANNEL_REWARDS, res.getString(R.string.notif_level_title, level), res.getString(R.string.notif_level_body, res.getString(titleRes)))
+        val seed = today() + level
+        post(ID_REWARD, CHANNEL_REWARDS, res.rotate(R.array.notif_level_titles, seed).format(level), res.rotate(R.array.notif_level_bodies, seed).format(res.getString(titleRes)))
     }
 
-    private fun android.content.res.Resources.pick(arrayRes: Int): String = getStringArray(arrayRes).random()
+    private fun today(): Long = LocalDate.now().toEpochDay()
+
+    private fun Resources.rotate(arrayRes: Int, seed: Long): String {
+        val items = getStringArray(arrayRes)
+        return items[Math.floorMod(seed, items.size.toLong()).toInt()]
+    }
 
     @SuppressLint("MissingPermission")
     private fun post(id: Int, channel: String, title: String, body: String) {

@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.GroupAdd
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.GroupAdd
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -65,18 +65,18 @@ fun GroupDetailScreen(groupId: Long, onBack: () -> Unit, onAddExpense: () -> Uni
         topBar = {
             TopAppBar(
                 title = { Text(group?.let { "${it.group.emoji} ${it.group.name}" } ?: stringResource(R.string.group), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) } },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back)) } },
                 actions = {
-                    IconButton(onClick = { editMembers = true }) { Icon(Icons.Filled.GroupAdd, contentDescription = stringResource(R.string.members)) }
+                    IconButton(onClick = { editMembers = true }) { Icon(Icons.Rounded.GroupAdd, contentDescription = stringResource(R.string.members)) }
                     IconButton(onClick = {
                         group?.let {
                             Sharing.shareText(context, shareTitle, Sharing.groupSummary(context, it.group.name, state.symbol, state.totalSpent, state.balances, state.settlements))
                         }
-                    }) { Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.share)) }
+                    }) { Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.share)) }
                 }
             )
         },
-        floatingActionButton = { FloatingActionButton(onClick = onAddExpense) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_shared_expense)) } }
+        floatingActionButton = { FloatingActionButton(onClick = onAddExpense) { Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_shared_expense)) } }
     ) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 96.dp)) {
             item {
