@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_a5">Not in this build. The lite build leaves out notification capture so Android lets you install it from WhatsApp or a file manager; the full build (installed over USB or from Play) has it. You can import a CSV from Me → Import CSV.</string>
+</resources>

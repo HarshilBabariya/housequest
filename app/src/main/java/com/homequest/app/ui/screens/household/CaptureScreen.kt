@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.homequest.app.AppContainer
+import com.homequest.app.BuildConfig
 import com.homequest.app.R
 import com.homequest.app.data.local.PaymentDraftEntity
 import com.homequest.app.domain.Category
@@ -94,7 +95,7 @@ fun CaptureScreen(onBack: () -> Unit, onEdit: (Long) -> Unit) {
         }
     ) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            item {
+            if (BuildConfig.PAYMENT_CAPTURE) item {
                 HqCard(Modifier.fillMaxWidth()) {
                     Text(stringResource(if (enabled) R.string.capture_on else R.string.capture_off), style = MaterialTheme.typography.titleMedium, color = if (enabled) scheme.primary else scheme.onSurface)
                     Text(stringResource(R.string.capture_explain), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp))

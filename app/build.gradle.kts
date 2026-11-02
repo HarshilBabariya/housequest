@@ -17,6 +17,19 @@ android {
         versionName = "1.7.1"
     }
 
+    flavorDimensions += "capture"
+    productFlavors {
+        create("full") {
+            dimension = "capture"
+            buildConfigField("boolean", "PAYMENT_CAPTURE", "true")
+        }
+        create("lite") {
+            dimension = "capture"
+            versionNameSuffix = "-lite"
+            buildConfigField("boolean", "PAYMENT_CAPTURE", "false")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -36,6 +49,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

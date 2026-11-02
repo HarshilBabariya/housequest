@@ -82,6 +82,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.homequest.app.BuildConfig
 import com.homequest.app.R
 import com.homequest.app.data.repository.DarkMode
 import com.homequest.app.data.repository.avatar
@@ -208,8 +209,8 @@ fun ProfileScreen(
         HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
             NavRow(Icons.Rounded.Storefront, Color(0xFF16A34A), stringResource(R.string.khata), stringResource(R.string.khata_sub), onOpenKhata)
             NavRow(Icons.Rounded.LocalDrink, Color(0xFF0EA5E9), stringResource(R.string.services), stringResource(R.string.services_sub), onOpenServices)
-            NavRow(Icons.Rounded.Diamond, Color(0xFFD99A1E), stringResource(R.string.savings), stringResource(R.string.savings_sub), onOpenSavings)
-            NavRow(Icons.Rounded.MarkEmailUnread, Color(0xFF8B5CF6), stringResource(R.string.capture), stringResource(R.string.capture_sub), onOpenCapture, last = true)
+            NavRow(Icons.Rounded.Diamond, Color(0xFFD99A1E), stringResource(R.string.savings), stringResource(R.string.savings_sub), onOpenSavings, last = !BuildConfig.PAYMENT_CAPTURE)
+            if (BuildConfig.PAYMENT_CAPTURE) NavRow(Icons.Rounded.MarkEmailUnread, Color(0xFF8B5CF6), stringResource(R.string.capture), stringResource(R.string.capture_sub), onOpenCapture, last = true)
         }
 
         SectionHeader(stringResource(R.string.your_data))

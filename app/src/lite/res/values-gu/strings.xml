@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_a5">આ બિલ્ડમાં નહીં. લાઇટ બિલ્ડમાં નોટિફિકેશન કૅપ્ચર નથી, જેથી Android તેને WhatsApp કે ફાઇલ મેનેજરથી ઇન્સ્ટોલ કરવા દે; ફુલ બિલ્ડ (USB કે Play થી ઇન્સ્ટોલ) માં તે છે. તમે “હું → CSV ઇમ્પોર્ટ કરો” વડે CSV લાવી શકો છો.</string>
+</resources>

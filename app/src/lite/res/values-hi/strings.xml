@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_a5">इस बिल्ड में नहीं। लाइट बिल्ड में नोटिफ़िकेशन कैप्चर नहीं है, ताकि Android इसे WhatsApp या फ़ाइल मैनेजर से इंस्टॉल करने दे; फ़ुल बिल्ड (USB या Play से इंस्टॉल) में यह है। आप “मैं → CSV इम्पोर्ट करें” से CSV ला सकते हैं।</string>
+</resources>

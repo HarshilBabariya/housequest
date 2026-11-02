@@ -13,6 +13,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.homequest.app.BuildConfig
 import com.homequest.app.MainActivity
 import com.homequest.app.R
 import com.homequest.app.data.local.ReminderEntity
@@ -38,11 +39,11 @@ class NotificationHelper(private val context: Context) {
     fun createChannels() {
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannels(
-            listOf(
+            listOfNotNull(
                 NotificationChannel(CHANNEL_REMINDERS, context.getString(R.string.channel_reminders), NotificationManager.IMPORTANCE_HIGH),
                 NotificationChannel(CHANNEL_BUDGET, context.getString(R.string.channel_budget), NotificationManager.IMPORTANCE_HIGH),
                 NotificationChannel(CHANNEL_REWARDS, context.getString(R.string.channel_rewards), NotificationManager.IMPORTANCE_DEFAULT),
-                NotificationChannel(CHANNEL_CAPTURE, context.getString(R.string.channel_capture), NotificationManager.IMPORTANCE_DEFAULT)
+                NotificationChannel(CHANNEL_CAPTURE, context.getString(R.string.channel_capture), NotificationManager.IMPORTANCE_DEFAULT).takeIf { BuildConfig.PAYMENT_CAPTURE }
             )
         )
     }

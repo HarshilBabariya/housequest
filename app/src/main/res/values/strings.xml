@@ -731,7 +731,6 @@
     <string name="faq_q4">How do I add an expense by voice?</string>
     <string name="faq_a4">Tap the mic and say something like “250 groceries by UPI note Diwali shopping”. Amount, category, payment mode and title are filled in; anything after “note” goes into the note.</string>
     <string name="faq_q5">Can it read my GPay or bank SMS?</string>
-    <string name="faq_a5">Not yet. You can import a CSV from Me → Import CSV. Capturing payments automatically from notifications is on the roadmap.</string>
     <string name="faq_q6">What does Pro give me?</string>
     <string name="faq_a6">Pro packs add points instantly, so you can unlock any theme, outfit, hair style, accessory or feature without waiting.</string>
     <string name="about_app">About app</string>
@@ -1166,7 +1165,6 @@
     <string name="unknown_payee">Payment</string>
     <string name="captures_hint">Tap to add them in one go</string>
     <string name="channel_capture">Captured payments</string>
-    <string name="capture_service_label">HomeQuest payment capture</string>
     <string name="notif_captured_title">Payment spotted 👀</string>
     <string name="notif_captured_credit_title">Money in 💸</string>
     <string name="notif_captured_body">%1$s to %2$s. Tap to add it.</string>

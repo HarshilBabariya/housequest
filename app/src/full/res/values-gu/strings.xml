@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_service_label">HomeQuest ચુકવણી કૅપ્ચર</string>
+    <string name="faq_a5">હા, નોટિફિકેશનમાંથી. “હું → ઘરના પૈસા → ચુકવણી આપમેળે પકડો” ખોલો અને નોટિફિકેશન ઍક્સેસ આપો. GPay, PhonePe, Paytm, BHIM, CRED, બેંક એપ્સ અને બેંક SMS ના અલર્ટ ડ્રાફ્ટ બને છે, જે ઉમેરતા પહેલાં તમે જોઈ લો છો, અને કંઈ પણ ફોનની બહાર જતું નથી. તમે “હું → CSV ઇમ્પોર્ટ કરો” વડે CSV પણ લાવી શકો છો.</string>
+</resources>

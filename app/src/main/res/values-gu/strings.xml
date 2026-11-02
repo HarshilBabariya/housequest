@@ -731,7 +731,6 @@
     <string name="faq_q4">બોલીને ખર્ચ કેવી રીતે ઉમેરું?</string>
     <string name="faq_a4">માઇક પર ટૅપ કરો અને કંઈક આવું બોલો “250 કરિયાણું UPIથી નોંધ દિવાળી શોપિંગ”. રકમ, શ્રેણી, ચુકવણીની રીત અને શીર્ષક આપમેળે ભરાઈ જાય છે; “નોંધ” પછી જે બોલો તે નોંધમાં જાય છે.</string>
     <string name="faq_q5">શું તે મારા GPay કે બેંક SMS વાંચી શકે?</string>
-    <string name="faq_a5">હજી નહીં. તમે “હું → CSV ઇમ્પોર્ટ કરો” વડે CSV લાવી શકો છો. નોટિફિકેશનમાંથી પેમેન્ટ આપમેળે પકડવાનું રોડમેપ પર છે.</string>
     <string name="faq_q6">Proથી મને શું મળે?</string>
     <string name="faq_a6">Pro પેક તરત પોઇન્ટ ઉમેરે છે, જેથી તમે રાહ જોયા વગર કોઈ પણ થીમ, પોશાક, હેર સ્ટાઇલ, એક્સેસરી કે ફીચર અનલૉક કરી શકો.</string>
     <string name="about_app">એપ વિશે</string>
@@ -1166,7 +1165,6 @@
     <string name="unknown_payee">ચુકવણી</string>
     <string name="captures_hint">બધી એકસાથે ઉમેરવા ટૅપ કરો</string>
     <string name="channel_capture">પકડાયેલી ચુકવણીઓ</string>
-    <string name="capture_service_label">HomeQuest ચુકવણી કૅપ્ચર</string>
     <string name="notif_captured_title">ચુકવણી પકડાઈ 👀</string>
     <string name="notif_captured_credit_title">પૈસા આવ્યા 💸</string>
     <string name="notif_captured_body">%2$s ને %1$s. ઉમેરવા ટૅપ કરો.</string>

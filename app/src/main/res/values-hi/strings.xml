@@ -731,7 +731,6 @@
     <string name="faq_q4">बोलकर खर्च कैसे जोड़ूँ?</string>
     <string name="faq_a4">माइक पर टैप करें और कुछ ऐसा बोलें “250 किराना UPI से नोट दिवाली शॉपिंग”। रकम, श्रेणी, भुगतान का तरीका और शीर्षक अपने-आप भर जाते हैं; “नोट” के बाद जो भी बोलें वह नोट में जाता है।</string>
     <string name="faq_q5">क्या यह मेरे GPay या बैंक SMS पढ़ सकता है?</string>
-    <string name="faq_a5">अभी नहीं। आप “मैं → CSV इम्पोर्ट करें” से CSV ला सकते हैं। नोटिफ़िकेशन से पेमेंट अपने-आप पकड़ना रोडमैप पर है।</string>
     <string name="faq_q6">Pro से मुझे क्या मिलता है?</string>
     <string name="faq_a6">Pro पैक तुरंत पॉइंट जोड़ देते हैं, ताकि आप बिना इंतज़ार कोई भी थीम, पोशाक, हेयर स्टाइल, एक्सेसरी या फ़ीचर अनलॉक कर सकें।</string>
     <string name="about_app">ऐप के बारे में</string>
@@ -1166,7 +1165,6 @@
     <string name="unknown_payee">भुगतान</string>
     <string name="captures_hint">सबको एक साथ जोड़ने के लिए टैप करें</string>
     <string name="channel_capture">पकड़े गए भुगतान</string>
-    <string name="capture_service_label">HomeQuest भुगतान कैप्चर</string>
     <string name="notif_captured_title">भुगतान पकड़ा गया 👀</string>
     <string name="notif_captured_credit_title">पैसे आए 💸</string>
     <string name="notif_captured_body">%2$s को %1$s। जोड़ने के लिए टैप करें।</string>
