@@ -196,6 +196,7 @@ private fun ReminderCard(r: ReminderEntity, category: Category?, symbol: String,
                         maxLines = 1
                     )
                     r.amount?.let { Text(" · ${it.money(symbol)}", style = MaterialTheme.typography.labelLarge, maxLines = 1) }
+                    if (r.autoLog) Text(" · ${stringResource(R.string.auto_badge)}", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.tertiary, maxLines = 1)
                 }
             }
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -245,6 +246,7 @@ private fun ReminderSheet(initial: ReminderEntity?, symbol: String, categories: 
     var month by remember { mutableStateOf(initial?.let { Month.of(it.month) } ?: Month.JANUARY) }
     var hour by remember { mutableIntStateOf(initial?.hour ?: 9) }
     var minute by remember { mutableIntStateOf(initial?.minute ?: 0) }
+    var autoLog by remember { mutableStateOf(initial?.autoLog ?: false) }
     val presetTitles = presets.map { stringResource(it.titleRes) }
 
     OptionSheet(stringResource(if (initial == null) R.string.new_reminder else R.string.edit_reminder), onDismiss, dismissByDrag = false) {
@@ -289,6 +291,15 @@ private fun ReminderSheet(initial: ReminderEntity?, symbol: String, categories: 
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(categories, key = { it.id }) { c -> CategoryChip(c, selected = categoryId == c.id) { categoryId = if (categoryId == c.id) null else c.id } }
             }
+            if (amount.toDoubleOrNull()?.takeIf { it > 0 } != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.auto_log), style = MaterialTheme.typography.labelLarge)
+                        Text(stringResource(R.string.auto_log_sub), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(checked = autoLog, onCheckedChange = { autoLog = it })
+                }
+            }
             PrimaryButton(
                 stringResource(R.string.save_reminder),
                 onClick = {
@@ -296,7 +307,8 @@ private fun ReminderSheet(initial: ReminderEntity?, symbol: String, categories: 
                         (initial ?: ReminderEntity(title = title, hour = hour, minute = minute, repeat = repeat)).copy(
                             title = title, hour = hour, minute = minute, repeat = repeat,
                             weekday = weekday.value, dayOfMonth = dayOfMonth, month = month.value,
-                            amount = amount.toDoubleOrNull()?.takeIf { it > 0 }, category = categoryId
+                            amount = amount.toDoubleOrNull()?.takeIf { it > 0 }, category = categoryId,
+                            autoLog = autoLog && amount.toDoubleOrNull()?.takeIf { it > 0 } != null
                         )
                     )
                 },

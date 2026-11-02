@@ -17,7 +17,6 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,6 +38,7 @@ import com.homequest.app.ui.components.EmptyState
 import com.homequest.app.ui.components.ExpenseRow
 import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.ui.components.StatTile
+import com.homequest.app.ui.components.TopBarAction
 import com.homequest.app.util.Dates
 import com.homequest.app.util.money
 
@@ -55,8 +55,8 @@ fun ExpensesScreen(onOpenExpense: (Long) -> Unit, onOpenCategories: () -> Unit, 
             TopAppBar(
                 title = { Text(stringResource(R.string.tab_expenses)) },
                 actions = {
-                    IconButton(onClick = onOpenCalendar) { Icon(Icons.Rounded.CalendarMonth, contentDescription = stringResource(R.string.calendar)) }
-                    IconButton(onClick = onOpenCategories) { Icon(Icons.Rounded.Tune, contentDescription = stringResource(R.string.categories)) }
+                    TopBarAction(Icons.Rounded.CalendarMonth, stringResource(R.string.calendar), onOpenCalendar)
+                    TopBarAction(Icons.Rounded.Tune, stringResource(R.string.categories), onOpenCategories, tint = MaterialTheme.colorScheme.tertiary)
                 }
             )
         }

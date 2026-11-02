@@ -30,7 +30,7 @@ class CsvImporter(
         AppLanguage.entries.map { Locale.forLanguageTag(it.tag) }.flatMap { locale ->
             listOf(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", locale), DateTimeFormatter.ofPattern("d MMM yyyy", locale))
         }
-    private val amountPattern = Regex("""^\d{1,3}(,\d{2,3})+(\.\d+)?$|^\d+(\.\d+)?$""")
+    private val amountPattern = Regex("""^[-−]?(\d{1,3}(,\d{2,3})+(\.\d+)?|\d+(\.\d+)?)$""")
 
     suspend fun import(text: String): ImportResult? {
         val rows = Csv.parse(text)
@@ -55,9 +55,9 @@ class CsvImporter(
         rows.drop(1).forEach { row ->
             val cell = { i: Int? -> i?.let { row.getOrNull(it) }?.trim().orEmpty() }
             val day = parseDate(cell(date))
-            val value = cell(amount).filterNot { it.isWhitespace() || it in CURRENCY_SYMBOLS }.takeIf { amountPattern.matches(it) }?.replace(",", "")?.toDouble()
+            val value = cell(amount).filterNot { it.isWhitespace() || it in CURRENCY_SYMBOLS }.takeIf { amountPattern.matches(it) }?.replace(",", "")?.replace('−', '-')?.toDouble()
             val name = cell(title)
-            if (day == null || value == null || value <= 0 || name.isEmpty()) {
+            if (day == null || value == null || value == 0.0 || name.isEmpty()) {
                 invalid++
                 return@forEach
             }

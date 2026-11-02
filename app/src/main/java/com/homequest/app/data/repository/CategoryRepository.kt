@@ -6,6 +6,7 @@ import com.homequest.app.data.local.BudgetDao
 import com.homequest.app.data.local.CategoryDao
 import com.homequest.app.data.local.CategoryEntity
 import com.homequest.app.data.local.ExpenseDao
+import com.homequest.app.data.local.ReminderDao
 import com.homequest.app.domain.BuiltInCategories
 import com.homequest.app.domain.Category
 import com.homequest.app.util.titleCased
@@ -17,6 +18,7 @@ class CategoryRepository(
     private val dao: CategoryDao,
     private val expenseDao: ExpenseDao,
     private val budgetDao: BudgetDao,
+    private val reminderDao: ReminderDao,
     private val badges: BadgeTracker
 ) {
     val categories: Flow<List<Category>> = dao.observeAll().map { list -> list.map { it.toDomain() } }
@@ -43,6 +45,7 @@ class CategoryRepository(
         if (category.builtIn) return
         expenseDao.reassignCategory(category.id, BuiltInCategories.OTHER)
         budgetDao.delete(category.id)
+        reminderDao.clearCategory(category.id)
         dao.deleteCustom(category.id)
     }
 

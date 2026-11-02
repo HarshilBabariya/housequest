@@ -56,6 +56,9 @@ interface CategoryDao {
 
 @Dao
 interface ExpenseDao {
+    @Query("SELECT COUNT(*) FROM expenses WHERE amount = :amount AND createdAt >= :since")
+    suspend fun similarSince(amount: Double, since: Long): Int
+
     @Transaction
     @Query("SELECT * FROM expenses ORDER BY epochDay DESC, createdAt DESC")
     fun observeAll(): Flow<List<ExpenseWithPayer>>
@@ -72,6 +75,9 @@ interface ExpenseDao {
 
     @Query("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE epochDay BETWEEN :fromDay AND :toDay")
     suspend fun total(fromDay: Long, toDay: Long): Double
+
+    @Query("SELECT COUNT(*) FROM expenses WHERE amount > 0 AND epochDay BETWEEN :fromDay AND :toDay")
+    suspend fun spendCount(fromDay: Long, toDay: Long): Int
 
     @Query("SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE category = :category AND epochDay BETWEEN :fromDay AND :toDay")
     suspend fun totalForCategory(category: String, fromDay: Long, toDay: Long): Double
@@ -184,6 +190,9 @@ interface ReminderDao {
     @Query("SELECT * FROM reminders ORDER BY hour, minute")
     fun observeAll(): Flow<List<ReminderEntity>>
 
+    @Query("UPDATE reminders SET category = NULL WHERE category = :categoryId")
+    suspend fun clearCategory(categoryId: String)
+
     @Query("SELECT * FROM reminders WHERE enabled = 1")
     suspend fun allEnabled(): List<ReminderEntity>
 
@@ -258,4 +267,88 @@ interface GamificationDao {
 
     @Insert
     suspend fun insertLedger(entry: PointsLedgerEntity)
+}
+
+@Dao
+interface HouseholdDao {
+    @Query("SELECT * FROM shops ORDER BY createdAt ASC")
+    fun observeShops(): Flow<List<ShopEntity>>
+
+    @Query("SELECT * FROM shop_entries ORDER BY epochDay DESC, createdAt DESC")
+    fun observeShopEntries(): Flow<List<ShopEntryEntity>>
+
+    @Insert
+    suspend fun insertShop(shop: ShopEntity): Long
+
+    @Delete
+    suspend fun deleteShop(shop: ShopEntity)
+
+    @Insert
+    suspend fun insertShopEntry(entry: ShopEntryEntity): Long
+
+    @Delete
+    suspend fun deleteShopEntry(entry: ShopEntryEntity)
+
+    @Query("SELECT * FROM services ORDER BY createdAt ASC")
+    fun observeServices(): Flow<List<ServiceEntity>>
+
+    @Query("SELECT * FROM service_days")
+    fun observeServiceDays(): Flow<List<ServiceDayEntity>>
+
+    @Query("SELECT * FROM service_bills")
+    fun observeServiceBills(): Flow<List<ServiceBillEntity>>
+
+    @Insert
+    suspend fun insertService(service: ServiceEntity): Long
+
+    @Update
+    suspend fun updateService(service: ServiceEntity)
+
+    @Delete
+    suspend fun deleteService(service: ServiceEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertServiceDay(day: ServiceDayEntity)
+
+    @Query("DELETE FROM service_days WHERE serviceId = :serviceId AND epochDay = :epochDay")
+    suspend fun clearServiceDay(serviceId: Long, epochDay: Long)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertServiceBill(bill: ServiceBillEntity)
+
+    @Query("SELECT * FROM gold ORDER BY epochDay DESC")
+    fun observeGold(): Flow<List<GoldEntity>>
+
+    @Insert
+    suspend fun insertGold(gold: GoldEntity): Long
+
+    @Delete
+    suspend fun deleteGold(gold: GoldEntity)
+
+    @Query("SELECT * FROM chits ORDER BY startMonth DESC")
+    fun observeChits(): Flow<List<ChitEntity>>
+
+    @Insert
+    suspend fun insertChit(chit: ChitEntity): Long
+
+    @Update
+    suspend fun updateChit(chit: ChitEntity)
+
+    @Delete
+    suspend fun deleteChit(chit: ChitEntity)
+
+    @Query("SELECT * FROM payment_drafts ORDER BY postedAt DESC")
+    fun observeDrafts(): Flow<List<PaymentDraftEntity>>
+
+    @Query("SELECT * FROM payment_drafts WHERE id = :id")
+    suspend fun draft(id: Long): PaymentDraftEntity?
+
+    @Query("SELECT COUNT(*) FROM payment_drafts WHERE amount = :amount AND postedAt >= :since")
+    suspend fun similarDrafts(amount: Double, since: Long): Int
+
+    @Insert
+    suspend fun insertDraft(draft: PaymentDraftEntity): Long
+
+    @Query("DELETE FROM payment_drafts WHERE id = :id")
+    suspend fun deleteDraft(id: Long)
 }

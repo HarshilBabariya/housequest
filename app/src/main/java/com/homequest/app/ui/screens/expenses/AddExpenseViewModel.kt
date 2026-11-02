@@ -7,6 +7,8 @@ import com.homequest.app.data.local.GroupWithMembers
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.ExpenseDraft
 import com.homequest.app.data.repository.byId
+import com.homequest.app.data.repository.day
+import com.homequest.app.data.repository.isCredit
 import com.homequest.app.data.repository.resolve
 import com.homequest.app.domain.BuiltInCategories
 import com.homequest.app.domain.Category
@@ -15,6 +17,7 @@ import com.homequest.app.domain.SplitType
 import com.homequest.app.util.VoiceParser
 import com.homequest.app.util.titleCased
 import java.time.LocalDate
+import kotlin.math.abs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,14 +40,15 @@ data class AddExpenseForm(
     val customShares: Map<Long, String> = emptyMap(),
     val note: String = "",
     val loaded: Boolean = false,
-    val heardText: String? = null
+    val heardText: String? = null,
+    val credit: Boolean = false
 ) {
     val amount: Double? get() = amountText.toDoubleOrNull()?.takeIf { it > 0 }
     val isEdit: Boolean get() = id != 0L
     val customTotal: Double get() = customShares.values.sumOf { it.toDoubleOrNull() ?: 0.0 }
     val isValid: Boolean
         get() = title.isNotBlank() && amount != null && paidByMemberId != 0L && when {
-            groupId == null -> true
+            groupId == null || credit -> true
             splitType == SplitType.EQUAL -> splitMemberIds.isNotEmpty()
             splitType == SplitType.CUSTOM -> kotlin.math.abs(customTotal - (amount ?: 0.0)) < 0.01
             else -> true
@@ -63,7 +67,7 @@ data class AddExpenseState(
     val category: Category get() = categories.byId().resolve(form.categoryId)
 }
 
-class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, presetGroupId: Long) : ViewModel() {
+class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, presetGroupId: Long, private val draftId: Long) : ViewModel() {
     private val form = MutableStateFlow(AddExpenseForm())
 
     val state: StateFlow<AddExpenseState> = combine(
@@ -84,7 +88,8 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
                 form.value = AddExpenseForm(
                     id = existing.id,
                     title = existing.title,
-                    amountText = trimAmount(existing.amount),
+                    amountText = trimAmount(abs(existing.amount)),
+                    credit = existing.isCredit,
                     categoryId = existing.category,
                     paymentMode = existing.paymentMode,
                     date = LocalDate.ofEpochDay(existing.epochDay),
@@ -94,6 +99,18 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
                     splitMemberIds = splits.map { it.memberId }.toSet(),
                     customShares = splits.associate { it.memberId to trimAmount(it.share) },
                     note = existing.note,
+                    loaded = true
+                )
+            } else if (draftId != 0L) {
+                val draft = container.captureRepository.draft(draftId)
+                val categories = container.categoryRepository.all()
+                form.value = AddExpenseForm(
+                    title = draft?.merchant.orEmpty(),
+                    amountText = draft?.let { trimAmount(abs(it.amount)) }.orEmpty(),
+                    credit = (draft?.amount ?: 0.0) < 0,
+                    categoryId = draft?.let { container.captureRepository.guessCategory(it.merchant, categories) } ?: BuiltInCategories.GROCERIES,
+                    date = draft?.day() ?: LocalDate.now(),
+                    paidByMemberId = ownerId,
                     loaded = true
                 )
             } else {
@@ -126,6 +143,7 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
                 title = parsed.title.ifBlank { title },
                 categoryId = parsed.categoryId ?: categoryId,
                 paymentMode = parsed.paymentMode ?: paymentMode,
+                credit = parsed.credit,
                 note = parsed.note ?: if (note.isBlank() || note == heardText?.titleCased()) text.titleCased() else note
             )
         }
@@ -139,12 +157,12 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
                 ExpenseDraft(
                     id = f.id,
                     title = f.title,
-                    amount = amount,
+                    amount = if (f.credit) -amount else amount,
                     categoryId = f.categoryId,
                     paymentMode = f.paymentMode,
                     date = f.date,
                     paidByMemberId = f.paidByMemberId,
-                    groupId = f.groupId,
+                    groupId = f.groupId.takeUnless { f.credit },
                     splitType = f.splitType,
                     splitMemberIds = f.splitMemberIds.toList(),
                     customShares = f.customShares.mapValues { it.value.toDoubleOrNull() ?: 0.0 },
@@ -152,6 +170,7 @@ class AddExpenseViewModel(private val container: AppContainer, expenseId: Long, 
                     byVoice = f.heardText != null
                 )
             )
+            if (draftId != 0L) container.captureRepository.dismiss(draftId)
             onDone()
         }
     }

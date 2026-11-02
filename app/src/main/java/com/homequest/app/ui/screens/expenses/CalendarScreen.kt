@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,7 +43,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -60,14 +58,12 @@ import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.EmptyState
 import com.homequest.app.ui.components.ExpenseRow
 import com.homequest.app.ui.components.HqCard
+import com.homequest.app.ui.components.MonthGrid
 import com.homequest.app.util.Dates
 import com.homequest.app.util.money
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.TextStyle
-import java.time.temporal.WeekFields
-import java.util.Locale
+import kotlin.math.abs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -164,7 +160,7 @@ fun CalendarScreen(onBack: () -> Unit, onOpenExpense: (Long) -> Unit) {
                     }
                 }
             }
-            item { MonthGrid(state, onSelect = vm::select) }
+            item { MonthGrid(state.month) { date, modifier -> DayCell(date, state, modifier, vm::select) } }
             item {
                 HqCard(Modifier.fillMaxWidth().padding(top = 14.dp)) {
                     Text(
@@ -202,37 +198,6 @@ private val OverColor = Color(0xFFE5484D)
 private val WithinColor = Color(0xFF30A46C)
 
 @Composable
-private fun MonthGrid(state: CalendarState, onSelect: (LocalDate) -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    val firstDay = WeekFields.of(Locale.getDefault()).firstDayOfWeek
-    val days = (0L..6L).map { firstDay.plus(it) }
-    val leading = Math.floorMod(state.month.atDay(1).dayOfWeek.value - firstDay.value, 7)
-    val cells: List<LocalDate?> = List(leading) { null } + (1..state.month.lengthOfMonth()).map { state.month.atDay(it) }
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row {
-            days.forEach { d ->
-                Text(
-                    d.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (d == DayOfWeek.SUNDAY) scheme.error else scheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1
-                )
-            }
-        }
-        cells.chunked(7).forEach { week ->
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                (0 until 7).forEach { i ->
-                    val date = week.getOrNull(i)
-                    if (date == null) Spacer(Modifier.weight(1f)) else DayCell(date, state, Modifier.weight(1f), onSelect)
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun DayCell(date: LocalDate, state: CalendarState, modifier: Modifier, onSelect: (LocalDate) -> Unit) {
     val scheme = MaterialTheme.colorScheme
     val total = state.totals[date.toEpochDay()]
@@ -266,7 +231,7 @@ private fun DayCell(date: LocalDate, state: CalendarState, modifier: Modifier, o
             color = if (date.isAfter(state.today)) scheme.onSurfaceVariant.copy(alpha = 0.5f) else scheme.onSurface
         )
         if (total != null && tint != null) {
-            Text("%,.0f".format(total), style = MaterialTheme.typography.labelSmall, color = tint, maxLines = 1, softWrap = false)
+            Text((if (total < 0) "+" else "") + "%,.0f".format(abs(total)), style = MaterialTheme.typography.labelSmall, color = tint, maxLines = 1, softWrap = false)
         }
     }
 }

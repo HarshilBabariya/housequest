@@ -74,15 +74,16 @@ class BadgeTracker(
         monthsUnderBudget: Int,
         language: String
     ): BadgeSnapshot {
-        val hours = expenses.map { Instant.ofEpochMilli(it.createdAt).atZone(ZoneId.systemDefault()).hour }
+        val spends = expenses.filter { it.amount > 0 }
+        val hours = spends.map { Instant.ofEpochMilli(it.createdAt).atZone(ZoneId.systemDefault()).hour }
         val paid = unlocked.mapNotNull { RewardCatalog.find(it) }.filter { !it.isFree }
         return BadgeSnapshot(
-            expenses = expenses.size,
-            distinctCategories = expenses.map { it.category }.toSet().size,
-            paymentModes = expenses.map { it.paymentMode }.toSet().size,
-            maxExpense = expenses.maxOfOrNull { it.amount } ?: 0.0,
-            smallExpenses = expenses.count { it.amount < 100 },
-            notedExpenses = expenses.count { it.note.isNotBlank() },
+            expenses = spends.size,
+            distinctCategories = spends.map { it.category }.toSet().size,
+            paymentModes = spends.map { it.paymentMode }.toSet().size,
+            maxExpense = spends.maxOfOrNull { it.amount } ?: 0.0,
+            smallExpenses = spends.count { it.amount < 100 },
+            notedExpenses = spends.count { it.note.isNotBlank() },
             earlyLogs = hours.count { it < 9 },
             lateLogs = hours.count { it >= 22 },
             voiceLogs = profile.voiceLogs,

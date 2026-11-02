@@ -4,11 +4,13 @@ import com.homequest.app.domain.BuiltInCategories
 import com.homequest.app.domain.PaymentMode
 
 object VoiceParser {
-    data class Result(val amount: Double?, val title: String, val categoryId: String?, val paymentMode: PaymentMode?, val note: String?)
+    data class Result(val amount: Double?, val title: String, val categoryId: String?, val paymentMode: PaymentMode?, val note: String?, val credit: Boolean)
 
     private val noteMarker = Regex("""(\S+)\s+(note|नोट|નોંધ|નોટ)[:,]?\s+\S""")
 
     private val currencyNoteWords = setOf("ka", "ke", "ki", "का", "के", "की", "no", "ni", "na", "નો", "ની", "ના")
+
+    private val creditWords = listOf("cashback", "refund", "refunded", "credited", "mila", "मिला", "मिले", "कैशबैक", "रिफंड", "કેશબેક", "રિફંડ", "મળ્યા")
 
     private val amountPattern = Regex("""(\d+(?:[.,]\d{1,2})?)""")
 
@@ -48,6 +50,8 @@ object VoiceParser {
             working = working.replaceFirst(m.value, " ")
             m.value.replace(",", ".").toDoubleOrNull()
         }
+        val credit = creditWords.any { working.containsWord(it) }
+        creditWords.forEach { working = working.removeWord(it) }
         val paymentMode = paymentWords.entries.firstOrNull { (_, words) -> words.any { working.containsWord(it) } }?.key
         paymentMode?.let { mode -> paymentWords.getValue(mode).forEach { working = working.removeWord(it) } }
 
@@ -59,7 +63,7 @@ object VoiceParser {
             .joinToString(" ")
             .ifBlank { custom?.value.orEmpty() }
             .titleCased()
-        return Result(amount, title, categoryId, paymentMode, note)
+        return Result(amount, title, categoryId, paymentMode, note, credit)
     }
 
     private fun String.containsWord(word: String) = Regex("(^|\\s)${Regex.escape(word)}(\\s|$)").containsMatchIn(this)

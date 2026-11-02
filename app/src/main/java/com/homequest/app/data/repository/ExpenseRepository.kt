@@ -30,8 +30,11 @@ data class ExpenseDraft(
     val splitMemberIds: List<Long> = emptyList(),
     val customShares: Map<Long, Double> = emptyMap(),
     val note: String = "",
-    val byVoice: Boolean = false
+    val byVoice: Boolean = false,
+    val earnsPoints: Boolean = true
 )
+
+val ExpenseEntity.isCredit: Boolean get() = amount < 0
 
 class ExpenseRepository(
     private val dao: ExpenseDao,
@@ -74,9 +77,9 @@ class ExpenseRepository(
             SplitType.NONE -> emptyMap()
         }
         val id = dao.upsertWithSplits(entity, shares)
-        if (isNew) {
-            gamification.recordExpenseLogged(Dates.today())
-            if (draft.byVoice) gamification.recordVoiceLog()
+        if (isNew && draft.byVoice) gamification.recordVoiceLog()
+        if (isNew && !entity.isCredit) {
+            if (draft.earnsPoints) gamification.recordExpenseLogged(Dates.today())
             budgetMonitor.afterExpenseAdded(draft.categoryId, draft.amount)
         }
         badges.refresh()

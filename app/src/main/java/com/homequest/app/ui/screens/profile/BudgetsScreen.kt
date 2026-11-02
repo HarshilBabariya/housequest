@@ -124,7 +124,7 @@ fun BudgetsScreen(onBack: () -> Unit) {
     ) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 32.dp)) {
             item {
-                val progress = if (state.monthlyBudget > 0) (state.monthTotal / state.monthlyBudget).toFloat() else 0f
+                val progress = if (state.monthlyBudget > 0) (state.monthTotal / state.monthlyBudget).toFloat().coerceAtLeast(0f) else 0f
                 val over = progress > 1f
                 HqCard(Modifier.padding(horizontal = 20.dp, vertical = 8.dp).fillMaxWidth()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {

@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -114,6 +115,20 @@ fun StatTile(label: String, value: String, icon: ImageVector, modifier: Modifier
         Text(value, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (hint != null) Text(hint, style = MaterialTheme.typography.labelSmall, color = accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
+}
+
+@Composable
+fun TopBarAction(icon: ImageVector, contentDescription: String, onClick: () -> Unit, tint: Color = MaterialTheme.colorScheme.primary) {
+    Box(
+        Modifier
+            .padding(end = 8.dp)
+            .size(44.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Brush.linearGradient(listOf(tint.copy(alpha = 0.22f), tint.copy(alpha = 0.08f))))
+            .border(1.dp, tint.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) { Icon(icon, contentDescription = contentDescription, tint = tint, modifier = Modifier.size(22.dp)) }
 }
 
 @Composable

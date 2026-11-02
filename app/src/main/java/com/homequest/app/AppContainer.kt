@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import com.homequest.app.data.local.HomeQuestDatabase
 import com.homequest.app.data.repository.BadgeTracker
+import com.homequest.app.data.repository.CaptureRepository
 import com.homequest.app.data.repository.CategoryRepository
 import com.homequest.app.data.repository.CsvImporter
 import com.homequest.app.data.repository.ExpenseRepository
 import com.homequest.app.data.repository.GamificationRepository
 import com.homequest.app.data.repository.GroupRepository
+import com.homequest.app.data.repository.HouseholdRepository
 import com.homequest.app.data.repository.MemberRepository
 import com.homequest.app.data.repository.ReminderRepository
 import com.homequest.app.data.repository.SettingsRepository
@@ -28,12 +30,14 @@ class AppContainer(private val context: Context) {
     val reminderScheduler = ReminderScheduler(context)
     val gamificationRepository = GamificationRepository(db.gamificationDao())
     val badgeTracker = BadgeTracker(db.expenseDao(), db.groupDao(), db.memberDao(), db.reminderDao(), db.categoryDao(), db.gamificationDao(), settingsRepository, gamificationRepository)
-    val categoryRepository = CategoryRepository(db.categoryDao(), db.expenseDao(), db.budgetDao(), badgeTracker)
+    val categoryRepository = CategoryRepository(db.categoryDao(), db.expenseDao(), db.budgetDao(), db.reminderDao(), badgeTracker)
     val budgetMonitor = BudgetMonitor(context, db.expenseDao(), db.budgetDao(), db.categoryDao(), settingsRepository, gamificationRepository, notificationHelper)
     val memberRepository = MemberRepository(db.memberDao(), settingsRepository, gamificationRepository, badgeTracker)
     val expenseRepository = ExpenseRepository(db.expenseDao(), db.budgetDao(), gamificationRepository, budgetMonitor, badgeTracker)
     val groupRepository = GroupRepository(db.groupDao(), db.expenseDao(), gamificationRepository, badgeTracker)
     val reminderRepository = ReminderRepository(db.reminderDao(), reminderScheduler, badgeTracker)
+    val householdRepository = HouseholdRepository(db.householdDao(), expenseRepository, memberRepository)
+    val captureRepository = CaptureRepository(db.householdDao(), db.expenseDao(), expenseRepository, memberRepository, settingsRepository, notificationHelper)
     val csvImporter = CsvImporter(context, db.expenseDao(), categoryRepository, memberRepository, badgeTracker)
 
     suspend fun bootstrap() {

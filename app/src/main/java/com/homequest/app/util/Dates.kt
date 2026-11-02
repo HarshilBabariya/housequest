@@ -46,4 +46,5 @@ object Dates {
 }
 
 fun Double.money(symbol: String): String =
-    if (this % 1.0 == 0.0 && this < 100_000) "$symbol${"%,.0f".format(this)}" else "$symbol${"%,.2f".format(this)}"
+    if (this < 0) "+" + (-this).money(symbol)
+    else if (this % 1.0 == 0.0 && this < 100_000) "$symbol${"%,.0f".format(this)}" else "$symbol${"%,.2f".format(this)}"

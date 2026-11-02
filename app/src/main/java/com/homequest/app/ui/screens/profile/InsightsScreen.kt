@@ -157,6 +157,7 @@ class InsightsViewModel(container: AppContainer) : ViewModel() {
             trendHighlight = trend.highlight,
             categories = current.groupBy { it.expense.category }
                 .map { (id, list) -> CategoryShare(map.resolve(id), list.sumOf { it.expense.amount }, previousByCategory[id] ?: 0.0) }
+                .filter { it.total > 0 }
                 .sortedByDescending { it.total },
             modes = PaymentMode.entries
                 .map { mode -> mode to current.filter { it.expense.paymentMode == mode }.sumOf { it.expense.amount } }
@@ -164,6 +165,7 @@ class InsightsViewModel(container: AppContainer) : ViewModel() {
                 .sortedByDescending { it.second },
             payers = current.groupBy { it.expense.paidByMemberId }
                 .mapNotNull { (id, list) -> members.firstOrNull { it.id == id }?.let { PayerShare(it, list.sumOf { e -> e.expense.amount }) } }
+                .filter { it.total > 0 }
                 .sortedByDescending { it.total }
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InsightsState())
@@ -181,7 +183,7 @@ class InsightsViewModel(container: AppContainer) : ViewModel() {
     }
 
     private fun trendOf(period: InsightPeriod, range: ClosedRange<LocalDate>, today: LocalDate, isCurrent: Boolean, current: List<ExpenseWithPayer>): Trend {
-        val byDay = current.groupBy { it.expense.epochDay }.mapValues { (_, list) -> list.sumOf { it.expense.amount } }
+        val byDay = current.groupBy { it.expense.epochDay }.mapValues { (_, list) -> list.sumOf { it.expense.amount }.coerceAtLeast(0.0) }
         return when (period) {
             InsightPeriod.WEEK -> {
                 val days = (0L..6L).map { range.start.plusDays(it) }
@@ -197,7 +199,7 @@ class InsightsViewModel(container: AppContainer) : ViewModel() {
                 Trend(values, labels, month.lengthOfMonth(), values.lastIndex)
             }
             InsightPeriod.YEAR -> {
-                val byMonth = current.groupBy { LocalDate.ofEpochDay(it.expense.epochDay).monthValue }.mapValues { (_, list) -> list.sumOf { it.expense.amount } }
+                val byMonth = current.groupBy { LocalDate.ofEpochDay(it.expense.epochDay).monthValue }.mapValues { (_, list) -> list.sumOf { it.expense.amount }.coerceAtLeast(0.0) }
                 val values = (1..12).map { byMonth[it] ?: 0.0 }
                 val highlight = if (isCurrent) today.monthValue - 1 else values.indices.maxByOrNull { values[it] } ?: 0
                 Trend(values, (1..12).map { YearMonth.of(range.start.year, it).month.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }, 12, highlight)
@@ -253,6 +255,7 @@ fun InsightsScreen(onBack: () -> Unit) {
             }
 
             SpendHero(state)
+            val categoryTotal = state.categories.sumOf { it.total }
 
             HqCard(Modifier.padding(horizontal = 20.dp, vertical = 12.dp).fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -260,14 +263,14 @@ fun InsightsScreen(onBack: () -> Unit) {
                     val top = state.categories.firstOrNull()
                     Text(
                         if (top == null) stringResource(R.string.insight_quiet)
-                        else stringResource(R.string.insight_top_category, top.category.label(), (top.total / state.total * 100).roundToInt()),
+                        else stringResource(R.string.insight_top_category, top.category.label(), (top.total / categoryTotal * 100).roundToInt()),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(start = 12.dp)
                     )
                 }
             }
 
-            if (state.total <= 0) return@Column
+            if (categoryTotal <= 0) return@Column
 
             SectionHeader(stringResource(R.string.spending_trend))
             HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
@@ -281,20 +284,21 @@ fun InsightsScreen(onBack: () -> Unit) {
             SectionHeader(stringResource(R.string.categories))
             HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    DonutChart(state.categories.map { CategoryAmount(it.category, it.total) }, valueLabel = { it.money(symbol) }, centerLabel = state.total.money(symbol))
+                    DonutChart(state.categories.map { CategoryAmount(it.category, it.total) }, valueLabel = { it.money(symbol) }, centerLabel = categoryTotal.money(symbol))
                 }
                 Spacer(Modifier.height(12.dp))
-                state.categories.forEach { CategoryShareRow(it, state.total, symbol) }
+                state.categories.forEach { CategoryShareRow(it, categoryTotal, symbol) }
             }
 
             SectionHeader(stringResource(R.string.payment_modes))
             HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
+                val modeTotal = state.modes.sumOf { it.second }
                 ShareBar(state.modes.map { (mode, amount) -> mode.color to amount })
                 state.modes.forEach { (mode, amount) ->
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 10.dp)) {
                         Box(Modifier.size(10.dp).background(mode.color, CircleShape))
                         Text(stringResource(mode.labelRes), Modifier.padding(start = 10.dp).weight(1f), style = MaterialTheme.typography.bodyMedium, maxLines = 1)
-                        Text("${(amount / state.total * 100).roundToInt()}%", style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, modifier = Modifier.padding(end = 12.dp))
+                        Text("${(amount / modeTotal * 100).roundToInt()}%", style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, modifier = Modifier.padding(end = 12.dp))
                         Text(amount.money(symbol), style = MaterialTheme.typography.titleSmall, maxLines = 1)
                     }
                 }
@@ -302,13 +306,14 @@ fun InsightsScreen(onBack: () -> Unit) {
 
             if (state.payers.size > 1) {
                 SectionHeader(stringResource(R.string.who_paid))
+                val payerTotal = state.payers.sumOf { it.total }
                 HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
                     state.payers.forEach { p ->
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
                             AvatarView(p.member.avatar(), size = 34.dp)
                             Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
                                 Text(p.member.name, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                LinearProgressIndicator(progress = { (p.total / state.total).toFloat() }, modifier = Modifier.fillMaxWidth().height(6.dp).padding(top = 2.dp), color = scheme.primary, trackColor = scheme.surfaceContainerHigh)
+                                LinearProgressIndicator(progress = { (p.total / payerTotal).toFloat() }, modifier = Modifier.fillMaxWidth().height(6.dp).padding(top = 2.dp), color = scheme.primary, trackColor = scheme.surfaceContainerHigh)
                             }
                             Text(p.total.money(symbol), style = MaterialTheme.typography.titleSmall, maxLines = 1)
                         }

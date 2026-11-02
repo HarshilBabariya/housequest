@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.homequest.app.AppContainer
+import com.homequest.app.R
 import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.repository.AppSettings
 import com.homequest.app.data.repository.DarkMode
@@ -87,11 +88,17 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
         settings.setAppLock(true)
     }
 
-    fun exportCsv(context: Context, month: YearMonth?) = viewModelScope.launch {
+    fun export(context: Context, month: YearMonth?, pdf: Boolean) = viewModelScope.launch {
         val all = container.expenseRepository.allForExport()
         val expenses = month?.let { m -> Dates.monthRange(m).let { range -> all.filter { it.expense.epochDay in range } } } ?: all
-        val fileName = month?.let { "HomeQuest_${it.format(DateTimeFormatter.ofPattern("MMMM_yyyy", Locale.ENGLISH))}.csv" } ?: "homequest-expenses.csv"
-        Sharing.exportCsv(context, expenses, container.categoryRepository.all().byId(), fileName)
+        val baseName = month?.let { "HomeQuest_${it.format(DateTimeFormatter.ofPattern("MMMM_yyyy", Locale.ENGLISH))}" } ?: "homequest-expenses"
+        val categories = container.categoryRepository.all().byId()
+        if (pdf) {
+            val title = "${context.getString(R.string.app_name)} · ${month?.let { Dates.monthLabel(it) } ?: context.getString(R.string.export_all)}"
+            Sharing.exportPdf(context, title, expenses, categories, state.value.settings.currencySymbol, "$baseName.pdf")
+        } else {
+            Sharing.exportCsv(context, expenses, categories, "$baseName.csv")
+        }
     }
 
     fun importCsv(context: Context, uri: Uri) = viewModelScope.launch {

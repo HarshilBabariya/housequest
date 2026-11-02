@@ -20,6 +20,7 @@ import com.homequest.app.domain.Badge
 import com.homequest.app.util.LocaleHelper
 import com.homequest.app.util.money
 import java.time.LocalDate
+import kotlin.math.abs
 
 class NotificationHelper(private val context: Context) {
 
@@ -27,8 +28,10 @@ class NotificationHelper(private val context: Context) {
         const val CHANNEL_REMINDERS = "reminders"
         const val CHANNEL_BUDGET = "budget"
         const val CHANNEL_REWARDS = "rewards"
+        const val CHANNEL_CAPTURE = "capture"
         private const val ID_BUDGET = 1000
         private const val ID_REWARD = 2000
+        private const val ID_CAPTURE = 2500
         private const val ID_REMINDER_BASE = 3000
     }
 
@@ -38,7 +41,8 @@ class NotificationHelper(private val context: Context) {
             listOf(
                 NotificationChannel(CHANNEL_REMINDERS, context.getString(R.string.channel_reminders), NotificationManager.IMPORTANCE_HIGH),
                 NotificationChannel(CHANNEL_BUDGET, context.getString(R.string.channel_budget), NotificationManager.IMPORTANCE_HIGH),
-                NotificationChannel(CHANNEL_REWARDS, context.getString(R.string.channel_rewards), NotificationManager.IMPORTANCE_DEFAULT)
+                NotificationChannel(CHANNEL_REWARDS, context.getString(R.string.channel_rewards), NotificationManager.IMPORTANCE_DEFAULT),
+                NotificationChannel(CHANNEL_CAPTURE, context.getString(R.string.channel_capture), NotificationManager.IMPORTANCE_DEFAULT)
             )
         )
     }
@@ -57,6 +61,23 @@ class NotificationHelper(private val context: Context) {
             res.rotate(R.array.notif_nudge_titles, seed) to res.rotate(R.array.notif_nudge_bodies, seed).format(reminder.title)
         }
         post(ID_REMINDER_BASE + reminder.id.toInt(), CHANNEL_REMINDERS, title, body)
+    }
+
+    fun showAutoLogged(language: String, reminder: ReminderEntity, amount: Double, symbol: String) {
+        val res = LocaleHelper.localized(context, language).resources
+        post(ID_REMINDER_BASE + reminder.id.toInt(), CHANNEL_REMINDERS, res.getString(R.string.notif_autolog_title, reminder.title), res.getString(R.string.notif_autolog_body, amount.money(symbol)))
+    }
+
+    fun showCaptured(language: String, amount: Double, merchant: String, symbol: String) {
+        val res = LocaleHelper.localized(context, language).resources
+        val value = abs(amount).money(symbol)
+        val body = when {
+            amount < 0 && merchant.isBlank() -> res.getString(R.string.notif_captured_credit_plain, value)
+            amount < 0 -> res.getString(R.string.notif_captured_credit, value, merchant)
+            merchant.isBlank() -> res.getString(R.string.notif_captured_body_plain, value)
+            else -> res.getString(R.string.notif_captured_body, value, merchant)
+        }
+        post(ID_CAPTURE, CHANNEL_CAPTURE, res.getString(if (amount < 0) R.string.notif_captured_credit_title else R.string.notif_captured_title), body)
     }
 
     fun showBudgetAlert(language: String, label: String, spent: String, limit: String, exceeded: Boolean) {

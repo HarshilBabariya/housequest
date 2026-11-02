@@ -12,6 +12,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +31,7 @@ import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.Diamond
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Face
@@ -39,12 +42,15 @@ import androidx.compose.material.icons.rounded.FileUpload
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Insights
+import androidx.compose.material.icons.rounded.LocalDrink
+import androidx.compose.material.icons.rounded.MarkEmailUnread
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.QuestionAnswer
 import androidx.compose.material.icons.rounded.Savings
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarBorder
+import androidx.compose.material.icons.rounded.Storefront
 import androidx.compose.material.icons.rounded.ViewDay
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -92,6 +98,7 @@ import com.homequest.app.ui.components.relationLabel
 import com.homequest.app.ui.screens.expenses.OptionSheet
 import com.homequest.app.util.Dates
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProfileScreen(
     onSignOut: () -> Unit,
@@ -106,7 +113,11 @@ fun ProfileScreen(
     onOpenInsights: () -> Unit,
     onOpenExpenses: () -> Unit,
     onOpenCalendar: () -> Unit,
-    onOpenPro: () -> Unit
+    onOpenPro: () -> Unit,
+    onOpenKhata: () -> Unit,
+    onOpenServices: () -> Unit,
+    onOpenSavings: () -> Unit,
+    onOpenCapture: () -> Unit
 ) {
     val vm = appViewModel { ProfileViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -115,6 +126,7 @@ fun ProfileScreen(
     var confirmSignOut by remember { mutableStateOf(false) }
     var setupPin by remember { mutableStateOf(false) }
     var exporting by remember { mutableStateOf(false) }
+    var exportPdf by remember { mutableStateOf(false) }
     var confirmErase by remember { mutableStateOf(false) }
     var showFaqs by remember { mutableStateOf(false) }
     var showAbout by remember { mutableStateOf(false) }
@@ -144,14 +156,19 @@ fun ProfileScreen(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        stringResource(R.string.level_summary, state.level.level, stringResource(state.level.titleRes), state.points, state.streak),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = scheme.primary,
-                        modifier = Modifier.padding(top = 4.dp).clip(RoundedCornerShape(50)).clickable(onClick = onOpenRewards),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Column(Modifier.padding(top = 4.dp).clip(RoundedCornerShape(8.dp)).clickable(onClick = onOpenRewards)) {
+                        Text(
+                            stringResource(R.string.xp_level_label, state.level.level, stringResource(state.level.titleRes)),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = scheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text(stringResource(R.string.points_label, state.points), style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant)
+                            Text(stringResource(R.string.streak_label, state.streak), style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant)
+                        }
+                    }
                 }
             }
             Row(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -187,10 +204,18 @@ fun ProfileScreen(
             NavRow(Icons.Rounded.Insights, Color(0xFF10B981), stringResource(R.string.insights), stringResource(R.string.insights_sub), onOpenInsights, last = true)
         }
 
+        SectionHeader(stringResource(R.string.household_money))
+        HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
+            NavRow(Icons.Rounded.Storefront, Color(0xFF16A34A), stringResource(R.string.khata), stringResource(R.string.khata_sub), onOpenKhata)
+            NavRow(Icons.Rounded.LocalDrink, Color(0xFF0EA5E9), stringResource(R.string.services), stringResource(R.string.services_sub), onOpenServices)
+            NavRow(Icons.Rounded.Diamond, Color(0xFFD99A1E), stringResource(R.string.savings), stringResource(R.string.savings_sub), onOpenSavings)
+            NavRow(Icons.Rounded.MarkEmailUnread, Color(0xFF8B5CF6), stringResource(R.string.capture), stringResource(R.string.capture_sub), onOpenCapture, last = true)
+        }
+
         SectionHeader(stringResource(R.string.your_data))
         HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
             NavRow(Icons.Rounded.FileDownload, Color(0xFF3B82F6), stringResource(R.string.import_csv), stringResource(R.string.import_sub), { importLauncher.launch(CSV_TYPES) }, last = !state.exportUnlocked)
-            if (state.exportUnlocked) NavRow(Icons.Rounded.FileUpload, Color(0xFF14B8A6), stringResource(R.string.export_csv), stringResource(R.string.export_sub), { exporting = true }, last = true)
+            if (state.exportUnlocked) NavRow(Icons.Rounded.FileUpload, Color(0xFF14B8A6), stringResource(R.string.export_data), stringResource(R.string.export_sub), { exporting = true }, last = true)
         }
 
         SectionHeader(stringResource(R.string.security))
@@ -317,11 +342,16 @@ fun ProfileScreen(
     }
 
     if (exporting) {
-        OptionSheet(stringResource(R.string.export_csv), onDismiss = { exporting = false }) {
+        OptionSheet(stringResource(R.string.export_data), onDismiss = { exporting = false }) {
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+                listOf(false to "CSV", true to "PDF").forEachIndexed { i, (pdf, label) ->
+                    SegmentedButton(selected = exportPdf == pdf, onClick = { exportPdf = pdf }, shape = SegmentedButtonDefaults.itemShape(i, 2)) { Text(label) }
+                }
+            }
             HqCard(Modifier.fillMaxWidth(), padding = 0) {
-                NavRow(Icons.Rounded.Folder, Color(0xFF14B8A6), stringResource(R.string.export_all), stringResource(R.string.export_all_sub), { exporting = false; vm.exportCsv(context, null) }, last = state.exportMonths.isEmpty())
+                NavRow(Icons.Rounded.Folder, Color(0xFF14B8A6), stringResource(R.string.export_all), stringResource(R.string.export_all_sub), { exporting = false; vm.export(context, null, exportPdf) }, last = state.exportMonths.isEmpty())
                 state.exportMonths.forEachIndexed { i, month ->
-                    NavRow(Icons.Rounded.CalendarMonth, Color(0xFF3B82F6), Dates.monthLabel(month), stringResource(R.string.export_month_sub), { exporting = false; vm.exportCsv(context, month) }, last = i == state.exportMonths.lastIndex)
+                    NavRow(Icons.Rounded.CalendarMonth, Color(0xFF3B82F6), Dates.monthLabel(month), stringResource(R.string.export_month_sub), { exporting = false; vm.export(context, month, exportPdf) }, last = i == state.exportMonths.lastIndex)
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.homequest.app.util
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import androidx.core.content.FileProvider
 import com.homequest.app.R
 import com.homequest.app.data.local.ExpenseWithPayer
@@ -12,6 +13,8 @@ import com.homequest.app.ui.components.label
 import java.io.File
 import java.time.LocalDate
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object Sharing {
     const val EXPORT_DIR = "exports"
@@ -52,32 +55,51 @@ object Sharing {
         }
     }
 
-    fun exportCsv(context: Context, expenses: List<ExpenseWithPayer>, categories: Map<String, Category>, fileName: String) {
-        val dir = File(context.cacheDir, EXPORT_DIR).apply { mkdirs() }
-        val file = File(dir, fileName)
-        file.bufferedWriter().use { w ->
-            w.appendLine(CsvColumns.HEADER.joinToString(","))
-            expenses.forEach { e ->
-                w.appendLine(
-                    listOf(
-                        LocalDate.ofEpochDay(e.expense.epochDay).toString(),
-                        e.expense.title,
-                        categories[e.expense.category]?.label(context) ?: e.expense.category,
-                        e.expense.paymentMode.name,
-                        "%.2f".format(Locale.ROOT, e.expense.amount),
-                        e.payer.name,
-                        e.expense.groupId?.toString().orEmpty(),
-                        e.expense.note
-                    ).joinToString(",") { Csv.cell(it) }
-                )
+    suspend fun exportCsv(context: Context, expenses: List<ExpenseWithPayer>, categories: Map<String, Category>, fileName: String) {
+        val file = exportFile(context, fileName)
+        withContext(Dispatchers.IO) {
+            file.bufferedWriter().use { w ->
+                w.appendLine(CsvColumns.HEADER.joinToString(","))
+                expenses.forEach { e ->
+                    w.appendLine(
+                        listOf(
+                            LocalDate.ofEpochDay(e.expense.epochDay).toString(),
+                            e.expense.title,
+                            categories[e.expense.category]?.label(context) ?: e.expense.category,
+                            e.expense.paymentMode.name,
+                            "%.2f".format(Locale.ROOT, e.expense.amount),
+                            e.payer.name,
+                            e.expense.groupId?.toString().orEmpty(),
+                            e.expense.note
+                        ).joinToString(",") { Csv.cell(it) }
+                    )
+                }
             }
         }
+        shareFile(context, file, "text/csv")
+    }
+
+    suspend fun exportPdf(context: Context, title: String, expenses: List<ExpenseWithPayer>, categories: Map<String, Category>, symbol: String, fileName: String) {
+        val file = exportFile(context, fileName)
+        withContext(Dispatchers.Default) { PdfReport.write(context, file, title, expenses, categories, symbol) }
+        shareFile(context, file, "application/pdf")
+    }
+
+    suspend fun shareImage(context: Context, render: () -> Bitmap, fileName: String) {
+        val file = exportFile(context, fileName)
+        withContext(Dispatchers.Default) { file.outputStream().use { render().compress(Bitmap.CompressFormat.PNG, 100, it) } }
+        shareFile(context, file, "image/png")
+    }
+
+    private fun exportFile(context: Context, fileName: String): File = File(File(context.cacheDir, EXPORT_DIR).apply { mkdirs() }, fileName)
+
+    private fun shareFile(context: Context, file: File, mime: String) {
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
         val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/csv"
+            type = mime
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.export_csv)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 }

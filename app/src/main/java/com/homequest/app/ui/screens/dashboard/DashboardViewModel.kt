@@ -20,11 +20,13 @@ import com.homequest.app.domain.Mood
 import com.homequest.app.notifications.nextOccurrence
 import com.homequest.app.ui.components.moodFor
 import com.homequest.app.util.Dates
+import com.homequest.app.util.WeeklySummary
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.math.ceil
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,9 +55,11 @@ data class DashboardState(
     val payers: List<PayerShare> = emptyList(),
     val groupNet: Double = 0.0,
     val upcomingBills: List<ReminderEntity> = emptyList(),
-    val insightsUnlocked: Boolean = false
+    val insightsUnlocked: Boolean = false,
+    val pendingCaptures: Int = 0,
+    val week: WeeklySummary? = null
 ) {
-    val budgetProgress: Float get() = if (settings.monthlyBudget > 0) (monthTotal / settings.monthlyBudget).toFloat() else 0f
+    val budgetProgress: Float get() = if (settings.monthlyBudget > 0) (monthTotal / settings.monthlyBudget).toFloat().coerceAtLeast(0f) else 0f
     val mood: Mood
         get() {
             member?.avatar()?.mood?.let { return it }
@@ -64,6 +68,14 @@ data class DashboardState(
         }
     val monthChangePercent: Double? get() = if (lastMonthTotal > 0) (monthTotal - lastMonthTotal) / lastMonthTotal * 100 else null
     val monthProjection: Double get() = (monthCumulative.lastOrNull() ?: 0.0) / today.dayOfMonth * today.lengthOfMonth()
+    val budgetCrossDate: LocalDate?
+        get() {
+            val budget = settings.monthlyBudget
+            val spent = monthCumulative.lastOrNull() ?: 0.0
+            val pace = spent / today.dayOfMonth
+            if (budget <= 0 || spent >= budget || pace <= 0 || monthProjection <= budget) return null
+            return today.plusDays(ceil((budget - spent) / pace).toLong())
+        }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -77,6 +89,7 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
         val monthRange = Dates.monthRange(month)
         val lastMonthRange = Dates.monthRange(month.minusMonths(1))
         val weekRange = Dates.last7Days(date)
+        val previousWeek = Dates.last7Days(date.minusDays(7))
         return combine(
             expenses.categoryTotals(monthRange),
             expenses.dayTotals(weekRange),
@@ -91,18 +104,28 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
             val paid = thisMonth.groupBy { it.expense.paidByMemberId }.mapValues { (_, list) -> list.sumOf { it.expense.amount } }
             val daily = thisMonth.groupBy { it.expense.epochDay }.mapValues { (_, list) -> list.sumOf { it.expense.amount } }
             val map = catalog.byId()
+            val thisWeek = all.filter { it.expense.epochDay in weekRange }
             SpendSlice(
                 today = date,
                 todayTotal = byDay[today] ?: 0.0,
                 monthTotal = thisMonth.sumOf { it.expense.amount },
                 lastMonthTotal = all.filter { it.expense.epochDay in lastMonthRange }.sumOf { it.expense.amount },
-                categories = categories.map { CategoryAmount(map.resolve(it.category), it.total) },
+                categories = categories.filter { it.total > 0 }.map { CategoryAmount(map.resolve(it.category), it.total) },
                 categoryMap = map,
                 weekValues = dayKeys.map { byDay[it] ?: 0.0 },
                 weekLabels = dayKeys.map { LocalDate.ofEpochDay(it).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()) },
                 monthCumulative = (1..date.dayOfMonth).map { daily[month.atDay(it).toEpochDay()] ?: 0.0 }.runningReduce(Double::plus),
                 recent = all.take(5),
-                payers = members.mapNotNull { m -> paid[m.id]?.let { PayerShare(m, it) } }.sortedByDescending { it.total }
+                payers = members.mapNotNull { m -> paid[m.id]?.takeIf { it > 0 }?.let { PayerShare(m, it) } }.sortedByDescending { it.total },
+                week = WeeklySummary(
+                    rangeLabel = "${Dates.shortLabel(weekRange.first)} – ${Dates.shortLabel(weekRange.last)}",
+                    total = thisWeek.sumOf { it.expense.amount },
+                    previousTotal = all.filter { it.expense.epochDay in previousWeek }.sumOf { it.expense.amount },
+                    categories = thisWeek.groupBy { it.expense.category }.map { (id, list) -> CategoryAmount(map.resolve(id), list.sumOf { it.expense.amount }) }.filter { it.total > 0 }.sortedByDescending { it.total },
+                    payers = thisWeek.groupBy { it.payer.name }.map { (name, list) -> name to list.sumOf { it.expense.amount } }.filter { it.second > 0 }.sortedByDescending { it.second },
+                    streak = 0,
+                    points = 0
+                )
             )
         }
     }
@@ -117,7 +140,7 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
         val net = member?.let { groups.netByMember(all.filter { e -> e.expense.groupId != null }, splits, settlements)[it.id] } ?: 0.0
         val bills = reminders.filter { it.enabled && it.amount != null }.sortedBy { it.nextOccurrence() }.take(3)
         Social(net, bills, member)
-    }
+    }.combine(container.captureRepository.drafts) { social, drafts -> social.copy(captures = drafts.size) }
 
     val state: StateFlow<DashboardState> = combine(
         container.settingsRepository.settings,
@@ -144,7 +167,9 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
             payers = slice.payers,
             groupNet = social.net,
             upcomingBills = social.bills,
-            insightsUnlocked = Features.INSIGHTS in unlocked
+            insightsUnlocked = Features.INSIGHTS in unlocked,
+            pendingCaptures = social.captures,
+            week = slice.week.copy(streak = profile.streakDays, points = profile.points)
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
 
@@ -159,8 +184,9 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
         val weekLabels: List<String>,
         val monthCumulative: List<Double>,
         val recent: List<ExpenseWithPayer>,
-        val payers: List<PayerShare>
+        val payers: List<PayerShare>,
+        val week: WeeklySummary
     )
 
-    private data class Social(val net: Double, val bills: List<ReminderEntity>, val member: MemberEntity?)
+    private data class Social(val net: Double, val bills: List<ReminderEntity>, val member: MemberEntity?, val captures: Int = 0)
 }

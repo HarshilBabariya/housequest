@@ -49,7 +49,7 @@ class BudgetMonitor(
         }
         val range = Dates.monthRange(previous)
         val spent = expenseDao.total(range.first, range.last)
-        if (spent in 0.01..s.monthlyBudget) gamification.recordMonthUnderBudget(key) else gamification.markBudgetMonthChecked(key)
+        if (expenseDao.spendCount(range.first, range.last) > 0 && spent <= s.monthlyBudget) gamification.recordMonthUnderBudget(key) else gamification.markBudgetMonthChecked(key)
     }
 
     private fun notifyIfCrossed(language: String, label: String, before: Double, after: Double, limit: Double, symbol: String) {

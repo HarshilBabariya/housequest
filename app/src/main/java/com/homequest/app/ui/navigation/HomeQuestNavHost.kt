@@ -82,6 +82,10 @@ import com.homequest.app.ui.screens.expenses.ExpensesScreen
 import com.homequest.app.ui.screens.family.FamilyScreen
 import com.homequest.app.ui.screens.groups.GroupDetailScreen
 import com.homequest.app.ui.screens.groups.GroupsScreen
+import com.homequest.app.ui.screens.household.CaptureScreen
+import com.homequest.app.ui.screens.household.KhataScreen
+import com.homequest.app.ui.screens.household.SavingsScreen
+import com.homequest.app.ui.screens.household.ServicesScreen
 import com.homequest.app.ui.screens.profile.AccountScreen
 import com.homequest.app.ui.screens.profile.BudgetsScreen
 import com.homequest.app.ui.screens.profile.InsightsScreen
@@ -135,7 +139,8 @@ fun HomeQuestNavHost(onSignOut: () -> Unit, onEraseAll: () -> Unit) {
                     onOpenGroups = { navController.openTab(BottomTab.GROUPS) },
                     onOpenReminders = { navController.navigate(Routes.REMINDERS) },
                     onOpenRewards = { navController.navigate(Routes.rewards()) },
-                    onOpenProfile = { navController.openTab(BottomTab.PROFILE) }
+                    onOpenProfile = { navController.openTab(BottomTab.PROFILE) },
+                    onOpenCapture = { navController.navigate(Routes.CAPTURE) }
                 )
             }
             composable(Routes.EXPENSES) {
@@ -171,7 +176,11 @@ fun HomeQuestNavHost(onSignOut: () -> Unit, onEraseAll: () -> Unit) {
                     onOpenInsights = { navController.navigate(Routes.INSIGHTS) },
                     onOpenExpenses = { navController.openTab(BottomTab.EXPENSES) },
                     onOpenCalendar = { navController.navigate(Routes.CALENDAR) },
-                    onOpenPro = { navController.navigate(Routes.rewards(pro = true)) }
+                    onOpenPro = { navController.navigate(Routes.rewards(pro = true)) },
+                    onOpenKhata = { navController.navigate(Routes.KHATA) },
+                    onOpenServices = { navController.navigate(Routes.SERVICES) },
+                    onOpenSavings = { navController.navigate(Routes.SAVINGS) },
+                    onOpenCapture = { navController.navigate(Routes.CAPTURE) }
                 )
             }
             composable(
@@ -179,12 +188,14 @@ fun HomeQuestNavHost(onSignOut: () -> Unit, onEraseAll: () -> Unit) {
                 arguments = listOf(
                     navArgument("expenseId") { type = NavType.LongType; defaultValue = 0L },
                     navArgument("groupId") { type = NavType.LongType; defaultValue = 0L },
-                    navArgument("voice") { type = NavType.BoolType; defaultValue = false }
+                    navArgument("voice") { type = NavType.BoolType; defaultValue = false },
+                    navArgument("draftId") { type = NavType.LongType; defaultValue = 0L }
                 )
             ) { entry ->
                 AddExpenseScreen(
                     expenseId = entry.arguments?.getLong("expenseId") ?: 0L,
                     groupId = entry.arguments?.getLong("groupId") ?: 0L,
+                    draftId = entry.arguments?.getLong("draftId") ?: 0L,
                     startWithVoice = entry.arguments?.getBoolean("voice") ?: false,
                     onDone = { navController.popBackStack() },
                     onOpenCategories = { navController.navigate(Routes.CATEGORIES) }
@@ -212,6 +223,12 @@ fun HomeQuestNavHost(onSignOut: () -> Unit, onEraseAll: () -> Unit) {
             composable(Routes.REMINDERS) { RemindersScreen(onBack = { navController.popBackStack() }) }
             composable(Routes.BUDGETS) { BudgetsScreen(onBack = { navController.popBackStack() }) }
             composable(Routes.INSIGHTS) { InsightsScreen(onBack = { navController.popBackStack() }) }
+            composable(Routes.CAPTURE) {
+                CaptureScreen(onBack = { navController.popBackStack() }, onEdit = { navController.navigate(Routes.addExpense(draftId = it)) })
+            }
+            composable(Routes.KHATA) { KhataScreen(onBack = { navController.popBackStack() }) }
+            composable(Routes.SERVICES) { ServicesScreen(onBack = { navController.popBackStack() }) }
+            composable(Routes.SAVINGS) { SavingsScreen(onBack = { navController.popBackStack() }) }
             composable(Routes.CALENDAR) {
                 CalendarScreen(onBack = { navController.popBackStack() }, onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) })
             }
@@ -296,24 +313,17 @@ private fun AddButton(onClick: () -> Unit, modifier: Modifier) {
 private fun TabItem(tab: BottomTab, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     val interaction = remember { MutableInteractionSource() }
-    val pill by animateColorAsState(if (selected) scheme.primaryContainer else Color.Transparent, label = "tabPill")
+    val tint by animateColorAsState(if (selected) scheme.primary else scheme.onSurfaceVariant, label = "tabTint")
     Column(
         modifier.fillMaxHeight().clickable(interactionSource = interaction, indication = null, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(Modifier.clip(RoundedCornerShape(50)).background(pill).padding(horizontal = 14.dp, vertical = 3.dp)) {
-            Icon(
-                if (selected) tab.icon else tab.outlined,
-                contentDescription = null,
-                tint = if (selected) scheme.primary else scheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
-            )
-        }
+        Icon(if (selected) tab.icon else tab.outlined, contentDescription = null, tint = tint, modifier = Modifier.size(26.dp))
         Text(
             stringResource(tab.labelRes),
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) scheme.primary else scheme.onSurfaceVariant,
+            color = tint,
             maxLines = 1,
             modifier = Modifier.padding(top = 3.dp)
         )

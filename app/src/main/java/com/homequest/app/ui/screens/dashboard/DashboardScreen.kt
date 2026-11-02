@@ -22,9 +22,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.TrendingDown
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.Handshake
+import androidx.compose.material.icons.rounded.MarkEmailUnread
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material.icons.rounded.WbSunny
@@ -39,20 +41,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homequest.app.R
-import com.homequest.app.domain.AvatarAction
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.data.repository.resolve
+import com.homequest.app.domain.AvatarAction
 import com.homequest.app.notifications.nextOccurrence
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AnimatedCount
@@ -73,12 +79,15 @@ import com.homequest.app.ui.components.StatTile
 import com.homequest.app.ui.components.label
 import com.homequest.app.ui.components.moodLine
 import com.homequest.app.util.Dates
+import com.homequest.app.util.Sharing
+import com.homequest.app.util.WeeklyCard
 import com.homequest.app.util.money
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun DashboardScreen(
@@ -91,16 +100,36 @@ fun DashboardScreen(
     onOpenGroups: () -> Unit,
     onOpenReminders: () -> Unit,
     onOpenRewards: () -> Unit,
-    onOpenProfile: () -> Unit
+    onOpenProfile: () -> Unit,
+    onOpenCapture: () -> Unit
 ) {
     val vm = appViewModel { DashboardViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
     val symbol = state.settings.currencySymbol
     val scheme = MaterialTheme.colorScheme
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 40.dp)) {
             item { Header(state, onOpenProfile, onVoiceExpense, onOpenRewards) }
+
+            if (state.pendingCaptures > 0) {
+                item {
+                    HqCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp).fillMaxWidth(), onClick = onOpenCapture, padding = 14) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(40.dp).background(scheme.tertiary.copy(alpha = 0.16f), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Rounded.MarkEmailUnread, contentDescription = null, tint = scheme.tertiary)
+                            }
+                            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                                Text(pluralStringResource(R.plurals.captures_to_review, state.pendingCaptures, state.pendingCaptures), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(stringResource(R.string.captures_hint), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
 
             item {
                 SectionHeader(stringResource(R.string.cash_flow), action = stringResource(R.string.manage), onAction = onOpenBudgets)
@@ -176,7 +205,18 @@ fun DashboardScreen(
                         Text(stringResource(R.string.on_pace_for), style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant)
                         AnimatedMoney(state.monthProjection, symbol, MaterialTheme.typography.titleLarge, if (state.settings.monthlyBudget > 0 && state.monthProjection > state.settings.monthlyBudget) scheme.error else scheme.onSurface)
                         if (state.settings.monthlyBudget > 0) {
-                            Text(stringResource(R.string.pace_hint), style = MaterialTheme.typography.bodySmall, color = scheme.tertiary, modifier = Modifier.padding(bottom = 8.dp))
+                            val budget = state.settings.monthlyBudget
+                            val cross = state.budgetCrossDate
+                            Text(
+                                when {
+                                    state.monthTotal > budget -> stringResource(R.string.forecast_already_over, (state.monthTotal - budget).money(symbol))
+                                    cross != null -> stringResource(R.string.forecast_over, (state.monthProjection - budget).money(symbol), Dates.shortLabel(cross.toEpochDay()))
+                                    else -> stringResource(R.string.forecast_on_track, (budget - state.monthProjection).coerceAtLeast(0.0).money(symbol))
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (state.monthTotal > budget || cross != null) scheme.error else scheme.tertiary
+                            )
+                            Text(stringResource(R.string.pace_hint), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 8.dp))
                         }
                         AreaChart(
                             values = state.monthCumulative,
@@ -192,7 +232,12 @@ fun DashboardScreen(
             }
 
             item {
-                SectionHeader(stringResource(R.string.last_7_days))
+                SectionHeader(stringResource(R.string.last_7_days), action = stringResource(R.string.share), onAction = {
+                    state.week?.let { week ->
+                        val colors = scheme.primary.toArgb() to scheme.tertiary.toArgb()
+                        scope.launch { Sharing.shareImage(context, { WeeklyCard.render(context, week, symbol, colors.first, colors.second) }, "homequest-week.png") }
+                    }
+                })
                 HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
                     val weekTotal = state.weekValues.sum()
                     Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(bottom = 12.dp)) {
@@ -213,7 +258,7 @@ fun DashboardScreen(
                         EmptyState("🧾", stringResource(R.string.nothing_logged), stringResource(R.string.first_expense_hint))
                     } else {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            DonutChart(state.categoryTotals, valueLabel = { it.money(symbol) }, centerLabel = state.monthTotal.money(symbol))
+                            DonutChart(state.categoryTotals, valueLabel = { it.money(symbol) }, centerLabel = state.categoryTotals.sumOf { it.total }.money(symbol))
                             Column(Modifier.padding(start = 16.dp).weight(1f)) {
                                 state.categoryTotals.take(5).forEach { t ->
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 3.dp)) {

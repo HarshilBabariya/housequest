@@ -31,7 +31,8 @@ data class AppSettings(
     val appLockEnabled: Boolean = false,
     val activeMemberId: Long = 0,
     val onboarded: Boolean = false,
-    val language: String = AppLanguage.ENGLISH.tag
+    val language: String = AppLanguage.ENGLISH.tag,
+    val goldRate24k: Double = 0.0
 )
 
 class SettingsRepository(private val context: Context) {
@@ -48,6 +49,7 @@ class SettingsRepository(private val context: Context) {
         val ACTIVE_MEMBER = longPreferencesKey("active_member")
         val ONBOARDED = booleanPreferencesKey("onboarded")
         val LANGUAGE = stringPreferencesKey("language")
+        val GOLD_RATE = doublePreferencesKey("gold_rate_24k")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -62,7 +64,8 @@ class SettingsRepository(private val context: Context) {
             appLockEnabled = p[Keys.APP_LOCK] ?: false,
             activeMemberId = p[Keys.ACTIVE_MEMBER] ?: 0,
             onboarded = p[Keys.ONBOARDED] ?: false,
-            language = p[Keys.LANGUAGE] ?: AppLanguage.ENGLISH.tag
+            language = p[Keys.LANGUAGE] ?: AppLanguage.ENGLISH.tag,
+            goldRate24k = p[Keys.GOLD_RATE] ?: 0.0
         )
     }
 
@@ -81,4 +84,5 @@ class SettingsRepository(private val context: Context) {
     suspend fun clear() = context.dataStore.edit { it.clear() }
     suspend fun setOnboarded() = context.dataStore.edit { it[Keys.ONBOARDED] = true }
     suspend fun setLanguage(tag: String) = context.dataStore.edit { it[Keys.LANGUAGE] = tag }
+    suspend fun setGoldRate(rate24k: Double) = context.dataStore.edit { it[Keys.GOLD_RATE] = rate24k }
 }

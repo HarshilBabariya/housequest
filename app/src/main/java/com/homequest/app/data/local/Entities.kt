@@ -12,6 +12,7 @@ import com.homequest.app.domain.FaceShape
 import com.homequest.app.domain.Gender
 import com.homequest.app.domain.PaymentMode
 import com.homequest.app.domain.RepeatRule
+import com.homequest.app.domain.ServiceBilling
 import com.homequest.app.domain.SplitType
 
 @Entity(tableName = "members")
@@ -133,7 +134,8 @@ data class ReminderEntity(
     val amount: Double? = null,
     val category: String? = null,
     val enabled: Boolean = true,
-    val isSample: Boolean = false
+    val isSample: Boolean = false,
+    val autoLog: Boolean = false
 )
 
 @Entity(tableName = "budgets")
@@ -171,6 +173,96 @@ data class PointsLedgerEntity(
     val delta: Int,
     val reason: String,
     val at: Long = System.currentTimeMillis()
+)
+
+@Entity(tableName = "shops")
+data class ShopEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val phone: String = "",
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "shop_entries",
+    foreignKeys = [ForeignKey(ShopEntity::class, ["id"], ["shopId"], onDelete = ForeignKey.CASCADE)],
+    indices = [Index("shopId")]
+)
+data class ShopEntryEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val shopId: Long,
+    val amount: Double,
+    val payment: Boolean,
+    val note: String = "",
+    val epochDay: Long,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(tableName = "services")
+data class ServiceEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val emoji: String,
+    val billing: ServiceBilling,
+    val rate: Double,
+    val defaultQty: Double,
+    val leaveDeduction: Double = 0.0,
+    val category: String,
+    val startEpochDay: Long,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "service_days",
+    primaryKeys = ["serviceId", "epochDay"],
+    foreignKeys = [ForeignKey(ServiceEntity::class, ["id"], ["serviceId"], onDelete = ForeignKey.CASCADE)]
+)
+data class ServiceDayEntity(
+    val serviceId: Long,
+    val epochDay: Long,
+    val qty: Double
+)
+
+@Entity(
+    tableName = "service_bills",
+    primaryKeys = ["serviceId", "month"],
+    foreignKeys = [ForeignKey(ServiceEntity::class, ["id"], ["serviceId"], onDelete = ForeignKey.CASCADE)]
+)
+data class ServiceBillEntity(
+    val serviceId: Long,
+    val month: String,
+    val amount: Double,
+    val paidAt: Long = System.currentTimeMillis()
+)
+
+@Entity(tableName = "gold")
+data class GoldEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val label: String,
+    val grams: Double,
+    val karat: Int,
+    val pricePaid: Double,
+    val epochDay: Long
+)
+
+@Entity(tableName = "chits")
+data class ChitEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val monthlyAmount: Double,
+    val months: Int,
+    val startMonth: String,
+    val paidMonths: Int = 0,
+    val prizeAmount: Double? = null
+)
+
+@Entity(tableName = "payment_drafts")
+data class PaymentDraftEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val amount: Double,
+    val merchant: String,
+    val source: String,
+    val postedAt: Long
 )
 
 data class ExpenseWithPayer(
