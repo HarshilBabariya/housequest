@@ -14,6 +14,7 @@ object PointsRules {
     const val SETTLE_UP = 15
     const val ADD_MEMBER = 20
     const val MONTH_UNDER_BUDGET = 100
+    const val FESTIVAL_GIFT = 50
 
     fun streakBonus(streakDays: Int): Int = (streakDays * STREAK_PER_DAY).coerceAtMost(STREAK_CAP)
 }
@@ -27,10 +28,19 @@ object LedgerReasons {
     const val BADGE = "badge"
     const val UNLOCK = "unlock"
     const val PURCHASE = "purchase"
+    const val FESTIVAL = "festival"
 
     fun encode(kind: String, arg: String = ""): String = if (arg.isEmpty()) kind else "$kind:$arg"
     fun kind(reason: String): String = reason.substringBefore(':')
     fun arg(reason: String): String = reason.substringAfter(':', "")
+}
+
+object StreakMilestones {
+    val days = listOf(3, 7, 14, 21, 30, 50, 75, 100, 150, 200, 365)
+
+    fun reached(streak: Int): Boolean = streak in days || (streak > days.last() && streak % 100 == 0)
+
+    fun next(streak: Int): Int = days.firstOrNull { it > streak } ?: (streak / 100 + 1) * 100
 }
 
 data class LevelInfo(

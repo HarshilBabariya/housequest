@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">HomeQuest</string>
-    <string name="channel_reminders">Expense reminders</string>
-    <string name="channel_budget">Budget alerts</string>
-    <string name="channel_rewards">Rewards</string>
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
@@ -198,7 +195,7 @@
     <string name="toast_points">+%1$d points</string>
     <string name="toast_badge">Badge unlocked: %1$s</string>
     <string name="toast_level">Level %1$d: %2$s</string>
-    <string name="toast_level_body">You levelled up!</string>
+    <string name="toast_level_body">You levelled up! Fresh looks are waiting in the shop ✨</string>
     <string name="toast_streak">%1$d-day streak</string>
     <string name="toast_streak_body">Keep logging every day</string>
     <string name="welcome_title">Welcome to HomeQuest</string>
@@ -1185,4 +1182,171 @@
     <string name="streak_label">🔥 %1$d-day streak</string>
     <string name="notif_captured_credit">+%1$s from %2$s. Tap to add it as a credit.</string>
     <string name="notif_captured_credit_plain">+%1$s received. Tap to add it as a credit.</string>
+    <string name="channel_nudges">Daily nudges</string>
+    <string name="channel_bills">Bill reminders</string>
+    <string name="channel_autolog">Auto-logged bills</string>
+    <string name="channel_budget_warn">Budget warnings</string>
+    <string name="channel_budget_over">Over budget</string>
+    <string name="channel_badges">Badges</string>
+    <string name="channel_levels">Level-ups</string>
+    <string name="channel_streak_risk">Streak in danger</string>
+    <string name="channel_streak_win">Streak milestones</string>
+    <string name="channel_group_festivals">Festivals</string>
+    <string name="channel_festival">%1$s greetings</string>
+    <string name="fest_uttarayan">Uttarayan</string>
+    <string name="fest_republic">Republic Day</string>
+    <string name="fest_holi">Holi</string>
+    <string name="fest_rakhi">Raksha Bandhan</string>
+    <string name="fest_independence">Independence Day</string>
+    <string name="fest_ganesh">Ganesh Chaturthi</string>
+    <string name="fest_navratri">Navratri</string>
+    <string name="fest_diwali">Diwali</string>
+    <string name="fest_christmas">Christmas</string>
+    <string name="fest_new_year">New Year</string>
+    <string name="pack_tiranga">Tiranga</string>
+    <string name="fest_uttarayan_title">🪁 Kai po che, %1$s!</string>
+    <string name="fest_republic_title">🇮🇳 Happy Republic Day, %1$s!</string>
+    <string name="fest_holi_title">🎨 Happy Holi, %1$s!</string>
+    <string name="fest_rakhi_title">🎀 Happy Raksha Bandhan, %1$s!</string>
+    <string name="fest_independence_title">🇮🇳 Happy Independence Day, %1$s!</string>
+    <string name="fest_ganesh_title">🌺 Ganpati Bappa Morya, %1$s!</string>
+    <string name="fest_navratri_title">💃 Happy Navratri, %1$s!</string>
+    <string name="fest_diwali_title">🪔 Happy Diwali, %1$s!</string>
+    <string name="fest_christmas_title">🎄 Merry Christmas, %1$s!</string>
+    <string name="fest_new_year_title">🎆 Happy New Year, %1$s!</string>
+    <string name="fest_uttarayan_line">Terrace booked, manja ready, chikki stocked. Just don\'t let the kite budget fly away 😎</string>
+    <string name="fest_republic_line">The Constitution has stayed strong for 75+ years. Your budget? Let\'s make it last at least a week 💪</string>
+    <string name="fest_holi_line">Bura na mano, Holi hai! Colours everywhere — just not on your bank statement 🌈</string>
+    <string name="fest_rakhi_line">Sibling gift negotiations have officially started. Log the shagun, we\'re not judging 🎁</string>
+    <string name="fest_independence_line">Freedom from overspending? It\'s giving financial azaadi 🇮🇳</string>
+    <string name="fest_ganesh_line">Modak count: unlimited. Budget: very much limited. Bappa sees everything 🙏</string>
+    <string name="fest_navratri_line">Nine nights of garba, zero nights off from the budget 💃 Chaniya choli ✅ Expenses logged ✅</string>
+    <string name="fest_diwali_line">Pataka budget > actual budget? We\'ve all been there. Light diyas, not your savings ✨</string>
+    <string name="fest_christmas_line">Ho ho ho! Santa is checking the list twice — and so are we 🎅</string>
+    <string name="fest_new_year_line">New year, new me, same old UPI history 😅 Let\'s make this the year of the budget</string>
+    <string name="fest_gift_hint">The %1$s theme, the festive look and +%2$d ⭐ are free today — yours to keep.</string>
+    <string name="fest_claim">Claim my gifts · +%1$d ⭐</string>
+    <string name="fest_wear">Wear the festive look</string>
+    <string name="later">Maybe later</string>
+    <string name="fest_upcoming_hint">Festive theme, outfit and +%1$d ⭐ unlock on the day</string>
+    <string name="fest_tap_to_celebrate">Tap to celebrate 🎉</string>
+    <string name="reason_festival">Festival gift: %1$s</string>
+    <string name="claim_free">🎁 Free today</string>
+    <string name="pack_only">%1$s only</string>
+    <string name="rw_theme_diwali">Diwali Glow</string>
+    <string name="rw_theme_diwali_d">Maroon, marigold and diya gold — the whole app lights up.</string>
+    <string name="rw_theme_holi">Holi Rang</string>
+    <string name="rw_theme_holi_d">Pink, yellow and teal splashes that never wash off.</string>
+    <string name="rw_theme_garba">Garba Nights</string>
+    <string name="rw_theme_garba_d">Chaniya-choli reds, oranges and greens.</string>
+    <string name="rw_theme_kites">Kite Sky</string>
+    <string name="rw_theme_kites_d">Clear Uttarayan blue with kite-red highlights.</string>
+    <string name="rw_theme_rakhi">Rakhi Pastel</string>
+    <string name="rw_theme_rakhi_d">Soft pinks and a thread of gold.</string>
+    <string name="rw_theme_bappa">Bappa Saffron</string>
+    <string name="rw_theme_bappa_d">Saffron, kumkum red and marigold.</string>
+    <string name="rw_theme_tiranga">Tiranga</string>
+    <string name="rw_theme_tiranga_d">Saffron, white, green and chakra navy.</string>
+    <string name="rw_theme_christmas">Jingle Red</string>
+    <string name="rw_theme_christmas_d">Candy-cane red, pine green and tinsel gold.</string>
+    <string name="rw_theme_new_year">New Year Gold</string>
+    <string name="rw_theme_new_year_d">Midnight glass with gold and party pink.</string>
+    <string name="rw_diwali_silk">Diwali silk kurta</string>
+    <string name="rw_diwali_silk_d">Maroon silk with a zari border and a little diya.</string>
+    <string name="rw_holi">Holi white kurta</string>
+    <string name="rw_holi_d">Starts white. Ends a rainbow.</string>
+    <string name="rw_garba">Garba kediyu</string>
+    <string name="rw_garba_d">Mirror work that spins with every taali.</string>
+    <string name="rw_kite">Kite-flyer tee</string>
+    <string name="rw_kite_d">For the terrace champion of Uttarayan.</string>
+    <string name="rw_rakhi">Rakhi pastel kurta</string>
+    <string name="rw_rakhi_d">Pastel pink with tiny flowers.</string>
+    <string name="rw_bappa">Bappa kurta</string>
+    <string name="rw_bappa_d">Saffron kurta with a red dupatta.</string>
+    <string name="rw_tiranga">Tiranga jacket</string>
+    <string name="rw_tiranga_d">Saffron, white and green with the chakra.</string>
+    <string name="rw_santa">Santa suit</string>
+    <string name="rw_santa_d">Red suit, white fur, gold buckle.</string>
+    <string name="rw_sequin">Sequin party jacket</string>
+    <string name="rw_sequin_d">Sparkles from every angle at midnight.</string>
+    <string name="rw_gulal">Gulal face</string>
+    <string name="rw_gulal_d">Colour smudges, the Holi way.</string>
+    <string name="rw_santa_hat">Santa hat</string>
+    <string name="rw_santa_hat_d">Floppy, red, with a pom-pom.</string>
+    <string name="rw_party_hat">Party hat</string>
+    <string name="rw_party_hat_d">A cone of pure celebration.</string>
+    <string name="celebrate_streak_title">%1$d-day streak! 🔥</string>
+    <string name="celebrate_keep_going">Let\'s go 🚀</string>
+    <string name="streak_start_title">Start a streak</string>
+    <string name="streak_start_body">Log one expense today to light the flame</string>
+    <string name="streak_safe">Safe for today ✅ See you tomorrow</string>
+    <string name="streak_at_risk">Log anything today or it resets at midnight ⏳</string>
+    <string name="streak_next">Next: %1$d 🔥</string>
+    <string name="festive_mode">Festive mode</string>
+    <string name="festive_mode_sub">Festival themes and celebrations on Diwali, Holi, Christmas and more</string>
+    <string name="sound_effects">Sound effects</string>
+    <string name="sound_effects_sub">In-app sounds for streaks, level-ups and festivals (quiet in silent mode). Notification sounds can be changed per kind in phone settings</string>
+    <string name="streaks_festivals">Streaks &amp; festivals</string>
+    <string name="engagement_notifs_sub">Streak-in-danger alerts, milestones and festival greetings</string>
+    <string name="rem_soon">Today &amp; tomorrow</string>
+    <string name="rem_this_week">This week</string>
+    <string name="rem_later">Later</string>
+    <string name="rem_all_quiet">All quiet. Add a reminder below</string>
+    <string name="rem_next_up">Next up</string>
+    <string name="rem_bills_ahead">%1$s in bills over 30 days · %2$d active</string>
+    <string name="rem_in_minutes">in %1$d min</string>
+    <string name="rem_today_at">Today, %1$s</string>
+    <string name="rem_tomorrow_at">Tomorrow, %1$s</string>
+    <string name="delete_reminder">Delete reminder</string>
+    <string-array name="celebrate_streak_lines">
+        <item>%1$s, %2$d days in a row. Main character energy, no cap 🔥</item>
+        <item>It\'s giving consistency. %2$d days and counting, %1$s!</item>
+        <item>%2$d days! Your wallet just texted: \"thank you, bestie\" 💌</item>
+        <item>POV: you\'re the one person in the family who actually logs expenses. %2$d days strong!</item>
+        <item>%1$s said \"streak toh banta hai\" and meant it. %2$d days 🙌</item>
+        <item>Not you casually hitting %2$d days like it\'s nothing 😎</item>
+    </string-array>
+    <string-array name="notif_streak_risk_titles">
+        <item>Your %1$d-day streak is in danger 😱</item>
+        <item>Moye moye moment loading… 🔥%1$d</item>
+        <item>%1$d days. Don\'t let it end like this 😭</item>
+        <item>Streak SOS 🆘 %1$d days on the line</item>
+        <item>Bas kar, rulayega kya? 🔥%1$d</item>
+        <item>Emotional damage incoming 💔</item>
+        <item>One expense. Just one. 🙏</item>
+    </string-array>
+    <string-array name="notif_streak_risk_bodies">
+        <item>Log one expense before midnight to keep %1$d days alive.</item>
+        <item>Even a chai counts. Save the streak!</item>
+        <item>The flame is flickering. One tap and it\'s back 🔥</item>
+        <item>Midnight is coming for your %1$d-day streak. Defend it.</item>
+        <item>Your streak isn\'t dead, it\'s just waiting for you ☕</item>
+        <item>You didn\'t come this far to only come this far. Log something!</item>
+        <item>Future you will thank present you. %1$d days, don\'t drop it.</item>
+        <item>One expense, two seconds, %1$d days saved.</item>
+        <item>Plot twist: you log an expense and the streak lives 🎬</item>
+    </string-array>
+    <string-array name="notif_streak_win_titles">
+        <item>🔥 %1$d-day streak unlocked!</item>
+        <item>%1$d days in a row. Iconic.</item>
+        <item>Streak level: %1$d 🔥</item>
+        <item>Okay, %1$d days?! Slay 💅</item>
+        <item>%1$d and not stopping 🚀</item>
+    </string-array>
+    <string-array name="notif_streak_win_bodies">
+        <item>Main character energy. Keep it going!</item>
+        <item>It\'s giving discipline. Your budget is proud.</item>
+        <item>The family group chat should hear about this 📣</item>
+        <item>No cap, that\'s elite consistency.</item>
+        <item>Your wallet just did a happy dance 💃</item>
+        <item>The next milestone is closer than you think 👀</item>
+    </string-array>
+    <plurals name="fest_countdown">
+        <item quantity="one">%1$s is tomorrow!</item>
+        <item quantity="other">%1$s in %2$d days</item>
+    </plurals>
+    <plurals name="rem_active">
+        <item quantity="one">%1$d reminder active</item>
+        <item quantity="other">%1$d reminders active</item>
+    </plurals>
 </resources>

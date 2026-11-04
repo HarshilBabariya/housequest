@@ -8,12 +8,15 @@ import com.homequest.app.data.local.UnlockEntity
 import com.homequest.app.domain.Badge
 import com.homequest.app.domain.BadgeCatalog
 import com.homequest.app.domain.BadgeSnapshot
+import com.homequest.app.domain.Festival
+import com.homequest.app.domain.FestivalPack
 import com.homequest.app.domain.LedgerReasons
 import com.homequest.app.domain.Levels
 import com.homequest.app.domain.PointPack
 import com.homequest.app.domain.PointsRules
 import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.domain.RewardItem
+import com.homequest.app.domain.StreakMilestones
 import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,7 +28,10 @@ sealed class RewardEvent {
     data class BadgeEarned(val badge: Badge) : RewardEvent()
     data class LevelUp(val level: Int, val titleRes: Int) : RewardEvent()
     data class StreakExtended(val days: Int) : RewardEvent()
+    data class StreakMilestone(val days: Int) : RewardEvent()
 }
+
+fun ProfileEntity.currentStreak(today: LocalDate): Int = if (lastLogEpochDay >= today.toEpochDay() - 1) streakDays else 0
 
 class GamificationRepository(private val dao: GamificationDao) {
 
@@ -64,7 +70,8 @@ class GamificationRepository(private val dao: GamificationDao) {
             streak = if (profile.lastLogEpochDay == todayDay - 1) streak + 1 else 1
             points += PointsRules.streakBonus(streak)
             dao.upsertProfile(profile.copy(streakDays = streak, lastLogEpochDay = todayDay))
-            if (streak > 1) _events.tryEmit(RewardEvent.StreakExtended(streak))
+            if (StreakMilestones.reached(streak)) _events.tryEmit(RewardEvent.StreakMilestone(streak))
+            else if (streak > 1) _events.tryEmit(RewardEvent.StreakExtended(streak))
         }
         award(points, LedgerReasons.LOG_EXPENSE)
     }
@@ -94,8 +101,13 @@ class GamificationRepository(private val dao: GamificationDao) {
         if (profile.lastBudgetCheckMonth != monthKey) dao.upsertProfile(profile.copy(lastBudgetCheckMonth = monthKey))
     }
 
+    suspend fun recordFestival(festival: Festival) = award(PointsRules.FESTIVAL_GIFT, LedgerReasons.encode(LedgerReasons.FESTIVAL, festival.name))
+
+    suspend fun claimPack(pack: FestivalPack) = dao.insertUnlocks(RewardCatalog.ofPack(pack).map { UnlockEntity(it.id) })
+
     suspend fun redeem(item: RewardItem): Boolean {
         if (dao.isUnlocked(item.id)) return true
+        if (item.pack != null) return false
         val profile = dao.profile() ?: ProfileEntity()
         if (profile.points < item.cost) return false
         dao.upsertProfile(profile.copy(points = profile.points - item.cost))

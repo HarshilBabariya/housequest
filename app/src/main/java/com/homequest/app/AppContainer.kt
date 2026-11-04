@@ -14,12 +14,21 @@ import com.homequest.app.data.repository.HouseholdRepository
 import com.homequest.app.data.repository.MemberRepository
 import com.homequest.app.data.repository.ReminderRepository
 import com.homequest.app.data.repository.SettingsRepository
+import com.homequest.app.domain.FestivalCalendar
+import com.homequest.app.domain.FestivalDay
 import com.homequest.app.notifications.BudgetMonitor
+import com.homequest.app.notifications.EngagementScheduler
 import com.homequest.app.notifications.NotificationHelper
 import com.homequest.app.notifications.ReminderScheduler
+import com.homequest.app.notifications.SoundPlayer
+import com.homequest.app.util.Dates
 import com.homequest.app.util.Sharing
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class AppContainer(private val context: Context) {
@@ -28,6 +37,9 @@ class AppContainer(private val context: Context) {
     val settingsRepository = SettingsRepository(context)
     val notificationHelper = NotificationHelper(context)
     val reminderScheduler = ReminderScheduler(context)
+    val engagementScheduler = EngagementScheduler(context)
+    val sounds = SoundPlayer(context)
+    val festival: Flow<FestivalDay?> = Dates.days().map { FestivalCalendar.active(it) }
     val gamificationRepository = GamificationRepository(db.gamificationDao())
     val badgeTracker = BadgeTracker(db.expenseDao(), db.groupDao(), db.memberDao(), db.reminderDao(), db.categoryDao(), db.gamificationDao(), settingsRepository, gamificationRepository)
     val categoryRepository = CategoryRepository(db.categoryDao(), db.expenseDao(), db.budgetDao(), db.reminderDao(), badgeTracker)
@@ -47,6 +59,17 @@ class AppContainer(private val context: Context) {
         budgetMonitor.closePreviousMonthIfNeeded()
         badgeTracker.refresh()
         reminderRepository.rescheduleAll()
+        engagementScheduler.scheduleAll()
+    }
+
+    private val festivalGift = Mutex()
+
+    suspend fun claimFestival(day: FestivalDay) = festivalGift.withLock {
+        gamificationRepository.claimPack(day.festival.pack)
+        if (settingsRepository.current().festivalGifted != day.key) {
+            settingsRepository.setFestivalGifted(day.key)
+            gamificationRepository.recordFestival(day.festival)
+        }
     }
 
     suspend fun eraseAll() {

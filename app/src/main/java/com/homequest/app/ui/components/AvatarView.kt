@@ -261,6 +261,15 @@ private fun outfitColors(id: String): Pair<Color, Color> = when (id) {
     Outfits.NEHRU -> Color(0xFF0F766E) to Color(0xFFFDE68A)
     Outfits.LEHENGA -> Color(0xFFBE185D) to Color(0xFFFACC15)
     Outfits.LAB_COAT -> Color(0xFFF8FAFC) to Color(0xFF0EA5E9)
+    Outfits.DIWALI_SILK -> Color(0xFF7F1D1D) to Color(0xFFFBBF24)
+    Outfits.HOLI -> Color(0xFFF8FAFC) to Color(0xFFEC4899)
+    Outfits.GARBA -> Color(0xFFDC2626) to Color(0xFF16A34A)
+    Outfits.KITE -> Color(0xFF38BDF8) to Color(0xFFEF4444)
+    Outfits.RAKHI -> Color(0xFFF9A8D4) to Color(0xFFF59E0B)
+    Outfits.BAPPA -> Color(0xFFF97316) to Color(0xFFB91C1C)
+    Outfits.TIRANGA -> Color(0xFFF8FAFC) to Color(0xFF1E3A8A)
+    Outfits.SANTA -> Color(0xFFDC2626) to Color(0xFFF8FAFC)
+    Outfits.SEQUIN -> Color(0xFF312E81) to Color(0xFFFACC15)
     else -> Color(0xFF3B82F6) to Color(0xFF1D4ED8)
 }
 
@@ -270,7 +279,7 @@ private fun DrawScope.drawBody(id: String, p: Palette, u: Float, outline: Stroke
     val base = if (id == Outfits.SAREE) Color(0xFF7E22CE) else p.cloth
     drawPath(torso, Brush.verticalGradient(listOf(base.lighten(0.14f), base, base.darken(0.14f)), startY = 65f * u, endY = 100f * u))
     drawPath(pen(u) { m(w, 100f).l(w, 86f).c(w, 76f, w + 7f, 71f, w + 15f, 68f).l(w + 15f, 100f).z() }, base.darken(0.1f).copy(alpha = 0.5f))
-    drawPath(torso, if (id == Outfits.SHIRT || id == Outfits.LAB_COAT) Color(0xFFD1D5DB) else Outline, style = outline)
+    drawPath(torso, if (id == Outfits.SHIRT || id == Outfits.LAB_COAT || id == Outfits.HOLI || id == Outfits.TIRANGA) Color(0xFFD1D5DB) else Outline, style = outline)
     drawPath(pen(u) { m(43f, 55f).l(57f, 55f).l(57f, 68f).q(50f, 73f, 43f, 68f).z() }, p.skinShade)
     when (id) {
         Outfits.HOODIE -> {
@@ -380,6 +389,106 @@ private fun DrawScope.drawBody(id: String, p: Palette, u: Float, outline: Stroke
             drawPath(pen(u) { m(60f, 66f).l(63f, 80f).l(50f, 100f) }, Color(0xFFD1D5DB), style = Stroke(1.4f * u))
             drawRoundRect(Color(0xFFD1D5DB), Offset(60f * u, 84f * u), Size(9f * u, 8f * u), CornerRadius(1f * u), style = Stroke(1f * u))
             drawLine(p.accent, Offset(62f * u, 81f * u), Offset(62f * u, 87f * u), 1.4f * u, StrokeCap.Round)
+        }
+        Outfits.DIWALI_SILK -> {
+            drawPath(pen(u) { m(41f, 65f).q(50f, 70f, 59f, 65f).l(59f, 70f).q(50f, 75f, 41f, 70f).z() }, p.accent)
+            drawLine(p.accent, Offset(50f * u, 72f * u), Offset(50f * u, 100f * u), 1.6f * u)
+            listOf(78f, 85f, 92f).forEach { y -> drawCircle(p.accent, 1.3f * u, Offset(50f * u, y * u)) }
+            clipPath(torso) {
+                drawRect(p.accent.copy(alpha = 0.85f), Offset(0f, 95f * u), Size(100f * u, 5f * u))
+                listOf(24f, 32f, 40f, 60f, 68f, 76f).forEach { x -> drawCircle(p.accent, 0.8f * u, Offset(x * u, 92.5f * u)) }
+            }
+            drawPath(pen(u) { m(60f, 85f).q(65f, 91f, 70f, 85f).z() }, Color(0xFFF59E0B))
+            drawPath(pen(u) { m(65f, 84.5f).q(62.5f, 81f, 65f, 77f).q(67.5f, 81f, 65f, 84.5f).z() }, Color(0xFFFF7A1A))
+            drawCircle(Color(0xFFFDE68A), 0.9f * u, Offset(65f * u, 82.5f * u))
+        }
+        Outfits.HOLI -> {
+            drawPath(pen(u) { m(42f, 66f).l(58f, 66f).l(58f, 70f).q(50f, 75f, 42f, 70f).z() }, Color(0xFFE5E7EB))
+            drawRect(Color(0xFFE5E7EB), Offset(48.5f * u, 70f * u), Size(3f * u, 22f * u))
+            clipPath(torso) {
+                listOf(
+                    Triple(28f, 80f, Color(0xFFEC4899)), Triple(68f, 76f, Color(0xFFFACC15)), Triple(38f, 93f, Color(0xFF22C55E)),
+                    Triple(72f, 92f, Color(0xFF3B82F6)), Triple(57f, 86f, Color(0xFFF97316))
+                ).forEach { (x, y, c) ->
+                    drawCircle(c.copy(alpha = 0.85f), 5f * u, Offset(x * u, y * u))
+                    drawCircle(c.copy(alpha = 0.7f), 1.6f * u, Offset((x + 6f) * u, (y - 4f) * u))
+                    drawCircle(c.copy(alpha = 0.6f), 1.1f * u, Offset((x - 5f) * u, (y + 5f) * u))
+                }
+            }
+        }
+        Outfits.GARBA -> {
+            clipPath(torso) {
+                drawRect(p.accent, Offset(0f, 84f * u), Size(100f * u, 7f * u))
+                drawPath(pen(u) { m(10f, 84f); var x = 10f; while (x < 90f) { l(x + 3f, 81f); l(x + 6f, 84f); x += 6f } }, Color(0xFFFACC15), style = Stroke(1.2f * u))
+                listOf(76f, 88f, 96f).forEachIndexed { row, y ->
+                    var x = if (row % 2 == 0) 22f else 26f
+                    while (x < 80f) {
+                        drawCircle(Color.White, 1.5f * u, Offset(x * u, y * u))
+                        drawCircle(Color(0xFFFACC15), 1.5f * u, Offset(x * u, y * u), style = Stroke(0.6f * u))
+                        x += 8f
+                    }
+                }
+            }
+            drawPath(pen(u) { m(36f, 65f).q(50f, 80f, 64f, 65f) }, Color(0xFFFACC15), style = Stroke(2.4f * u))
+        }
+        Outfits.KITE -> {
+            drawPath(pen(u) { m(41f, 66f).q(50f, 75f, 59f, 66f) }, Color.White, style = Stroke(2.4f * u))
+            listOf(Triple(34f, 82f, p.accent), Triple(63f, 78f, Color(0xFFFACC15)), Triple(55f, 92f, Color(0xFF22C55E))).forEach { (x, y, c) ->
+                drawPath(pen(u) { m(x, y - 5f).l(x + 4f, y).l(x, y + 5f).l(x - 4f, y).z() }, c)
+                drawLine(Color.White.copy(alpha = 0.7f), Offset(x * u, (y - 5f) * u), Offset(x * u, (y + 5f) * u), 0.5f * u)
+                drawPath(pen(u) { m(x, y + 5f).q(x + 3f, y + 8f, x - 1f, y + 11f) }, Color.White.copy(alpha = 0.8f), style = Stroke(0.6f * u))
+            }
+        }
+        Outfits.RAKHI -> {
+            drawPath(pen(u) { m(42f, 66f).l(58f, 66f).l(58f, 70f).q(50f, 75f, 42f, 70f).z() }, p.accent)
+            drawRect(p.accent, Offset(48.5f * u, 70f * u), Size(3f * u, 22f * u))
+            listOf(30f to 80f, 70f to 84f, 36f to 94f, 64f to 96f).forEach { (x, y) ->
+                repeat(5) { i ->
+                    val a = i * 72f / 180f * PI.toFloat()
+                    drawCircle(Color.White.copy(alpha = 0.85f), 1.5f * u, Offset((x + cos(a) * 1.8f) * u, (y + sin(a) * 1.8f) * u))
+                }
+                drawCircle(p.accent, 1.1f * u, Offset(x * u, y * u))
+            }
+        }
+        Outfits.BAPPA -> {
+            drawPath(pen(u) { m(42f, 66f).l(58f, 66f).l(58f, 70f).q(50f, 75f, 42f, 70f).z() }, Color(0xFFFDE68A))
+            clipPath(torso) {
+                drawPath(pen(u) { m(22f, 70f).l(32f, 66f).l(84f, 100f).l(70f, 100f).z() }, p.accent)
+                drawPath(pen(u) { m(32f, 66f).l(84f, 100f) }, Color(0xFFFACC15), style = Stroke(1.2f * u))
+                drawPath(pen(u) { m(22f, 70f).l(70f, 100f) }, Color(0xFFFACC15), style = Stroke(1.2f * u))
+            }
+            listOf(80f, 88f).forEach { y -> drawCircle(Color(0xFFFDE68A), 1.2f * u, Offset(40f * u, y * u)) }
+        }
+        Outfits.TIRANGA -> {
+            clipPath(torso) {
+                drawRect(Color(0xFFFF9933), Offset(0f, 65f * u), Size(100f * u, 12f * u))
+                drawRect(Color(0xFF138808), Offset(0f, 89f * u), Size(100f * u, 11f * u))
+            }
+            drawPath(pen(u) { m(41f, 65f).q(50f, 69f, 59f, 65f).l(59f, 69f).q(50f, 73f, 41f, 69f).z() }, Color(0xFFF8FAFC))
+            drawCircle(p.accent, 5f * u, Offset(50f * u, 83f * u), style = Stroke(0.9f * u))
+            repeat(24) { i ->
+                val a = i * 15f / 180f * PI.toFloat()
+                drawLine(p.accent, Offset(50f * u, 83f * u), Offset((50f + cos(a) * 5f) * u, (83f + sin(a) * 5f) * u), 0.3f * u)
+            }
+            drawCircle(p.accent, 0.9f * u, Offset(50f * u, 83f * u))
+        }
+        Outfits.SANTA -> {
+            drawPath(pen(u) { m(36f, 65f).q(50f, 72f, 64f, 65f).l(64f, 70f).q(50f, 77f, 36f, 70f).z() }, p.accent)
+            drawRoundRect(p.accent, Offset(46f * u, 72f * u), Size(8f * u, 28f * u), CornerRadius(3f * u))
+            clipPath(torso) { drawRect(Color(0xFF111827), Offset(0f, 88f * u), Size(100f * u, 5f * u)) }
+            drawRect(Color(0xFFFACC15), Offset(45.5f * u, 87.5f * u), Size(9f * u, 6f * u), style = Stroke(1.3f * u))
+        }
+        Outfits.SEQUIN -> {
+            clipPath(torso) {
+                for (y in 68..100 step 4) for (x in 14..86 step 4) {
+                    val shift = if ((y / 4) % 2 == 0) 0f else 2f
+                    drawCircle(p.accent.copy(alpha = 0.25f + 0.5f * ((x * 7 + y * 13) % 5) / 4f), 0.9f * u, Offset((x + shift) * u, y * u))
+                }
+            }
+            drawPath(pen(u) { m(40f, 66f).q(37f, 84f, 50f, 97f) }, p.accent, style = Stroke(2.2f * u))
+            drawPath(pen(u) { m(60f, 66f).q(63f, 84f, 50f, 97f) }, p.accent, style = Stroke(2.2f * u))
+            drawPath(pen(u) { m(50f, 70f).l(44f, 67f).l(44f, 73f).z() }, Ink)
+            drawPath(pen(u) { m(50f, 70f).l(56f, 67f).l(56f, 73f).z() }, Ink)
         }
         else -> drawPath(pen(u) { m(41f, 66f).q(50f, 75f, 59f, 66f) }, p.accent, style = Stroke(2.4f * u))
     }
@@ -750,6 +859,24 @@ private fun DrawScope.drawAccessory(id: String, u: Float) {
         Accessories.CHAIN -> {
             drawPath(pen(u) { m(40f, 67f).q(50f, 82f, 60f, 67f) }, Color(0xFFFBBF24), style = Stroke(1.5f * u, pathEffect = PathEffect.dashPathEffect(floatArrayOf(2f * u, 1f * u))))
             drawCircle(Color(0xFFF59E0B), 2.6f * u, Offset(50f * u, 76f * u))
+        }
+        Accessories.GULAL -> {
+            drawOval(Color(0xFFEC4899).copy(alpha = 0.55f), Offset(29f * u, 46f * u), Size(12f * u, 8f * u))
+            drawOval(Color(0xFF22C55E).copy(alpha = 0.5f), Offset(59f * u, 47f * u), Size(11f * u, 7f * u))
+            drawOval(Color(0xFFFACC15).copy(alpha = 0.55f), Offset(43f * u, 26f * u), Size(10f * u, 5f * u))
+            drawCircle(Color(0xFF3B82F6).copy(alpha = 0.5f), 1.6f * u, Offset(66f * u, 55f * u))
+            drawCircle(Color(0xFFEC4899).copy(alpha = 0.5f), 1.2f * u, Offset(33f * u, 56f * u))
+        }
+        Accessories.SANTA_HAT -> {
+            drawPath(pen(u) { m(25f, 31f).c(25f, 12f, 48f, 2f, 70f, 8f).q(82f, 12f, 84f, 24f).q(76f, 18f, 72f, 20f).q(76f, 24f, 75f, 31f).z() }, Brush.verticalGradient(listOf(Color(0xFFEF4444), Color(0xFFB91C1C)), startY = 4f * u, endY = 31f * u))
+            drawRoundRect(Color.White, Offset(23f * u, 27f * u), Size(54f * u, 8f * u), CornerRadius(4f * u))
+            drawCircle(Color.White, 4.5f * u, Offset(84f * u, 25f * u))
+        }
+        Accessories.PARTY_HAT -> {
+            val cone = pen(u) { m(37f, 22f).l(53f, 2f).l(64f, 24f).q(50f, 19f, 37f, 22f).z() }
+            drawPath(cone, Brush.linearGradient(listOf(Color(0xFF8B5CF6), Color(0xFFEC4899)), start = Offset(37f * u, 22f * u), end = Offset(64f * u, 2f * u)))
+            clipPath(cone) { listOf(8f, 14f, 20f).forEach { y -> drawLine(Color(0xFFFACC15), Offset(30f * u, (y + 4f) * u), Offset(70f * u, (y - 4f) * u), 1.6f * u) } }
+            drawCircle(Color(0xFFFACC15), 3.2f * u, Offset(53f * u, 3f * u))
         }
     }
 }

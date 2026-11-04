@@ -9,9 +9,12 @@ data class RewardItem(
     @StringRes val nameRes: Int,
     @StringRes val descriptionRes: Int,
     val cost: Int,
-    val emoji: String
+    val emoji: String,
+    val pack: FestivalPack? = null
 ) {
     val isFree: Boolean get() = cost == 0
+
+    fun claimableDuring(active: FestivalPack?): Boolean = pack != null && pack == active
 }
 
 data class PointPack(val id: String, @StringRes val nameRes: Int, val rupees: Int, val points: Int)
@@ -86,15 +89,47 @@ object RewardCatalog {
         RewardItem(Accessories.CHAIN, RewardKind.ACCESSORY, R.string.rw_chain, R.string.rw_chain_d, 220, "⛓️"),
         RewardItem(Accessories.TURBAN, RewardKind.ACCESSORY, R.string.rw_turban, R.string.rw_turban_d, 250, "👳"),
 
+        RewardItem(ThemeIds.DIWALI, RewardKind.THEME, R.string.rw_theme_diwali, R.string.rw_theme_diwali_d, 0, "🪔", FestivalPack.DIWALI),
+        RewardItem(ThemeIds.HOLI, RewardKind.THEME, R.string.rw_theme_holi, R.string.rw_theme_holi_d, 0, "🎨", FestivalPack.HOLI),
+        RewardItem(ThemeIds.GARBA, RewardKind.THEME, R.string.rw_theme_garba, R.string.rw_theme_garba_d, 0, "💃", FestivalPack.NAVRATRI),
+        RewardItem(ThemeIds.KITES, RewardKind.THEME, R.string.rw_theme_kites, R.string.rw_theme_kites_d, 0, "🪁", FestivalPack.UTTARAYAN),
+        RewardItem(ThemeIds.RAKHI, RewardKind.THEME, R.string.rw_theme_rakhi, R.string.rw_theme_rakhi_d, 0, "🎀", FestivalPack.RAKHI),
+        RewardItem(ThemeIds.BAPPA, RewardKind.THEME, R.string.rw_theme_bappa, R.string.rw_theme_bappa_d, 0, "🌺", FestivalPack.GANESH),
+        RewardItem(ThemeIds.TIRANGA, RewardKind.THEME, R.string.rw_theme_tiranga, R.string.rw_theme_tiranga_d, 0, "🇮🇳", FestivalPack.TIRANGA),
+        RewardItem(ThemeIds.CHRISTMAS, RewardKind.THEME, R.string.rw_theme_christmas, R.string.rw_theme_christmas_d, 0, "🎄", FestivalPack.CHRISTMAS),
+        RewardItem(ThemeIds.NEW_YEAR, RewardKind.THEME, R.string.rw_theme_new_year, R.string.rw_theme_new_year_d, 0, "🎆", FestivalPack.NEW_YEAR),
+        RewardItem(Outfits.DIWALI_SILK, RewardKind.OUTFIT, R.string.rw_diwali_silk, R.string.rw_diwali_silk_d, 0, "🪔", FestivalPack.DIWALI),
+        RewardItem(Outfits.HOLI, RewardKind.OUTFIT, R.string.rw_holi, R.string.rw_holi_d, 0, "🎨", FestivalPack.HOLI),
+        RewardItem(Outfits.GARBA, RewardKind.OUTFIT, R.string.rw_garba, R.string.rw_garba_d, 0, "💃", FestivalPack.NAVRATRI),
+        RewardItem(Outfits.KITE, RewardKind.OUTFIT, R.string.rw_kite, R.string.rw_kite_d, 0, "🪁", FestivalPack.UTTARAYAN),
+        RewardItem(Outfits.RAKHI, RewardKind.OUTFIT, R.string.rw_rakhi, R.string.rw_rakhi_d, 0, "🎀", FestivalPack.RAKHI),
+        RewardItem(Outfits.BAPPA, RewardKind.OUTFIT, R.string.rw_bappa, R.string.rw_bappa_d, 0, "🌺", FestivalPack.GANESH),
+        RewardItem(Outfits.TIRANGA, RewardKind.OUTFIT, R.string.rw_tiranga, R.string.rw_tiranga_d, 0, "🇮🇳", FestivalPack.TIRANGA),
+        RewardItem(Outfits.SANTA, RewardKind.OUTFIT, R.string.rw_santa, R.string.rw_santa_d, 0, "🎅", FestivalPack.CHRISTMAS),
+        RewardItem(Outfits.SEQUIN, RewardKind.OUTFIT, R.string.rw_sequin, R.string.rw_sequin_d, 0, "🪩", FestivalPack.NEW_YEAR),
+        RewardItem(Accessories.GULAL, RewardKind.ACCESSORY, R.string.rw_gulal, R.string.rw_gulal_d, 0, "🌈", FestivalPack.HOLI),
+        RewardItem(Accessories.SANTA_HAT, RewardKind.ACCESSORY, R.string.rw_santa_hat, R.string.rw_santa_hat_d, 0, "🎅", FestivalPack.CHRISTMAS),
+        RewardItem(Accessories.PARTY_HAT, RewardKind.ACCESSORY, R.string.rw_party_hat, R.string.rw_party_hat_d, 0, "🥳", FestivalPack.NEW_YEAR),
+
         RewardItem(Features.INSIGHTS, RewardKind.FEATURE, R.string.rw_insights, R.string.rw_insights_d, 300, "📈"),
         RewardItem(Features.EXPORT_CSV, RewardKind.FEATURE, R.string.rw_export, R.string.rw_export_d, 250, "📤")
     )
 
     private val byId = items.associateBy { it.id }
 
-    fun defaults(): List<String> = items.filter { it.isFree }.map { it.id }
+    fun defaults(): List<String> = items.filter { it.isFree && it.pack == null }.map { it.id }
 
     fun ofKind(kind: RewardKind): List<RewardItem> = items.filter { it.kind == kind }
+
+    fun ofPack(pack: FestivalPack): List<RewardItem> = items.filter { it.pack == pack }
+
+    fun dressFor(pack: FestivalPack, config: AvatarConfig): AvatarConfig {
+        val festive = ofPack(pack)
+        return config.copy(
+            outfitId = festive.firstOrNull { it.kind == RewardKind.OUTFIT }?.id ?: config.outfitId,
+            accessoryId = festive.firstOrNull { it.kind == RewardKind.ACCESSORY }?.id ?: config.accessoryId
+        )
+    }
 
     fun find(id: String): RewardItem? = byId[id]
 }

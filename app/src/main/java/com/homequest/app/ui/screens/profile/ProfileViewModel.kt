@@ -11,6 +11,7 @@ import com.homequest.app.data.repository.AppSettings
 import com.homequest.app.data.repository.DarkMode
 import com.homequest.app.data.repository.ImportResult
 import com.homequest.app.data.repository.byId
+import com.homequest.app.data.repository.currentStreak
 import com.homequest.app.domain.Features
 import com.homequest.app.domain.LevelInfo
 import com.homequest.app.domain.Levels
@@ -60,16 +61,16 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     val state: StateFlow<ProfileState> = combine(
         combine(container.memberRepository.members, container.memberRepository.activeMember, ::Pair),
         settings.settings,
-        container.gamificationRepository.profile,
+        combine(container.gamificationRepository.profile, Dates.days(), ::Pair),
         container.gamificationRepository.unlockedIds,
         exportMonths
-    ) { (members, member), s, profile, unlocked, months ->
+    ) { (members, member), s, (profile, today), unlocked, months ->
         ProfileState(
             member = member,
             settings = s,
             level = Levels.fromLifetimePoints(profile.lifetimePoints),
             points = profile.points,
-            streak = profile.streakDays,
+            streak = profile.currentStreak(today),
             memberCount = members.size,
             exportUnlocked = Features.EXPORT_CSV in unlocked,
             exportMonths = months
@@ -82,6 +83,9 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     fun setBudgetAlerts(enabled: Boolean) = viewModelScope.launch { settings.setBudgetAlerts(enabled) }
     fun setReminderNotifications(enabled: Boolean) = viewModelScope.launch { settings.setReminderNotifications(enabled) }
     fun setRewardNotifications(enabled: Boolean) = viewModelScope.launch { settings.setRewardNotifications(enabled) }
+    fun setEngagementNotifications(enabled: Boolean) = viewModelScope.launch { settings.setEngagementNotifications(enabled) }
+    fun setSoundEffects(enabled: Boolean) = viewModelScope.launch { settings.setSoundEffects(enabled) }
+    fun setFestiveMode(enabled: Boolean) = viewModelScope.launch { settings.setFestiveMode(enabled) }
     fun setAppLock(enabled: Boolean) = viewModelScope.launch { settings.setAppLock(enabled) }
     fun setPinAndLock(memberId: Long, pin: String) = viewModelScope.launch {
         container.memberRepository.setPin(memberId, pin)

@@ -268,6 +268,15 @@ object Outfits {
     const val NEHRU = "outfit_nehru"
     const val LEHENGA = "outfit_lehenga"
     const val LAB_COAT = "outfit_lab_coat"
+    const val DIWALI_SILK = "outfit_diwali_silk"
+    const val HOLI = "outfit_holi"
+    const val GARBA = "outfit_garba"
+    const val KITE = "outfit_kite"
+    const val RAKHI = "outfit_rakhi"
+    const val BAPPA = "outfit_bappa"
+    const val TIRANGA = "outfit_tiranga"
+    const val SANTA = "outfit_santa"
+    const val SEQUIN = "outfit_sequin"
 }
 
 object Accessories {
@@ -285,6 +294,9 @@ object Accessories {
     const val BOW_TIE = "acc_bow_tie"
     const val NOSE_RING = "acc_nose_ring"
     const val CHAIN = "acc_chain"
+    const val GULAL = "acc_gulal"
+    const val SANTA_HAT = "acc_santa_hat"
+    const val PARTY_HAT = "acc_party_hat"
 }
 
 object Features {
@@ -300,6 +312,15 @@ object ThemeIds {
     const val CANDY = "theme_candy"
     const val ROYAL = "theme_royal"
     const val GLASS = "theme_glass"
+    const val DIWALI = "theme_diwali"
+    const val HOLI = "theme_holi"
+    const val GARBA = "theme_garba"
+    const val KITES = "theme_kites"
+    const val RAKHI = "theme_rakhi"
+    const val BAPPA = "theme_bappa"
+    const val TIRANGA = "theme_tiranga"
+    const val CHRISTMAS = "theme_christmas"
+    const val NEW_YEAR = "theme_new_year"
 }
 
 val SkinTones = listOf(

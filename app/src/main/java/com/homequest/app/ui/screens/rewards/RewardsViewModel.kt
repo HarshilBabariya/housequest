@@ -6,6 +6,8 @@ import com.homequest.app.AppContainer
 import com.homequest.app.data.local.PointsLedgerEntity
 import com.homequest.app.data.local.ProfileEntity
 import com.homequest.app.domain.BadgeStatus
+import com.homequest.app.domain.FestivalDay
+import com.homequest.app.domain.FestivalPack
 import com.homequest.app.domain.LevelInfo
 import com.homequest.app.domain.Levels
 import com.homequest.app.domain.PointPack
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -38,7 +41,8 @@ data class RewardsState(
     val activeThemeId: String = "",
     val ledger: List<PointsLedgerEntity> = emptyList(),
     val ownerId: Long = 0,
-    val lastMessage: RewardsMessage? = null
+    val lastMessage: RewardsMessage? = null,
+    val activePack: FestivalPack? = null
 )
 
 fun Flow<List<BadgeStatus>>.sortedForDisplay(): Flow<List<BadgeStatus>> = map { list ->
@@ -50,8 +54,8 @@ class RewardsViewModel(private val container: AppContainer) : ViewModel() {
     private val message = MutableStateFlow<RewardsMessage?>(null)
     private val gamification = container.gamificationRepository
 
-    private val meta = combine(kind, message, container.memberRepository.activeMember, container.settingsRepository.settings) { k, m, owner, s ->
-        Meta(k, m, owner?.id ?: 0, s.themeId)
+    private val meta = combine(kind, message, container.memberRepository.activeMember, container.settingsRepository.settings, container.festival) { k, m, owner, s, festival ->
+        Meta(k, m, owner?.id ?: 0, s.themeFor(festival), festival)
     }
 
     val state: StateFlow<RewardsState> = combine(
@@ -71,7 +75,8 @@ class RewardsViewModel(private val container: AppContainer) : ViewModel() {
             activeThemeId = meta.themeId,
             ledger = ledger,
             ownerId = meta.ownerId,
-            lastMessage = meta.message
+            lastMessage = meta.message,
+            activePack = meta.festival?.festival?.pack
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RewardsState())
 
@@ -82,8 +87,12 @@ class RewardsViewModel(private val container: AppContainer) : ViewModel() {
     fun redeem(item: RewardItem) = viewModelScope.launch {
         val ok = gamification.redeem(item)
         message.value = RewardsMessage.Redeem(item, if (ok) 0 else item.cost - state.value.profile.points)
-        if (ok && item.kind == RewardKind.THEME) container.settingsRepository.setTheme(item.id)
+        if (ok && item.kind == RewardKind.THEME) useTheme(item.id)
         if (ok) container.badgeTracker.refresh()
+    }
+
+    fun claim(item: RewardItem) = viewModelScope.launch {
+        container.festival.first()?.takeIf { item.claimableDuring(it.festival.pack) }?.let { container.claimFestival(it) }
     }
 
     fun creditPurchase(pack: PointPack) = viewModelScope.launch {
@@ -94,7 +103,13 @@ class RewardsViewModel(private val container: AppContainer) : ViewModel() {
 
     fun notify(value: RewardsMessage) { message.value = value }
 
-    fun applyTheme(themeId: String) = viewModelScope.launch { container.settingsRepository.setTheme(themeId) }
+    fun applyTheme(themeId: String) = viewModelScope.launch { useTheme(themeId) }
 
-    private data class Meta(val kind: RewardKind, val message: RewardsMessage?, val ownerId: Long, val themeId: String)
+    private suspend fun useTheme(themeId: String) {
+        container.settingsRepository.setTheme(themeId)
+        val festival = container.festival.first()
+        if (festival != null && festival.festival.pack.themeId != themeId) container.settingsRepository.setFestiveThemeSkipped(festival.key)
+    }
+
+    private data class Meta(val kind: RewardKind, val message: RewardsMessage?, val ownerId: Long, val themeId: String, val festival: FestivalDay?)
 }

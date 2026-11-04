@@ -56,6 +56,7 @@ class BootReceiver : BroadcastReceiver() {
         app.appScope.launch {
             try {
                 app.container.reminderRepository.rescheduleAll()
+                app.container.engagementScheduler.scheduleAll()
             } finally {
                 result.finish()
             }

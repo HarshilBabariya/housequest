@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">HomeQuest</string>
-    <string name="channel_reminders">ખર્ચ રિમાઇન્ડર</string>
-    <string name="channel_budget">બજેટ ચેતવણી</string>
-    <string name="channel_rewards">ઇનામ</string>
     <string name="back">પાછળ</string>
     <string name="cancel">રદ કરો</string>
     <string name="ok">બરાબર</string>
@@ -199,7 +196,7 @@
     <string name="toast_points">+%1$d પોઇન્ટ</string>
     <string name="toast_badge">બેજ અનલૉક: %1$s</string>
     <string name="toast_level">લેવલ %1$d: %2$s</string>
-    <string name="toast_level_body">તમારું લેવલ વધ્યું!</string>
+    <string name="toast_level_body">લેવલ અપ! શોપમાં નવા લુક તમારી રાહ જુએ છે ✨</string>
     <string name="toast_streak">%1$d દિવસની સ્ટ્રીક</string>
     <string name="toast_streak_body">દરરોજ નોંધતા રહો</string>
     <string name="welcome_title">HomeQuestમાં સ્વાગત છે</string>
@@ -1185,4 +1182,171 @@
     <string name="streak_label">🔥 %1$d દિવસની સ્ટ્રીક</string>
     <string name="notif_captured_credit">%2$s તરફથી +%1$s. જમા તરીકે ઉમેરવા ટૅપ કરો.</string>
     <string name="notif_captured_credit_plain">+%1$s મળ્યા. જમા તરીકે ઉમેરવા ટૅપ કરો.</string>
+    <string name="channel_nudges">રોજની યાદ</string>
+    <string name="channel_bills">બિલ રિમાઇન્ડર</string>
+    <string name="channel_autolog">આપમેળે નોંધાયેલા બિલ</string>
+    <string name="channel_budget_warn">બજેટ ચેતવણી</string>
+    <string name="channel_budget_over">બજેટ પાર</string>
+    <string name="channel_badges">બેજ</string>
+    <string name="channel_levels">લેવલ-અપ</string>
+    <string name="channel_streak_risk">સ્ટ્રીક જોખમમાં</string>
+    <string name="channel_streak_win">સ્ટ્રીક માઇલસ્ટોન</string>
+    <string name="channel_group_festivals">તહેવારો</string>
+    <string name="channel_festival">%1$s ની શુભેચ્છા</string>
+    <string name="fest_uttarayan">ઉત્તરાયણ</string>
+    <string name="fest_republic">પ્રજાસત્તાક દિવસ</string>
+    <string name="fest_holi">હોળી</string>
+    <string name="fest_rakhi">રક્ષાબંધન</string>
+    <string name="fest_independence">સ્વતંત્રતા દિવસ</string>
+    <string name="fest_ganesh">ગણેશ ચતુર્થી</string>
+    <string name="fest_navratri">નવરાત્રિ</string>
+    <string name="fest_diwali">દિવાળી</string>
+    <string name="fest_christmas">ક્રિસમસ</string>
+    <string name="fest_new_year">નવું વર્ષ</string>
+    <string name="pack_tiranga">તિરંગો</string>
+    <string name="fest_uttarayan_title">🪁 કાઇ પો છે, %1$s!</string>
+    <string name="fest_republic_title">🇮🇳 પ્રજાસત્તાક દિવસની શુભેચ્છા, %1$s!</string>
+    <string name="fest_holi_title">🎨 હેપ્પી હોળી, %1$s!</string>
+    <string name="fest_rakhi_title">🎀 રક્ષાબંધનની શુભેચ્છા, %1$s!</string>
+    <string name="fest_independence_title">🇮🇳 સ્વતંત્રતા દિવસની શુભેચ્છા, %1$s!</string>
+    <string name="fest_ganesh_title">🌺 ગણપતિ બાપ્પા મોરયા, %1$s!</string>
+    <string name="fest_navratri_title">💃 નવરાત્રિની શુભેચ્છા, %1$s!</string>
+    <string name="fest_diwali_title">🪔 હેપ્પી દિવાળી, %1$s!</string>
+    <string name="fest_christmas_title">🎄 મેરી ક્રિસમસ, %1$s!</string>
+    <string name="fest_new_year_title">🎆 હેપ્પી ન્યૂ યર, %1$s!</string>
+    <string name="fest_uttarayan_line">ધાબું બુક, દોરી તૈયાર, ચીકી સ્ટોકમાં. બસ પતંગનું બજેટ ઉડી ન જાય 😎</string>
+    <string name="fest_republic_line">બંધારણ 75+ વર્ષથી મજબૂત છે. તમારું બજેટ? ઓછામાં ઓછું એક અઠવાડિયું તો ટકે 💪</string>
+    <string name="fest_holi_line">બુરા ન માનો, હોળી છે! રંગ બધે — બસ બેંક સ્ટેટમેન્ટ પર નહીં 🌈</string>
+    <string name="fest_rakhi_line">ભાઈ-બહેનની ગિફ્ટ ડીલ શરૂ થઈ ગઈ. શગુન લખી લો, અમે જજ નહીં કરીએ 🎁</string>
+    <string name="fest_independence_line">ફાલતુ ખર્ચથી આઝાદી? આ જ છે સાચી ફાઇનાન્શિયલ આઝાદી 🇮🇳</string>
+    <string name="fest_ganesh_line">મોદક અનલિમિટેડ, બજેટ લિમિટેડ. બાપ્પા બધું જુએ છે 🙏</string>
+    <string name="fest_navratri_line">નવ રાત ગરબા, બજેટમાંથી એક પણ રાતની રજા નહીં 💃 ચણિયા ચોળી ✅ ખર્ચ નોંધ ✅</string>
+    <string name="fest_diwali_line">ફટાકડાનું બજેટ > સાચું બજેટ? આપણે બધા ત્યાં રહ્યા છીએ. દીવા પ્રગટાવો, બચત નહીં ✨</string>
+    <string name="fest_christmas_line">હો હો હો! સાન્તા લિસ્ટ બે વાર ચેક કરે છે — અને અમે પણ 🎅</string>
+    <string name="fest_new_year_line">નવું વર્ષ, નવો હું, એ જ જૂની UPI હિસ્ટ્રી 😅 આ વર્ષને બજેટનું વર્ષ બનાવીએ</string>
+    <string name="fest_gift_hint">%1$s થીમ, તહેવારનો લુક અને +%2$d ⭐ આજે મફત — હંમેશ માટે તમારા.</string>
+    <string name="fest_claim">મારી ગિફ્ટ લો · +%1$d ⭐</string>
+    <string name="fest_wear">તહેવારનો લુક પહેરો</string>
+    <string name="later">પછી</string>
+    <string name="fest_upcoming_hint">તહેવારના દિવસે થીમ, આઉટફિટ અને +%1$d ⭐ ખુલશે</string>
+    <string name="fest_tap_to_celebrate">ઉજવણી માટે ટૅપ કરો 🎉</string>
+    <string name="reason_festival">તહેવારની ગિફ્ટ: %1$s</string>
+    <string name="claim_free">🎁 આજે મફત</string>
+    <string name="pack_only">ફક્ત %1$s પર</string>
+    <string name="rw_theme_diwali">દિવાળી ગ્લો</string>
+    <string name="rw_theme_diwali_d">મરૂન, ગલગોટા અને દીવાનું સોનેરી — આખી એપ ઝગમગે.</string>
+    <string name="rw_theme_holi">હોળી રંગ</string>
+    <string name="rw_theme_holi_d">ગુલાબી, પીળા અને ફિરોઝી છાંટા જે ક્યારેય ન ધોવાય.</string>
+    <string name="rw_theme_garba">ગરબા નાઇટ્સ</string>
+    <string name="rw_theme_garba_d">ચણિયા-ચોળીના લાલ, કેસરી અને લીલા રંગ.</string>
+    <string name="rw_theme_kites">પતંગ આકાશ</string>
+    <string name="rw_theme_kites_d">ઉત્તરાયણનું ચોખ્ખું વાદળી આકાશ, લાલ પતંગો સાથે.</string>
+    <string name="rw_theme_rakhi">રાખી પેસ્ટલ</string>
+    <string name="rw_theme_rakhi_d">આછું ગુલાબી અને સોનેરી દોરો.</string>
+    <string name="rw_theme_bappa">બાપ્પા કેસરી</string>
+    <string name="rw_theme_bappa_d">કેસરી, કંકુ લાલ અને ગલગોટા.</string>
+    <string name="rw_theme_tiranga">તિરંગો</string>
+    <string name="rw_theme_tiranga_d">કેસરી, સફેદ, લીલો અને ચક્રનો વાદળી.</string>
+    <string name="rw_theme_christmas">જિંગલ રેડ</string>
+    <string name="rw_theme_christmas_d">કેન્ડી-કેન લાલ, પાઇન લીલો અને ટિન્સેલ સોનેરી.</string>
+    <string name="rw_theme_new_year">ન્યૂ યર ગોલ્ડ</string>
+    <string name="rw_theme_new_year_d">મધરાતનો ગ્લાસ, સોનેરી અને પાર્ટી ગુલાબી.</string>
+    <string name="rw_diwali_silk">દિવાળી સિલ્ક કુર્તો</string>
+    <string name="rw_diwali_silk_d">જરી બોર્ડર અને નાનકડા દીવાવાળું મરૂન સિલ્ક.</string>
+    <string name="rw_holi">હોળી સફેદ કુર્તો</string>
+    <string name="rw_holi_d">શરૂઆત સફેદ, અંત મેઘધનુષ.</string>
+    <string name="rw_garba">ગરબા કેડિયું</string>
+    <string name="rw_garba_d">દરેક તાળીએ ફરતું આભલાં કામ.</string>
+    <string name="rw_kite">પતંગબાજ ટી</string>
+    <string name="rw_kite_d">ઉત્તરાયણના ધાબાના ચેમ્પિયન માટે.</string>
+    <string name="rw_rakhi">રાખી પેસ્ટલ કુર્તો</string>
+    <string name="rw_rakhi_d">નાના ફૂલોવાળો આછો ગુલાબી.</string>
+    <string name="rw_bappa">બાપ્પા કુર્તો</string>
+    <string name="rw_bappa_d">લાલ દુપટ્ટા સાથે કેસરી કુર્તો.</string>
+    <string name="rw_tiranga">તિરંગા જેકેટ</string>
+    <string name="rw_tiranga_d">ચક્ર સાથે કેસરી, સફેદ અને લીલું.</string>
+    <string name="rw_santa">સાન્તા સૂટ</string>
+    <string name="rw_santa_d">લાલ સૂટ, સફેદ ફર, સોનેરી બકલ.</string>
+    <string name="rw_sequin">સિક્વિન પાર્ટી જેકેટ</string>
+    <string name="rw_sequin_d">મધરાતે દરેક બાજુથી ચમક.</string>
+    <string name="rw_gulal">ગુલાલવાળો ચહેરો</string>
+    <string name="rw_gulal_d">હોળી સ્ટાઇલ રંગ.</string>
+    <string name="rw_santa_hat">સાન્તા ટોપી</string>
+    <string name="rw_santa_hat_d">લાલ, ઢીલી, ફૂમતાવાળી.</string>
+    <string name="rw_party_hat">પાર્ટી ટોપી</string>
+    <string name="rw_party_hat_d">ઉજવણીનો એક કોન.</string>
+    <string name="celebrate_streak_title">%1$d દિવસની સ્ટ્રીક! 🔥</string>
+    <string name="celebrate_keep_going">ચાલો આગળ 🚀</string>
+    <string name="streak_start_title">સ્ટ્રીક શરૂ કરો</string>
+    <string name="streak_start_body">આજે એક ખર્ચ નોંધો અને જ્યોત પ્રગટાવો</string>
+    <string name="streak_safe">આજ માટે સુરક્ષિત ✅ કાલે મળીએ</string>
+    <string name="streak_at_risk">આજે કંઈ પણ નોંધો, નહીં તો મધરાતે રીસેટ ⏳</string>
+    <string name="streak_next">આગળ: %1$d 🔥</string>
+    <string name="festive_mode">તહેવાર મોડ</string>
+    <string name="festive_mode_sub">દિવાળી, હોળી, ક્રિસમસ અને બીજા તહેવારોમાં થીમ અને ઉજવણી</string>
+    <string name="sound_effects">સાઉન્ડ ઇફેક્ટ</string>
+    <string name="sound_effects_sub">સ્ટ્રીક, લેવલ-અપ અને તહેવારોના એપમાં અવાજ (સાઇલન્ટ મોડમાં ચૂપ). નોટિફિકેશનનો અવાજ ફોન સેટિંગમાં દરેક પ્રકાર માટે બદલી શકાય</string>
+    <string name="streaks_festivals">સ્ટ્રીક અને તહેવારો</string>
+    <string name="engagement_notifs_sub">સ્ટ્રીક જોખમ ચેતવણી, માઇલસ્ટોન અને તહેવારની શુભેચ્છા</string>
+    <string name="rem_soon">આજે અને કાલે</string>
+    <string name="rem_this_week">આ અઠવાડિયે</string>
+    <string name="rem_later">પછીથી</string>
+    <string name="rem_all_quiet">બધું શાંત. નીચે રિમાઇન્ડર ઉમેરો</string>
+    <string name="rem_next_up">આગળ</string>
+    <string name="rem_bills_ahead">30 દિવસમાં %1$s ના બિલ · %2$d ચાલુ</string>
+    <string name="rem_in_minutes">%1$d મિનિટમાં</string>
+    <string name="rem_today_at">આજે, %1$s</string>
+    <string name="rem_tomorrow_at">કાલે, %1$s</string>
+    <string name="delete_reminder">રિમાઇન્ડર કાઢો</string>
+    <string-array name="celebrate_streak_lines">
+        <item>%1$s, સતત %2$d દિવસ. મેઇન કેરેક્ટર એનર્જી! 🔥</item>
+        <item>આ છે સાચી કન્સિસ્ટન્સી. %2$d દિવસ અને ચાલુ, %1$s!</item>
+        <item>%2$d દિવસ! તમારા વૉલેટે મેસેજ કર્યો: \"થેન્ક યુ, બેસ્ટી\" 💌</item>
+        <item>ઘરમાં તમે જ છો જે ખરેખર ખર્ચ લખે છે. %2$d દિવસ મજબૂત!</item>
+        <item>%1$s એ કહ્યું \"સ્ટ્રીક તો બને જ\" અને કરી બતાવ્યું. %2$d દિવસ 🙌</item>
+        <item>આરામથી %2$d દિવસ પાર, જાણે કંઈ થયું જ નથી 😎</item>
+    </string-array>
+    <string-array name="notif_streak_risk_titles">
+        <item>તમારી %1$d દિવસની સ્ટ્રીક જોખમમાં 😱</item>
+        <item>મોયે મોયે થવાનું છે… 🔥%1$d</item>
+        <item>%1$d દિવસ. આમ ખતમ ન થવા દો 😭</item>
+        <item>સ્ટ્રીક SOS 🆘 %1$d દિવસ દાવ પર</item>
+        <item>બસ કર ભાઈ, રડાવીશ કે શું? 🔥%1$d</item>
+        <item>ઇમોશનલ ડેમેજ આવે છે 💔</item>
+        <item>એક ખર્ચ. બસ એક. 🙏</item>
+    </string-array>
+    <string-array name="notif_streak_risk_bodies">
+        <item>મધરાત પહેલાં એક ખર્ચ નોંધો અને %1$d દિવસ બચાવો.</item>
+        <item>એક ચા પણ ચાલશે. સ્ટ્રીક બચાવો!</item>
+        <item>જ્યોત ટમટમે છે. એક ટૅપ અને પાછી 🔥</item>
+        <item>મધરાત તમારી %1$d દિવસની સ્ટ્રીક પાછળ છે. બચાવો.</item>
+        <item>સ્ટ્રીક ખતમ નથી થઈ, બસ તમારી રાહ જુએ છે ☕</item>
+        <item>આટલે આવીને અટકવું નથી. કંઈક તો નોંધો!</item>
+        <item>આવતીકાલના તમે આભાર માનશો. %1$d દિવસ, છોડશો નહીં.</item>
+        <item>એક ખર્ચ, બે સેકન્ડ, %1$d દિવસ સેવ.</item>
+        <item>પ્લોટ ટ્વિસ્ટ: તમે ખર્ચ નોંધો અને સ્ટ્રીક બચી જાય 🎬</item>
+    </string-array>
+    <string-array name="notif_streak_win_titles">
+        <item>🔥 %1$d દિવસની સ્ટ્રીક અનલૉક!</item>
+        <item>સતત %1$d દિવસ. આઇકોનિક.</item>
+        <item>સ્ટ્રીક લેવલ: %1$d 🔥</item>
+        <item>%1$d દિવસ?! કમાલ 💅</item>
+        <item>%1$d અને અટકવું નથી 🚀</item>
+    </string-array>
+    <string-array name="notif_streak_win_bodies">
+        <item>મેઇન કેરેક્ટર એનર્જી. આમ જ ચાલુ રાખો!</item>
+        <item>આ છે ડિસિપ્લિન. તમારું બજેટ ગર્વ અનુભવે છે.</item>
+        <item>ફેમિલી ગ્રુપમાં આ સમાચાર જવા જોઈએ 📣</item>
+        <item>ખરેખર, આ એલીટ કન્સિસ્ટન્સી છે.</item>
+        <item>તમારું વૉલેટ ખુશીથી નાચે છે 💃</item>
+        <item>આગલો માઇલસ્ટોન બહુ દૂર નથી 👀</item>
+    </string-array>
+    <plurals name="fest_countdown">
+        <item quantity="one">%1$s કાલે છે!</item>
+        <item quantity="other">%1$s %2$d દિવસમાં</item>
+    </plurals>
+    <plurals name="rem_active">
+        <item quantity="one">%1$d રિમાઇન્ડર ચાલુ</item>
+        <item quantity="other">%1$d રિમાઇન્ડર ચાલુ</item>
+    </plurals>
 </resources>

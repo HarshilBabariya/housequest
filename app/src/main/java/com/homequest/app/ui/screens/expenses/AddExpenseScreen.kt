@@ -74,6 +74,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homequest.app.R
 import com.homequest.app.data.local.MemberEntity
@@ -373,7 +374,15 @@ fun CategoryGrid(categories: List<Category>, selectedId: String, onSelect: (Stri
                         .border(2.dp, if (selected) c.color else Color.Transparent, RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) { Icon(c.icon, contentDescription = null, tint = if (selected) Color.White else c.color) }
-                Text(c.label(), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp), color = if (selected) scheme.onSurface else scheme.onSurfaceVariant)
+                Text(
+                    c.label(),
+                    style = MaterialTheme.typography.labelSmall.copy(lineHeight = 13.sp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp, start = 4.dp, end = 4.dp, bottom = 4.dp),
+                    color = if (selected) scheme.onSurface else scheme.onSurfaceVariant
+                )
             }
         }
     }

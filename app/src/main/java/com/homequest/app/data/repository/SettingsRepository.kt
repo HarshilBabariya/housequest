@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.homequest.app.domain.AppLanguage
+import com.homequest.app.domain.FestivalDay
 import com.homequest.app.domain.ThemeIds
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -32,8 +33,17 @@ data class AppSettings(
     val activeMemberId: Long = 0,
     val onboarded: Boolean = false,
     val language: String = AppLanguage.ENGLISH.tag,
-    val goldRate24k: Double = 0.0
-)
+    val goldRate24k: Double = 0.0,
+    val engagementNotificationsEnabled: Boolean = true,
+    val soundEffectsEnabled: Boolean = true,
+    val festiveMode: Boolean = true,
+    val festivalSeen: String = "",
+    val festivalGifted: String = "",
+    val festiveThemeSkipped: String = ""
+) {
+    fun themeFor(festival: FestivalDay?): String =
+        if (festival != null && festiveMode && festiveThemeSkipped != festival.key) festival.festival.pack.themeId else themeId
+}
 
 class SettingsRepository(private val context: Context) {
 
@@ -50,6 +60,12 @@ class SettingsRepository(private val context: Context) {
         val ONBOARDED = booleanPreferencesKey("onboarded")
         val LANGUAGE = stringPreferencesKey("language")
         val GOLD_RATE = doublePreferencesKey("gold_rate_24k")
+        val ENGAGEMENT_NOTIFS = booleanPreferencesKey("engagement_notifications")
+        val SOUND_EFFECTS = booleanPreferencesKey("sound_effects")
+        val FESTIVE_MODE = booleanPreferencesKey("festive_mode")
+        val FESTIVAL_SEEN = stringPreferencesKey("festival_seen")
+        val FESTIVAL_GIFTED = stringPreferencesKey("festival_gifted")
+        val FESTIVE_THEME_SKIPPED = stringPreferencesKey("festive_theme_skipped")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -65,7 +81,13 @@ class SettingsRepository(private val context: Context) {
             activeMemberId = p[Keys.ACTIVE_MEMBER] ?: 0,
             onboarded = p[Keys.ONBOARDED] ?: false,
             language = p[Keys.LANGUAGE] ?: AppLanguage.ENGLISH.tag,
-            goldRate24k = p[Keys.GOLD_RATE] ?: 0.0
+            goldRate24k = p[Keys.GOLD_RATE] ?: 0.0,
+            engagementNotificationsEnabled = p[Keys.ENGAGEMENT_NOTIFS] ?: true,
+            soundEffectsEnabled = p[Keys.SOUND_EFFECTS] ?: true,
+            festiveMode = p[Keys.FESTIVE_MODE] ?: true,
+            festivalSeen = p[Keys.FESTIVAL_SEEN] ?: "",
+            festivalGifted = p[Keys.FESTIVAL_GIFTED] ?: "",
+            festiveThemeSkipped = p[Keys.FESTIVE_THEME_SKIPPED] ?: ""
         )
     }
 
@@ -85,4 +107,10 @@ class SettingsRepository(private val context: Context) {
     suspend fun setOnboarded() = context.dataStore.edit { it[Keys.ONBOARDED] = true }
     suspend fun setLanguage(tag: String) = context.dataStore.edit { it[Keys.LANGUAGE] = tag }
     suspend fun setGoldRate(rate24k: Double) = context.dataStore.edit { it[Keys.GOLD_RATE] = rate24k }
+    suspend fun setEngagementNotifications(enabled: Boolean) = context.dataStore.edit { it[Keys.ENGAGEMENT_NOTIFS] = enabled }
+    suspend fun setSoundEffects(enabled: Boolean) = context.dataStore.edit { it[Keys.SOUND_EFFECTS] = enabled }
+    suspend fun setFestiveMode(enabled: Boolean) = context.dataStore.edit { it[Keys.FESTIVE_MODE] = enabled }
+    suspend fun setFestivalSeen(key: String) = context.dataStore.edit { it[Keys.FESTIVAL_SEEN] = key }
+    suspend fun setFestivalGifted(key: String) = context.dataStore.edit { it[Keys.FESTIVAL_GIFTED] = key }
+    suspend fun setFestiveThemeSkipped(key: String) = context.dataStore.edit { it[Keys.FESTIVE_THEME_SKIPPED] = key }
 }

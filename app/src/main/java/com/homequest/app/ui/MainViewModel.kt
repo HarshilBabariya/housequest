@@ -7,14 +7,24 @@ import com.homequest.app.data.local.MemberEntity
 import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.data.repository.AppSettings
 import com.homequest.app.data.repository.RewardEvent
+import com.homequest.app.data.repository.avatar
+import com.homequest.app.domain.FestivalCalendar
+import com.homequest.app.domain.FestivalDay
 import com.homequest.app.domain.Gender
 import com.homequest.app.domain.RepeatRule
+import com.homequest.app.domain.RewardCatalog
+import com.homequest.app.notifications.Sound
+import com.homequest.app.ui.components.Celebration
+import com.homequest.app.util.Dates
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -42,22 +52,83 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
     private val _pinError = MutableStateFlow(false)
     val pinError: StateFlow<Boolean> = _pinError
 
+    private val _celebrations = MutableStateFlow<List<Celebration>>(emptyList())
+    val celebrations: StateFlow<List<Celebration>> = _celebrations
+
+    val festival: StateFlow<FestivalDay?> = container.festival.stateIn(viewModelScope, SharingStarted.Eagerly, FestivalCalendar.active(Dates.today()))
+
+    private val notified = mutableSetOf<Celebration>()
+
     init {
         viewModelScope.launch {
             container.gamificationRepository.events.collect { event ->
-                _toast.value = event
-                if (event is RewardEvent.BadgeEarned || event is RewardEvent.LevelUp) {
-                    _confetti.value++
-                    val s = container.settingsRepository.current()
-                    if (s.rewardNotificationsEnabled) {
-                        when (event) {
-                            is RewardEvent.BadgeEarned -> container.notificationHelper.showBadge(s.language, event.badge)
-                            is RewardEvent.LevelUp -> container.notificationHelper.showLevelUp(s.language, event.level, event.titleRes)
-                            else -> Unit
+                val s = container.settingsRepository.current()
+                when (event) {
+                    is RewardEvent.LevelUp -> {
+                        val celebration = Celebration.Level(event.level, event.titleRes)
+                        if (posts(s.rewardNotificationsEnabled)) {
+                            notified += celebration
+                            container.notificationHelper.showLevelUp(s.language, event.level, event.titleRes)
                         }
+                        celebrate(celebration)
                     }
+                    is RewardEvent.StreakMilestone -> {
+                        val celebration = Celebration.Streak(event.days)
+                        if (posts(s.engagementNotificationsEnabled)) {
+                            notified += celebration
+                            container.notificationHelper.showStreakMilestone(s.language, event.days)
+                        }
+                        celebrate(celebration)
+                    }
+                    is RewardEvent.BadgeEarned -> {
+                        _toast.value = event
+                        _confetti.value++
+                        if (posts(s.rewardNotificationsEnabled)) container.notificationHelper.showBadge(s.language, event.badge)
+                        else if (s.soundEffectsEnabled) container.sounds.play(Sound.POWER_UP)
+                    }
+                    else -> _toast.value = event
                 }
             }
+        }
+        viewModelScope.launch {
+            combine(festival, container.settingsRepository.settings) { day, s -> day?.takeIf { s.onboarded && s.festiveMode && s.festivalSeen != it.key } }
+                .distinctUntilChanged()
+                .collect { day -> if (day != null) celebrate(Celebration.Holiday(day)) }
+        }
+    }
+
+    private fun posts(enabled: Boolean) = enabled && container.notificationHelper.canPost()
+
+    private fun celebrate(celebration: Celebration) = _celebrations.update { queue -> if (celebration in queue) queue else queue + celebration }
+
+    fun onCelebrationShown(celebration: Celebration) = viewModelScope.launch {
+        if (notified.remove(celebration) || !container.settingsRepository.current().soundEffectsEnabled) return@launch
+        container.sounds.play(
+            when (celebration) {
+                is Celebration.Streak -> Sound.FIRE
+                is Celebration.Level -> Sound.AIRHORN
+                is Celebration.Holiday -> Sound.of(celebration.day.festival.pack)
+            }
+        )
+    }
+
+    private fun close(celebration: Celebration): Boolean {
+        if (celebration !in _celebrations.value) return false
+        _celebrations.update { it - celebration }
+        return true
+    }
+
+    fun dismissCelebration(celebration: Celebration) {
+        if (close(celebration) && celebration is Celebration.Holiday) viewModelScope.launch { container.settingsRepository.setFestivalSeen(celebration.day.key) }
+    }
+
+    fun celebrationAction(celebration: Celebration) {
+        if (!close(celebration) || celebration !is Celebration.Holiday) return
+        viewModelScope.launch {
+            val day = celebration.day
+            container.settingsRepository.setFestivalSeen(day.key)
+            container.claimFestival(day)
+            container.memberRepository.activeMember.first()?.let { member -> container.memberRepository.updateAvatar(member.id, RewardCatalog.dressFor(day.festival.pack, member.avatar())) }
         }
     }
 

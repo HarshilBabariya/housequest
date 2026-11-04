@@ -246,6 +246,10 @@ fun ProfileScreen(
                 ) { Text(stringResource(when (m) { DarkMode.SYSTEM -> R.string.mode_system; DarkMode.LIGHT -> R.string.mode_light; DarkMode.DARK -> R.string.mode_dark }), maxLines = 1) }
             }
         }
+        HqCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp).fillMaxWidth(), padding = 0) {
+            ToggleRow(stringResource(R.string.festive_mode), stringResource(R.string.festive_mode_sub), state.settings.festiveMode, onChange = vm::setFestiveMode)
+            ToggleRow(stringResource(R.string.sound_effects), stringResource(R.string.sound_effects_sub), state.settings.soundEffectsEnabled, onChange = vm::setSoundEffects, last = true)
+        }
 
         SectionHeader(stringResource(R.string.currency))
         Row(Modifier.padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -258,7 +262,8 @@ fun ProfileScreen(
         HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
             ToggleRow(stringResource(R.string.budget_alerts), stringResource(R.string.budget_alerts_sub), state.settings.budgetAlertsEnabled, onChange = vm::setBudgetAlerts)
             ToggleRow(stringResource(R.string.reminders_bills), stringResource(R.string.reminder_notifs_sub), state.settings.reminderNotificationsEnabled, onChange = vm::setReminderNotifications)
-            ToggleRow(stringResource(R.string.rewards), stringResource(R.string.reward_notifs_sub), state.settings.rewardNotificationsEnabled, onChange = vm::setRewardNotifications, last = true)
+            ToggleRow(stringResource(R.string.rewards), stringResource(R.string.reward_notifs_sub), state.settings.rewardNotificationsEnabled, onChange = vm::setRewardNotifications)
+            ToggleRow(stringResource(R.string.streaks_festivals), stringResource(R.string.engagement_notifs_sub), state.settings.engagementNotificationsEnabled, onChange = vm::setEngagementNotifications, last = true)
         }
 
         SectionHeader(stringResource(R.string.more_options))

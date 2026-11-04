@@ -10,10 +10,13 @@ import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.data.repository.AppSettings
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.data.repository.byId
+import com.homequest.app.data.repository.currentStreak
 import com.homequest.app.data.repository.resolve
 import com.homequest.app.domain.Category
 import com.homequest.app.domain.CategoryAmount
 import com.homequest.app.domain.Features
+import com.homequest.app.domain.FestivalCalendar
+import com.homequest.app.domain.FestivalDay
 import com.homequest.app.domain.LevelInfo
 import com.homequest.app.domain.Levels
 import com.homequest.app.domain.Mood
@@ -34,6 +37,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class PayerShare(val member: MemberEntity, val total: Double)
 
@@ -57,14 +61,18 @@ data class DashboardState(
     val upcomingBills: List<ReminderEntity> = emptyList(),
     val insightsUnlocked: Boolean = false,
     val pendingCaptures: Int = 0,
-    val week: WeeklySummary? = null
+    val week: WeeklySummary? = null,
+    val streak: Int = 0,
+    val festival: FestivalDay? = null,
+    val upcomingFestival: FestivalDay? = null
 ) {
+    val loggedToday: Boolean get() = profile.lastLogEpochDay == today.toEpochDay()
     val budgetProgress: Float get() = if (settings.monthlyBudget > 0) (monthTotal / settings.monthlyBudget).toFloat().coerceAtLeast(0f) else 0f
     val mood: Mood
         get() {
             member?.avatar()?.mood?.let { return it }
             val sinceLog = if (profile.lastLogEpochDay < 0) 0L else today.toEpochDay() - profile.lastLogEpochDay
-            return moodFor(budgetProgress, settings.monthlyBudget > 0, profile.streakDays, sinceLog, LocalTime.now().hour, today.dayOfMonth)
+            return moodFor(budgetProgress, settings.monthlyBudget > 0, streak, sinceLog, LocalTime.now().hour, today.dayOfMonth)
         }
     val monthChangePercent: Double? get() = if (lastMonthTotal > 0) (monthTotal - lastMonthTotal) / lastMonthTotal * 100 else null
     val monthProjection: Double get() = (monthCumulative.lastOrNull() ?: 0.0) / today.dayOfMonth * today.lengthOfMonth()
@@ -149,6 +157,7 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
         spend,
         social
     ) { settings, profile, unlocked, slice, social ->
+        val streak = profile.currentStreak(slice.today)
         DashboardState(
             settings = settings,
             today = slice.today,
@@ -169,9 +178,14 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
             upcomingBills = social.bills,
             insightsUnlocked = Features.INSIGHTS in unlocked,
             pendingCaptures = social.captures,
-            week = slice.week.copy(streak = profile.streakDays, points = profile.points)
+            week = slice.week.copy(streak = streak, points = profile.points),
+            streak = streak,
+            festival = FestivalCalendar.active(slice.today),
+            upcomingFestival = FestivalCalendar.upcoming(slice.today)
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
+
+    fun replayFestival() = viewModelScope.launch { container.settingsRepository.setFestivalSeen("") }
 
     private data class SpendSlice(
         val today: LocalDate,

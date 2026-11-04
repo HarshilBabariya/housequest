@@ -1,6 +1,13 @@
 package com.homequest.app.ui.screens.reminders
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,11 +18,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,7 +33,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -42,17 +51,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -69,7 +88,6 @@ import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.CategoryChip
 import com.homequest.app.ui.components.CategoryIcon
 import com.homequest.app.ui.components.EmptyState
-import com.homequest.app.ui.components.HqCard
 import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.ui.components.PrimaryButton
 import com.homequest.app.ui.components.TimeWheel
@@ -84,6 +102,12 @@ import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.sin
+import kotlin.random.Random
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -116,6 +140,18 @@ private val presets = listOf(
     Preset(R.string.preset_daily_nudge, RepeatRule.DAILY, null)
 )
 
+private enum class Bucket(val titleRes: Int) { SOON(R.string.rem_soon), WEEK(R.string.rem_this_week), LATER(R.string.rem_later), PAUSED(R.string.paused) }
+
+private fun bucketOf(r: ReminderEntity, now: LocalDateTime): Bucket {
+    if (!r.enabled) return Bucket.PAUSED
+    val days = ChronoUnit.DAYS.between(now.toLocalDate(), r.nextOccurrence(now).toLocalDate())
+    return when {
+        days <= 1 -> Bucket.SOON
+        days <= 7 -> Bucket.WEEK
+        else -> Bucket.LATER
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemindersScreen(onBack: () -> Unit) {
@@ -125,6 +161,14 @@ fun RemindersScreen(onBack: () -> Unit) {
     var editing by remember { mutableStateOf<ReminderEntity?>(null) }
     var showAdd by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<ReminderEntity?>(null) }
+    val listState = rememberLazyListState()
+    val now by produceState(LocalDateTime.now()) {
+        while (true) {
+            delay(30_000)
+            value = LocalDateTime.now()
+        }
+    }
+    val buckets = remember(state.reminders, now) { state.reminders.groupBy { bucketOf(it, now) } }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -135,25 +179,38 @@ fun RemindersScreen(onBack: () -> Unit) {
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { showAdd = true }, icon = { Icon(Icons.Rounded.Add, contentDescription = null) }, text = { Text(stringResource(R.string.new_reminder)) })
+            ExtendedFloatingActionButton(
+                onClick = { showAdd = true },
+                expanded = !listState.canScrollBackward,
+                icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
+                text = { Text(stringResource(R.string.new_reminder)) }
+            )
         }
     ) { padding ->
-        if (state.reminders.isEmpty()) {
-            EmptyState("⏰", stringResource(R.string.nothing_scheduled_title), stringResource(R.string.nothing_scheduled_body), Modifier.padding(padding))
-        } else {
-            LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 100.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(state.reminders, key = { it.id }) { r ->
-                    ReminderCard(r, r.category?.let { categoryMap.resolve(it) }, state.symbol, onToggle = { vm.toggle(r, it) }, onEdit = { editing = r }, onDelete = { pendingDelete = r })
+        LazyColumn(Modifier.padding(padding), state = listState, contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 110.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            item(key = "orbit") { ReminderOrbit(state.reminders, categoryMap, now, state.symbol, onOpen = { editing = it }) }
+            if (state.reminders.isEmpty()) {
+                item(key = "empty") { EmptyState("⏰", stringResource(R.string.nothing_scheduled_title), stringResource(R.string.nothing_scheduled_body)) }
+            }
+            Bucket.entries.forEach { bucket ->
+                val list = buckets[bucket].orEmpty()
+                if (list.isNotEmpty()) {
+                    item(key = "h_${bucket.name}") {
+                        Text(stringResource(bucket.titleRes), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 10.dp, start = 4.dp))
+                    }
+                    items(list, key = { it.id }) { r ->
+                        ReminderRow(r, r.category?.let { categoryMap.resolve(it) }, state.symbol, now, onToggle = { vm.toggle(r, it) }, onEdit = { editing = r })
+                    }
                 }
             }
         }
     }
 
     if (showAdd) {
-        ReminderSheet(initial = null, symbol = state.symbol, categories = state.categories, onDismiss = { showAdd = false }) { vm.save(it); showAdd = false }
+        ReminderSheet(initial = null, symbol = state.symbol, categories = state.categories, onDismiss = { showAdd = false }, onDelete = null) { vm.save(it); showAdd = false }
     }
     editing?.let { r ->
-        ReminderSheet(initial = r, symbol = state.symbol, categories = state.categories, onDismiss = { editing = null }) { vm.save(it); editing = null }
+        ReminderSheet(initial = r, symbol = state.symbol, categories = state.categories, onDismiss = { editing = null }, onDelete = { editing = null; pendingDelete = r }) { vm.save(it); editing = null }
     }
     pendingDelete?.let { r ->
         AlertDialog(
@@ -167,59 +224,153 @@ fun RemindersScreen(onBack: () -> Unit) {
     }
 }
 
+private class Star(val x: Float, val y: Float, val phase: Float)
+
+private const val ORBIT_DAYS = 30f
+
 @Composable
-private fun ReminderCard(r: ReminderEntity, category: Category?, symbol: String, onToggle: (Boolean) -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
-    val next = r.nextOccurrence()
-    val days = ChronoUnit.DAYS.between(LocalDateTime.now().toLocalDate(), next.toLocalDate())
-    val dueText = when {
-        !r.enabled -> stringResource(R.string.paused)
-        days == 0L -> stringResource(R.string.due_today)
-        days == 1L -> stringResource(R.string.due_tomorrow)
-        days < 7 -> stringResource(R.string.in_days, days)
-        else -> next.format(DateTimeFormatter.ofPattern("d MMM", Locale.getDefault()))
+private fun ReminderOrbit(reminders: List<ReminderEntity>, categories: Map<String, Category>, now: LocalDateTime, symbol: String, onOpen: (ReminderEntity) -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val active = reminders.filter { it.enabled }
+    val next = active.minByOrNull { it.nextOccurrence(now) }
+    val horizon = now.plusDays(ORBIT_DAYS.toLong())
+    val billsAhead = active.filter { it.amount != null && it.nextOccurrence(now).isBefore(horizon) }.sumOf { it.amount ?: 0.0 }
+    val stars = remember { val r = Random(11); List(28) { Star(r.nextFloat(), r.nextFloat(), r.nextFloat()) } }
+    val transition = rememberInfiniteTransition(label = "orbit")
+    val sweep by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(24_000, easing = LinearEasing)), label = "sweep")
+    val drift by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(30_000, easing = LinearEasing)), label = "drift")
+    val pulse by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(1800)), label = "pulse")
+    val dots = active.mapNotNull { r ->
+        val fraction = ChronoUnit.MINUTES.between(now, r.nextOccurrence(now)) / 60f / 24f / ORBIT_DAYS
+        if (fraction > 1f) null else Triple(r, fraction.coerceAtLeast(0f), r.category?.let { categories.resolve(it).color } ?: scheme.primary)
     }
-    HqCard(Modifier.fillMaxWidth(), onClick = onEdit, padding = 14) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (category != null) CategoryIcon(category, 44) else {
-                Box(Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Rounded.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                }
+
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(330.dp)
+            .clip(RoundedCornerShape(28.dp))
+            .background(scheme.surfaceContainerLowest)
+            .border(1.dp, scheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(28.dp))
+    ) {
+        Canvas(Modifier.matchParentSize()) {
+            val tau = 2f * PI.toFloat()
+            listOf(scheme.primary to 0f, scheme.tertiary to 0.33f, scheme.secondary to 0.66f).forEach { (color, phase) ->
+                val a = (drift + phase) * tau
+                val center = Offset(size.width * (0.5f + 0.3f * cos(a)), size.height * (0.45f + 0.22f * sin(2 * a)))
+                val radius = size.width * 0.55f
+                drawCircle(Brush.radialGradient(listOf(color.copy(alpha = 0.26f), Color.Transparent), center, radius), radius, center)
             }
-            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                Text(r.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(scheduleLabel(r), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-                    Text(
-                        dueText,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = if (r.enabled && days <= 1) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                        maxLines = 1
-                    )
-                    r.amount?.let { Text(" · ${it.money(symbol)}", style = MaterialTheme.typography.labelLarge, maxLines = 1) }
-                    if (r.autoLog) Text(" · ${stringResource(R.string.auto_badge)}", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.tertiary, maxLines = 1)
-                }
+            stars.forEach { star ->
+                val twinkle = 0.5f + 0.5f * sin((drift * 6 + star.phase) * tau)
+                drawCircle(scheme.onSurface.copy(alpha = 0.06f + 0.22f * twinkle), (0.8f + star.phase) * density, Offset(star.x * size.width, star.y * size.height))
             }
-            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Switch(checked = r.enabled, onCheckedChange = onToggle)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    CardAction(Icons.Rounded.Edit, stringResource(R.string.edit), MaterialTheme.colorScheme.primary, onEdit)
-                    CardAction(Icons.Rounded.DeleteOutline, stringResource(R.string.delete), MaterialTheme.colorScheme.error, onDelete)
-                }
+            val center = Offset(size.width / 2, size.height * 0.45f)
+            val radius = min(size.width, size.height) * 0.36f
+            drawCircle(scheme.onSurface.copy(alpha = 0.08f), radius, center, style = Stroke(1.5f * density))
+            listOf(0f, 7f, 14f, 21f).forEach { day ->
+                val a = (-90f + day / ORBIT_DAYS * 360f) / 180f * PI.toFloat()
+                drawLine(scheme.onSurface.copy(alpha = 0.18f), Offset(center.x + cos(a) * (radius - 6f * density), center.y + sin(a) * (radius - 6f * density)), Offset(center.x + cos(a) * (radius + 6f * density), center.y + sin(a) * (radius + 6f * density)), 1.5f * density)
+            }
+            drawArc(
+                Brush.sweepGradient(listOf(Color.Transparent, scheme.primary.copy(alpha = 0.55f), Color.Transparent), center),
+                startAngle = sweep - 50f, sweepAngle = 50f, useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius), size = Size(radius * 2, radius * 2),
+                style = Stroke(3f * density, cap = StrokeCap.Round)
+            )
+            dots.forEach { (r, fraction, color) ->
+                val a = (-90f + fraction * 360f) / 180f * PI.toFloat()
+                val at = Offset(center.x + cos(a) * radius, center.y + sin(a) * radius)
+                if (r.id == next?.id) drawCircle(color.copy(alpha = (1f - pulse) * 0.5f), (7f + 12f * pulse) * density, at)
+                drawCircle(color, 6.5f * density, at)
+                drawCircle(Color.White.copy(alpha = 0.7f), 2.2f * density, at)
             }
         }
+        Column(
+            Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 78.dp)
+                .width(170.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .clickable(enabled = next != null) { next?.let(onOpen) }
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (next == null) {
+                Text("🌙", fontSize = 34.sp)
+                Text(stringResource(R.string.rem_all_quiet), style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center, maxLines = 2)
+            } else {
+                Text(stringResource(R.string.rem_next_up), style = MaterialTheme.typography.labelSmall, color = scheme.onSurfaceVariant, maxLines = 1)
+                val category = next.category?.let { categories.resolve(it) }
+                Box(Modifier.padding(vertical = 6.dp)) {
+                    if (category != null) CategoryIcon(category, 40) else Text("⏰", fontSize = 26.sp)
+                }
+                Text(next.title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(dueLabel(next.nextOccurrence(now), now), style = MaterialTheme.typography.titleLarge, color = scheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                next.amount?.let { Text(it.money(symbol), style = MaterialTheme.typography.labelLarge, maxLines = 1) }
+            }
+        }
+        Text(
+            if (billsAhead > 0) stringResource(R.string.rem_bills_ahead, billsAhead.money(symbol), active.size) else pluralStringResource(R.plurals.rem_active, active.size, active.size),
+            style = MaterialTheme.typography.labelMedium,
+            color = scheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 14.dp, start = 16.dp, end = 16.dp)
+        )
     }
 }
 
 @Composable
-private fun CardAction(icon: ImageVector, label: String, tint: Color, onClick: () -> Unit) {
-    Box(
+private fun dueLabel(at: LocalDateTime, now: LocalDateTime): String {
+    val minutes = ChronoUnit.MINUTES.between(now, at)
+    val days = ChronoUnit.DAYS.between(now.toLocalDate(), at.toLocalDate())
+    val time = at.toLocalTime().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.getDefault()))
+    return when {
+        minutes < 60 -> stringResource(R.string.rem_in_minutes, minutes.coerceAtLeast(1))
+        days == 0L -> stringResource(R.string.rem_today_at, time)
+        days == 1L -> stringResource(R.string.rem_tomorrow_at, time)
+        days < 7 -> stringResource(R.string.in_days, days)
+        else -> at.format(DateTimeFormatter.ofPattern("d MMM", Locale.getDefault()))
+    }
+}
+
+@Composable
+private fun ReminderRow(r: ReminderEntity, category: Category?, symbol: String, now: LocalDateTime, onToggle: (Boolean) -> Unit, onEdit: () -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val next = r.nextOccurrence(now)
+    val urgent = r.enabled && r.amount != null && ChronoUnit.DAYS.between(now.toLocalDate(), next.toLocalDate()) <= 1
+    Row(
         Modifier
-            .size(34.dp)
-            .clip(CircleShape)
-            .background(tint.copy(alpha = 0.12f))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) { Icon(icon, contentDescription = label, tint = tint, modifier = Modifier.size(18.dp)) }
+            .fillMaxWidth()
+            .alpha(if (r.enabled) 1f else 0.55f)
+            .clip(RoundedCornerShape(18.dp))
+            .background(scheme.surfaceContainerLowest)
+            .clickable(onClick = onEdit)
+            .padding(start = 12.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (category != null) CategoryIcon(category, 38) else {
+            Box(Modifier.size(38.dp).background(scheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
+                Icon(Icons.Rounded.Schedule, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(20.dp))
+            }
+        }
+        Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(r.title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                if (r.autoLog) Text(" · ${stringResource(R.string.auto_badge)}", style = MaterialTheme.typography.labelSmall, color = scheme.tertiary, maxLines = 1)
+                r.amount?.let { Text(it.money(symbol), style = MaterialTheme.typography.titleSmall, maxLines = 1, modifier = Modifier.padding(start = 8.dp)) }
+            }
+            Text(
+                if (r.enabled) "${dueLabel(next, now)} · ${scheduleLabel(r)}" else scheduleLabel(r),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (urgent) scheme.error else scheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Switch(checked = r.enabled, onCheckedChange = onToggle, modifier = Modifier.scale(0.8f))
+    }
 }
 
 @Composable
@@ -236,7 +387,7 @@ private fun scheduleLabel(r: ReminderEntity): String {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ReminderSheet(initial: ReminderEntity?, symbol: String, categories: List<Category>, onDismiss: () -> Unit, onSave: (ReminderEntity) -> Unit) {
+private fun ReminderSheet(initial: ReminderEntity?, symbol: String, categories: List<Category>, onDismiss: () -> Unit, onDelete: (() -> Unit)?, onSave: (ReminderEntity) -> Unit) {
     var title by remember { mutableStateOf(initial?.title.orEmpty()) }
     var amount by remember { mutableStateOf(initial?.amount?.let { if (it % 1.0 == 0.0) it.toLong().toString() else it.toString() }.orEmpty()) }
     var repeat by remember { mutableStateOf(initial?.repeat ?: RepeatRule.MONTHLY) }
@@ -314,6 +465,12 @@ private fun ReminderSheet(initial: ReminderEntity?, symbol: String, categories: 
                 },
                 enabled = title.isNotBlank()
             )
+            onDelete?.let {
+                TextButton(onClick = it, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
+                    Icon(Icons.Rounded.DeleteOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.delete_reminder), modifier = Modifier.padding(start = 6.dp))
+                }
+            }
         }
     }
 }

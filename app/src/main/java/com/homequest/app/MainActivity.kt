@@ -17,15 +17,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.homequest.app.data.repository.avatar
 import com.homequest.app.ui.Gate
 import com.homequest.app.ui.MainViewModel
 import com.homequest.app.ui.appViewModel
+import com.homequest.app.ui.components.CelebrationHost
 import com.homequest.app.ui.components.ConfettiBurst
 import com.homequest.app.ui.components.RewardToast
 import com.homequest.app.ui.navigation.HomeQuestNavHost
@@ -53,6 +56,8 @@ private fun HomeQuestRoot() {
     val unlocked by vm.sessionUnlocked.collectAsStateWithLifecycle()
     val pinError by vm.pinError.collectAsStateWithLifecycle()
     val erasing by vm.erasing.collectAsStateWithLifecycle()
+    val festival by vm.festival.collectAsStateWithLifecycle()
+    val celebrations by vm.celebrations.collectAsStateWithLifecycle()
     val baseContext = LocalContext.current
     val localized = remember(settings.language) {
         Locale.setDefault(Locale.forLanguageTag(settings.language))
@@ -65,7 +70,7 @@ private fun HomeQuestRoot() {
     }
 
     CompositionLocalProvider(LocalContext provides localized, LocalConfiguration provides localized.resources.configuration) {
-        HomeQuestTheme(themeId = settings.themeId, darkMode = settings.darkMode) {
+        HomeQuestTheme(themeId = settings.themeFor(festival), darkMode = settings.darkMode) {
             Surface(Modifier.fillMaxSize()) {
                 Crossfade(targetState = vm.gate(settings, unlocked, erasing), animationSpec = tween(350), label = "gate") { gate ->
                     Box(Modifier.fillMaxSize()) {
@@ -82,6 +87,18 @@ private fun HomeQuestRoot() {
                                 HomeQuestNavHost(onSignOut = vm::signOut, onEraseAll = vm::eraseAll)
                                 ConfettiBurst(trigger = confetti)
                                 Box(Modifier.align(Alignment.TopCenter)) { RewardToast(event = toast, onDismiss = vm::dismissToast) }
+                                celebrations.firstOrNull()?.let { celebration ->
+                                    val member = members.firstOrNull { it.id == settings.activeMemberId }
+                                    key(celebration) { CelebrationHost(
+                                        celebration = celebration,
+                                        avatar = member?.avatar(),
+                                        name = member?.name.orEmpty(),
+                                        giftedKey = settings.festivalGifted,
+                                        onShown = { vm.onCelebrationShown(celebration) },
+                                        onAction = { vm.celebrationAction(celebration) },
+                                        onDismiss = { vm.dismissCelebration(celebration) }
+                                    ) }
+                                }
                             }
                         }
                     }

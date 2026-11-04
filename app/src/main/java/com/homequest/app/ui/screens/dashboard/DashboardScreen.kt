@@ -113,6 +113,10 @@ fun DashboardScreen(
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 40.dp)) {
             item { Header(state, onOpenProfile, onVoiceExpense, onOpenRewards) }
+            (state.festival ?: state.upcomingFestival)?.let { day ->
+                item { FestivalBanner(day, upcoming = state.festival == null, today = state.today, name = state.member?.name.orEmpty(), onCelebrate = if (state.festival != null && state.settings.festiveMode) { { vm.replayFestival() } } else null, modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)) }
+            }
+            item { StreakCard(state.streak, state.loggedToday, state.today, onClick = onOpenRewards, modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)) }
 
             if (state.pendingCaptures > 0) {
                 item {
@@ -355,7 +359,7 @@ private fun Header(state: DashboardState, onOpenProfile: () -> Unit, onVoice: ()
                 ) {
                     Text("⭐ ", style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer)
                     AnimatedCount(state.profile.points, MaterialTheme.typography.labelMedium, scheme.onPrimaryContainer)
-                    Text(" · 🔥 ${state.profile.streakDays}", style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer, maxLines = 1)
+                    Text(" · 🔥 ${state.streak}", style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer, maxLines = 1)
                 }
             }
             IconButton(onClick = onVoice, modifier = Modifier.size(44.dp).border(1.dp, scheme.tertiary.copy(alpha = 0.5f), CircleShape).background(scheme.tertiaryContainer.copy(alpha = 0.5f), CircleShape)) {

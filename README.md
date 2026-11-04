@@ -5,6 +5,7 @@ Gamified household expense manager for Android. Log day-to-day spending, split i
 - Native Android · Kotlin · Jetpack Compose · Material 3
 - Local-first: Room database + DataStore, no backend or account required (data never leaves the phone)
 - English, Hindi and Gujarati
+- Festival packs, streak celebrations and a sound for every kind of notification
 - minSdk 26 · targetSdk 35
 
 ## Build
@@ -36,6 +37,7 @@ Push this folder to a GitHub repository (branch `main`). The included workflow `
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.8.0 | 2026-11-04 | Notification sounds per kind (original meme-style effects) and in-app sound effects; festival packs (themes, outfits, effects, sounds, greetings, full-screen gift moment) for Uttarayan, Tiranga days, Holi, Rakhi, Ganesh, Navratri, Diwali, Christmas, New Year; streak card, milestone celebrations and streak-in-danger alerts; category labels no longer clipped; ambient Reminders orbit redesign |
 | 1.7.1 | 2026-11-02 | Credits that subtract from totals (form, voice, capture); stricter capture rules; shares add up with credits; tint-only bottom tabs; calendar icon tile; date chips fit; points and streak below the level on Me; `full` and `lite` (no auto-capture, installs past Play Protect) builds |
 | 1.7.0 | 2026-11-02 | Kirana khata, milk/maid/services tally, gold and chit funds (DB v7); payment auto-capture from notifications; auto-logging reminders; budget forecast; weekly summary card; PDF export |
 | 1.6.0 | 2026-11-02 | Avatar actions, face shapes, beards and 19 new looks (DB v6); labelled XP bar; tappable charts; voice note; Calendar view; Pro plans sheet; More options; editable reminders; custom group emoji; rotating sassy notifications; Glass theme; notched 3D bottom bar; top-bar inset fix |

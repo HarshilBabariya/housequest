@@ -55,6 +55,7 @@ import com.homequest.app.domain.AvatarAction
 import com.homequest.app.domain.AvatarConfig
 import com.homequest.app.domain.Beard
 import com.homequest.app.domain.FaceShape
+import com.homequest.app.domain.FestivalPack
 import com.homequest.app.domain.Gender
 import com.homequest.app.domain.HairColors
 import com.homequest.app.domain.Mood
@@ -79,7 +80,8 @@ data class AvatarStudioState(
     val config: AvatarConfig = AvatarConfig(),
     val unlocked: Set<String> = emptySet(),
     val points: Int = 0,
-    val dirty: Boolean = false
+    val dirty: Boolean = false,
+    val activePack: FestivalPack? = null
 )
 
 class AvatarStudioViewModel(private val container: AppContainer, private val memberId: Long) : ViewModel() {
@@ -88,9 +90,9 @@ class AvatarStudioViewModel(private val container: AppContainer, private val mem
     private var saved = AvatarConfig()
 
     val state: StateFlow<AvatarStudioState> = combine(
-        draft, memberName, container.gamificationRepository.unlockedIds, container.gamificationRepository.profile
-    ) { d, name, unlocked, profile ->
-        AvatarStudioState(name, d ?: saved, unlocked, profile.points, d != null && d != saved)
+        draft, memberName, container.gamificationRepository.unlockedIds, container.gamificationRepository.profile, container.festival
+    ) { d, name, unlocked, profile, festival ->
+        AvatarStudioState(name, d ?: saved, unlocked, profile.points, d != null && d != saved, festival?.festival?.pack)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AvatarStudioState())
 
     init {
@@ -105,7 +107,10 @@ class AvatarStudioViewModel(private val container: AppContainer, private val mem
 
     fun update(transform: AvatarConfig.() -> AvatarConfig) { draft.value = (draft.value ?: saved).transform() }
 
-    fun unlock(item: RewardItem) = viewModelScope.launch { if (container.gamificationRepository.redeem(item)) container.badgeTracker.refresh() }
+    fun unlock(item: RewardItem) = viewModelScope.launch {
+        if (item.pack != null) container.festival.first()?.takeIf { item.claimableDuring(it.festival.pack) }?.let { container.claimFestival(it) }
+        else if (container.gamificationRepository.redeem(item)) container.badgeTracker.refresh()
+    }
 
     fun save(onDone: () -> Unit) = viewModelScope.launch {
         draft.value?.let { container.memberRepository.updateAvatar(memberId, it); saved = it }
@@ -206,19 +211,21 @@ private fun ItemRow(title: String, kind: RewardKind, state: AvatarStudioState, s
         items(RewardCatalog.ofKind(kind), key = { it.id }) { item ->
             val unlocked = item.id in state.unlocked
             val selected = item.id == selectedId
-            val affordable = state.points >= item.cost
+            val obtainable = if (item.pack != null) item.claimableDuring(state.activePack) else state.points >= item.cost
             PreviewTile(
                 config = previewConfig(state.config, kind, item.id),
                 name = stringResource(item.nameRes),
                 status = when {
                     unlocked -> stringResource(if (selected) R.string.wearing else R.string.owned)
-                    affordable -> stringResource(R.string.cost_tap, item.cost)
+                    item.pack != null && obtainable -> stringResource(R.string.claim_free)
+                    item.pack != null -> stringResource(R.string.pack_only, stringResource(item.pack.nameRes))
+                    obtainable -> stringResource(R.string.cost_tap, item.cost)
                     else -> "⭐ ${item.cost}"
                 },
                 selected = selected,
                 available = unlocked,
-                highlightStatus = unlocked || affordable
-            ) { if (unlocked) onSelect(item.id) else if (affordable) onUnlock(item) }
+                highlightStatus = unlocked || obtainable
+            ) { if (unlocked) onSelect(item.id) else if (obtainable) onUnlock(item) }
         }
     }
 }

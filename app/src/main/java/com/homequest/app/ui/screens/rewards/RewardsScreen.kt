@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -63,6 +64,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -215,7 +217,9 @@ fun RewardsScreen(openPro: Boolean, onBack: () -> Unit, onOpenAvatar: (Long) -> 
                     unlocked = item.id in state.unlocked,
                     active = item.kind == RewardKind.THEME && item.id == state.activeThemeId,
                     affordable = state.profile.points >= item.cost,
+                    claimable = item.claimableDuring(state.activePack),
                     onRedeem = { vm.redeem(item) },
+                    onClaim = { vm.claim(item) },
                     onUse = {
                         when (item.kind) {
                             RewardKind.THEME -> vm.applyTheme(item.id)
@@ -278,7 +282,7 @@ private fun PlanRow(pack: PointPack, best: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun RewardRow(modifier: Modifier, item: RewardItem, unlocked: Boolean, active: Boolean, affordable: Boolean, onRedeem: () -> Unit, onUse: () -> Unit) {
+private fun RewardRow(modifier: Modifier, item: RewardItem, unlocked: Boolean, active: Boolean, affordable: Boolean, claimable: Boolean, onRedeem: () -> Unit, onClaim: () -> Unit, onUse: () -> Unit) {
     val border by animateColorAsState(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, label = "border")
     Row(
         modifier
@@ -307,6 +311,16 @@ private fun RewardRow(modifier: Modifier, item: RewardItem, unlocked: Boolean, a
             active -> Text(stringResource(R.string.active), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
             unlocked && item.kind == RewardKind.FEATURE -> Text(stringResource(R.string.unlocked), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
             unlocked -> FilledTonalButton(onClick = onUse) { Text(stringResource(if (item.kind == RewardKind.THEME) R.string.apply else R.string.wear)) }
+            claimable -> Button(onClick = onClaim) { Text(stringResource(R.string.claim_free)) }
+            item.pack != null -> Text(
+                stringResource(R.string.pack_only, stringResource(item.pack.nameRes)),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.widthIn(max = 110.dp)
+            )
             else -> Button(onClick = onRedeem, enabled = affordable) { Text("⭐ ${item.cost}") }
         }
     }

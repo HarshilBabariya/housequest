@@ -40,6 +40,8 @@ class MemberRepository(
         return if (active != 0L && dao.byId(active) != null) active else dao.owner()?.id ?: error("Owner member missing")
     }
 
+    suspend fun activeMemberName(): String = dao.byId(activeMemberId())?.name.orEmpty()
+
     suspend fun add(name: String, relation: String, phone: String, gender: Gender): Long {
         val id = dao.insert(newMember(name, relation, phone = phone, avatar = randomAvatar(gender)))
         gamification.recordMemberAdded()
