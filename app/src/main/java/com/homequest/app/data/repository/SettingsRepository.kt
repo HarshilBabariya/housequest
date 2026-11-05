@@ -37,6 +37,7 @@ data class AppSettings(
     val engagementNotificationsEnabled: Boolean = true,
     val soundEffectsEnabled: Boolean = true,
     val festiveMode: Boolean = true,
+    val festiveIcon: Boolean = true,
     val festivalSeen: String = "",
     val festivalGifted: String = "",
     val festiveThemeSkipped: String = ""
@@ -63,6 +64,7 @@ class SettingsRepository(private val context: Context) {
         val ENGAGEMENT_NOTIFS = booleanPreferencesKey("engagement_notifications")
         val SOUND_EFFECTS = booleanPreferencesKey("sound_effects")
         val FESTIVE_MODE = booleanPreferencesKey("festive_mode")
+        val FESTIVE_ICON = booleanPreferencesKey("festive_icon")
         val FESTIVAL_SEEN = stringPreferencesKey("festival_seen")
         val FESTIVAL_GIFTED = stringPreferencesKey("festival_gifted")
         val FESTIVE_THEME_SKIPPED = stringPreferencesKey("festive_theme_skipped")
@@ -85,6 +87,7 @@ class SettingsRepository(private val context: Context) {
             engagementNotificationsEnabled = p[Keys.ENGAGEMENT_NOTIFS] ?: true,
             soundEffectsEnabled = p[Keys.SOUND_EFFECTS] ?: true,
             festiveMode = p[Keys.FESTIVE_MODE] ?: true,
+            festiveIcon = p[Keys.FESTIVE_ICON] ?: true,
             festivalSeen = p[Keys.FESTIVAL_SEEN] ?: "",
             festivalGifted = p[Keys.FESTIVAL_GIFTED] ?: "",
             festiveThemeSkipped = p[Keys.FESTIVE_THEME_SKIPPED] ?: ""
@@ -110,6 +113,7 @@ class SettingsRepository(private val context: Context) {
     suspend fun setEngagementNotifications(enabled: Boolean) = context.dataStore.edit { it[Keys.ENGAGEMENT_NOTIFS] = enabled }
     suspend fun setSoundEffects(enabled: Boolean) = context.dataStore.edit { it[Keys.SOUND_EFFECTS] = enabled }
     suspend fun setFestiveMode(enabled: Boolean) = context.dataStore.edit { it[Keys.FESTIVE_MODE] = enabled }
+    suspend fun setFestiveIcon(enabled: Boolean) = context.dataStore.edit { it[Keys.FESTIVE_ICON] = enabled }
     suspend fun setFestivalSeen(key: String) = context.dataStore.edit { it[Keys.FESTIVAL_SEEN] = key }
     suspend fun setFestivalGifted(key: String) = context.dataStore.edit { it[Keys.FESTIVAL_GIFTED] = key }
     suspend fun setFestiveThemeSkipped(key: String) = context.dataStore.edit { it[Keys.FESTIVE_THEME_SKIPPED] = key }

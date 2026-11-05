@@ -27,12 +27,11 @@ class CaptureRepository(
 
     suspend fun draft(id: Long): PaymentDraftEntity? = dao.draft(id)
 
-    suspend fun capture(packageName: String, text: String, postedAt: Long) {
-        val source = PaymentParser.sources[packageName] ?: return
+    suspend fun capture(sender: String, text: String, postedAt: Long) {
         val captured = PaymentParser.parse(text) ?: return
         val since = postedAt - DUPLICATE_WINDOW_MS
         if (dao.similarDrafts(captured.amount, since) > 0 || expenseDao.similarSince(captured.amount, since) > 0) return
-        dao.insertDraft(PaymentDraftEntity(amount = captured.amount, merchant = captured.merchant, source = source, postedAt = postedAt))
+        dao.insertDraft(PaymentDraftEntity(amount = captured.amount, merchant = captured.merchant, source = PaymentParser.source(sender), postedAt = postedAt))
         val s = settings.current()
         if (s.reminderNotificationsEnabled) notifications.showCaptured(s.language, captured.amount, captured.merchant, s.currencySymbol)
     }

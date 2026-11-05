@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import com.homequest.app.HomeQuestApp
 import com.homequest.app.domain.FestivalCalendar
+import com.homequest.app.util.FestiveLauncher
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -60,6 +61,7 @@ class EngagementReceiver : BroadcastReceiver() {
                 val now = LocalDateTime.now()
                 val today = now.toLocalDate()
                 val notify = settings.onboarded && settings.engagementNotificationsEnabled
+                FestiveLauncher.switchIconInBackground(context, FestiveLauncher.packFor(settings, FestivalCalendar.active(today)))
                 when (intent.action) {
                     EngagementScheduler.ACTION_STREAK_CHECK -> {
                         val profile = container.gamificationRepository.profile.first()

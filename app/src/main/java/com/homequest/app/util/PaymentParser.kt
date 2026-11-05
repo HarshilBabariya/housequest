@@ -3,27 +3,27 @@ package com.homequest.app.util
 object PaymentParser {
     data class Captured(val amount: Double, val merchant: String)
 
-    val sources: Map<String, String> = mapOf(
-        "com.google.android.apps.nbu.paisa.user" to "GPay",
-        "com.phonepe.app" to "PhonePe",
-        "net.one97.paytm" to "Paytm",
-        "in.org.npci.upiapp" to "BHIM",
-        "com.dreamplug.androidapp" to "CRED",
-        "in.amazon.mShop.android.shopping" to "Amazon Pay",
-        "com.sbi.lotusintouch" to "YONO SBI",
-        "com.snapwork.hdfc" to "HDFC Bank",
-        "com.csam.icici.bank.imobile" to "iMobile",
-        "com.axis.mobile" to "Axis Mobile",
-        "com.msf.kbank.mobile" to "Kotak",
-        "com.google.android.apps.messaging" to "SMS",
-        "com.samsung.android.messaging" to "SMS",
-        "com.android.mms" to "SMS",
-        "com.android.messaging" to "SMS"
+    private const val SOURCE = "SMS"
+
+    fun source(sender: String): String = sender.trim().ifBlank { SOURCE }
+
+    private val smsApps = setOf(
+        "com.google.android.apps.messaging",
+        "com.samsung.android.messaging",
+        "com.android.mms",
+        "com.android.messaging",
+        "com.oneplus.mms",
+        "com.motorola.messaging",
+        "com.coloros.mms"
     )
+
+    fun isSmsApp(packageName: String, defaultSmsApp: () -> String?): Boolean = packageName in smsApps || packageName == defaultSmsApp()
 
     private val amountPattern = Regex("""(?:₹|\brs\.?|\binr)\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)""", RegexOption.IGNORE_CASE)
     private val debitWords = Regex("""\b(paid|sent|debited|spent|payment of|purchase|withdrawn|transferred)\b""", RegexOption.IGNORE_CASE)
     private val skipWords = Regex("""\b(otp|requested|request|failed|declined|reversed|pending|initiated|due on|is due|will be debited|will be credited|will be refunded|auto ?pay set|received your payment|payment received|salary|interest)\b""", RegexOption.IGNORE_CASE)
+    private val promoWords = Regex("""(?:₹|\brs\.?|\binr)\s*[0-9][0-9,]*\s*(?:off|discount)\b|\b[0-9]+\s*%\s*off\b|\b(offer|offers|coupon|promo ?code|use code|upto|up to|flat|shop now)\b""", RegexOption.IGNORE_CASE)
+    private val confirmation = Regex("""\b(debited|credited|spent|a/c|acct|avl\.? bal|ref(?: no)?|txn|upi ref)\b""", RegexOption.IGNORE_CASE)
     private val paidYou = Regex("""\b(paid you|sent you)\b""", RegexOption.IGNORE_CASE)
     private val creditWords = Regex("""\b(credited|received|refund|refunded|cashback)\b""", RegexOption.IGNORE_CASE)
     private val senderPattern = Regex("""^\s*([\p{L}0-9&.' ]{2,40}?)\s+(?:paid|sent) you\b|\bfrom\s+(?:vpa\s+)?([\p{L}0-9&.'@_ -]{2,40}?)(?=\s+(?:on|via|using|ref|upi|to|in|a/c|ac|is|has|was|processed)\b|[.,(]|$)""", RegexOption.IGNORE_CASE)
@@ -31,6 +31,7 @@ object PaymentParser {
 
     fun parse(text: String): Captured? {
         if (skipWords.containsMatchIn(text)) return null
+        if (promoWords.containsMatchIn(text) && !confirmation.containsMatchIn(text)) return null
         val debit = debitWords.containsMatchIn(text)
         val credit = paidYou.containsMatchIn(text) || (!debit && creditWords.containsMatchIn(text))
         if (!credit && !debit) return null

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:drawable="@drawable/ic_launcher_foreground_uttarayan">
+    <target android:name="emblem">
+        <aapt:attr name="android:animation">
+            <set xmlns:android="http://schemas.android.com/apk/res/android">
+                <objectAnimator android:propertyName="scaleX" android:valueFrom="0.85" android:valueTo="1" android:valueType="floatType" android:duration="500" />
+                <objectAnimator android:propertyName="scaleY" android:valueFrom="0.85" android:valueTo="1" android:valueType="floatType" android:duration="500" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="burst0">
+        <aapt:attr name="android:animation">
+            <set xmlns:android="http://schemas.android.com/apk/res/android">
+                <objectAnimator android:propertyName="scaleX" android:valueFrom="0.8" android:valueTo="1.35" android:valueType="floatType" android:duration="900" />
+                <objectAnimator android:propertyName="scaleY" android:valueFrom="0.8" android:valueTo="1.35" android:valueType="floatType" android:duration="900" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rays0">
+        <aapt:attr name="android:animation">
+            <set xmlns:android="http://schemas.android.com/apk/res/android">
+                <objectAnimator android:propertyName="strokeAlpha" android:valueFrom="1" android:valueTo="0" android:valueType="floatType" android:duration="900" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="burst1">
+        <aapt:attr name="android:animation">
+            <set xmlns:android="http://schemas.android.com/apk/res/android">
+                <objectAnimator android:propertyName="scaleX" android:valueFrom="0.8" android:valueTo="1.35" android:valueType="floatType" android:duration="900" />
+                <objectAnimator android:propertyName="scaleY" android:valueFrom="0.8" android:valueTo="1.35" android:valueType="floatType" android:duration="900" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rays1">
+        <aapt:attr name="android:animation">
+            <set xmlns:android="http://schemas.android.com/apk/res/android">
+                <objectAnimator android:propertyName="strokeAlpha" android:valueFrom="1" android:valueTo="0" android:valueType="floatType" android:duration="900" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="burst2">
+        <aapt:attr name="android:animation">
+            <set xmlns:android="http://schemas.android.com/apk/res/android">
+                <objectAnimator android:propertyName="scaleX" android:valueFrom="0.8" android:valueTo="1.35" android:valueType="floatType" android:duration="900" />
+                <objectAnimator android:propertyName="scaleY" android:valueFrom="0.8" android:valueTo="1.35" android:valueType="floatType" android:duration="900" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="rays2">
+        <aapt:attr name="android:animation">
+            <set xmlns:android="http://schemas.android.com/apk/res/android">
+                <objectAnimator android:propertyName="strokeAlpha" android:valueFrom="1" android:valueTo="0" android:valueType="floatType" android:duration="900" />
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

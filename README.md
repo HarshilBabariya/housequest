@@ -18,7 +18,7 @@ Open the folder in Android Studio (Ladybug or newer) and run the `app` configura
 
 Two flavours share one app id, so either installs over the other and keeps its data:
 
-- **full** — everything, including auto-capture of payment notifications. It declares a notification listener, so in India Play Protect blocks installing it from a browser, WhatsApp or a file manager; install it over USB (`adb install -r app-full-debug.apk`) or through Play.
+- **full** — everything, including auto-capture of bank and UPI text messages (from the SMS app's notifications). It declares a notification listener, so in India Play Protect blocks installing it from a browser, WhatsApp or a file manager; install it over USB (`adb install -r app-full-debug.apk`) or through Play.
 - **lite** — the same app without auto-capture (no notification listener, no Capture row on Me), so it installs normally from any source.
 
 The repo ships without a Gradle wrapper binary; Android Studio generates one, or run `gradle wrapper --gradle-version 8.9` once.
@@ -37,6 +37,7 @@ Push this folder to a GitHub repository (branch `main`). The included workflow `
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.8.1 | 2026-11-05 | Festival countdown fixed; home & money notification sounds (cooker whistle, debit/credit ting, doorbell, firecrackers…); auto-capture from SMS only, offers ignored; festival app icons with animated splash |
 | 1.8.0 | 2026-11-04 | Notification sounds per kind (original meme-style effects) and in-app sound effects; festival packs (themes, outfits, effects, sounds, greetings, full-screen gift moment) for Uttarayan, Tiranga days, Holi, Rakhi, Ganesh, Navratri, Diwali, Christmas, New Year; streak card, milestone celebrations and streak-in-danger alerts; category labels no longer clipped; ambient Reminders orbit redesign |
 | 1.7.1 | 2026-11-02 | Credits that subtract from totals (form, voice, capture); stricter capture rules; shares add up with credits; tint-only bottom tabs; calendar icon tile; date chips fit; points and streak below the level on Me; `full` and `lite` (no auto-capture, installs past Play Protect) builds |
 | 1.7.0 | 2026-11-02 | Kirana khata, milk/maid/services tally, gold and chit funds (DB v7); payment auto-capture from notifications; auto-logging reminders; budget forecast; weekly summary card; PDF export |

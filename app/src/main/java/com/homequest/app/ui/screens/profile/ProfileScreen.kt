@@ -248,6 +248,7 @@ fun ProfileScreen(
         }
         HqCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp).fillMaxWidth(), padding = 0) {
             ToggleRow(stringResource(R.string.festive_mode), stringResource(R.string.festive_mode_sub), state.settings.festiveMode, onChange = vm::setFestiveMode)
+            ToggleRow(stringResource(R.string.festive_icon), stringResource(R.string.festive_icon_sub), state.settings.festiveIcon, onChange = vm::setFestiveIcon)
             ToggleRow(stringResource(R.string.sound_effects), stringResource(R.string.sound_effects_sub), state.settings.soundEffectsEnabled, onChange = vm::setSoundEffects, last = true)
         }
 

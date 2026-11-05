@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.HomeQuest.Splash.Diwali" parent="Theme.HomeQuest">
+        <item name="android:windowSplashScreenBackground">#FF1A0B07</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FF7F1D1D</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_diwali</item>
+    </style>
+    <style name="Theme.HomeQuest.Splash.Holi" parent="Theme.HomeQuest">
+        <item name="android:windowSplashScreenBackground">#FF1A0A16</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FFE91E8C</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_holi</item>
+    </style>
+    <style name="Theme.HomeQuest.Splash.Navratri" parent="Theme.HomeQuest">
+        <item name="android:windowSplashScreenBackground">#FF1A0C09</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FFD9271C</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_navratri</item>
+    </style>
+    <style name="Theme.HomeQuest.Splash.Uttarayan" parent="Theme.HomeQuest">
+        <item name="android:windowSplashScreenBackground">#FF07131F</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FF0284C7</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_uttarayan</item>
+    </style>
+    <style name="Theme.HomeQuest.Splash.Tiranga" parent="Theme.HomeQuest">
+        <item name="android:windowSplashScreenBackground">#FF0E1210</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FFFF9933</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_tiranga</item>
+    </style>
+    <style name="Theme.HomeQuest.Splash.Rakhi" parent="Theme.HomeQuest">
+        <item name="android:windowSplashScreenBackground">#FF1C0E14</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FFDB2777</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_rakhi</item>
+    </style>
+    <style name="Theme.HomeQuest.Splash.Ganesh" parent="Theme.HomeQuest">
+        <item name="android:windowSplashScreenBackground">#FF1C0F06</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FFEA580C</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_ganesh</item>
+    </style>
+    <style name="Theme.HomeQuest.Splash.Christmas" parent="Theme.HomeQuest">
+        <item name="android:windowSplashScreenBackground">#FF0D1410</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FFC62828</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_christmas</item>
+    </style>
+    <style name="Theme.HomeQuest.Splash.NewYear" parent="Theme.HomeQuest">
+        <item name="android:windowSplashScreenBackground">#FF0C0A1F</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FF312E81</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_new_year</item>
+    </style>
+</resources>

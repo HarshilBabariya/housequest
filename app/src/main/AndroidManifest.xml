@@ -25,14 +25,136 @@
         android:theme="@style/Theme.HomeQuest">
 
         <activity
+            android:name=".HomeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity-alias
             android:name=".MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize">
+            android:targetActivity=".HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Launcher_UTTARAYAN"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_uttarayan"
+            android:roundIcon="@mipmap/ic_launcher_uttarayan"
+            android:targetActivity=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Launcher_TIRANGA"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_tiranga"
+            android:roundIcon="@mipmap/ic_launcher_tiranga"
+            android:targetActivity=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Launcher_HOLI"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_holi"
+            android:roundIcon="@mipmap/ic_launcher_holi"
+            android:targetActivity=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Launcher_RAKHI"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_rakhi"
+            android:roundIcon="@mipmap/ic_launcher_rakhi"
+            android:targetActivity=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Launcher_GANESH"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_ganesh"
+            android:roundIcon="@mipmap/ic_launcher_ganesh"
+            android:targetActivity=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Launcher_NAVRATRI"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_navratri"
+            android:roundIcon="@mipmap/ic_launcher_navratri"
+            android:targetActivity=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Launcher_DIWALI"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_diwali"
+            android:roundIcon="@mipmap/ic_launcher_diwali"
+            android:targetActivity=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Launcher_CHRISTMAS"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_christmas"
+            android:roundIcon="@mipmap/ic_launcher_christmas"
+            android:targetActivity=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".Launcher_NEW_YEAR"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_new_year"
+            android:roundIcon="@mipmap/ic_launcher_new_year"
+            android:targetActivity=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <receiver android:name=".notifications.ReminderReceiver" android:exported="false" />
 

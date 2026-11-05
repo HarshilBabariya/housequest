@@ -58,9 +58,9 @@ fun FestivalBanner(day: FestivalDay, upcoming: Boolean, today: LocalDate, name: 
         Row(Modifier.padding(horizontal = 18.dp).align(Alignment.CenterStart), verticalAlignment = Alignment.CenterVertically) {
             Text(pack.emoji, fontSize = 40.sp)
             Column(Modifier.padding(start = 14.dp)) {
-                val days = ChronoUnit.DAYS.between(today, day.start).toInt()
+                val days = ChronoUnit.DAYS.between(today, day.main).toInt()
                 Text(
-                    if (upcoming) pluralStringResource(R.plurals.fest_countdown, days, stringResource(day.festival.nameRes), days) else stringResource(day.festival.titleRes, name),
+                    if (days > 0) pluralStringResource(R.plurals.fest_countdown, days, stringResource(day.festival.nameRes), days) else stringResource(day.festival.titleRes, name),
                     style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                     maxLines = 1,

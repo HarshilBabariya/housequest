@@ -84,7 +84,7 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
                         _toast.value = event
                         _confetti.value++
                         if (posts(s.rewardNotificationsEnabled)) container.notificationHelper.showBadge(s.language, event.badge)
-                        else if (s.soundEffectsEnabled) container.sounds.play(Sound.POWER_UP)
+                        else if (s.soundEffectsEnabled) container.sounds.play(Sound.PIGGY_BANK)
                     }
                     else -> _toast.value = event
                 }
@@ -105,8 +105,8 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         if (notified.remove(celebration) || !container.settingsRepository.current().soundEffectsEnabled) return@launch
         container.sounds.play(
             when (celebration) {
-                is Celebration.Streak -> Sound.FIRE
-                is Celebration.Level -> Sound.AIRHORN
+                is Celebration.Streak -> Sound.STOVE
+                is Celebration.Level -> Sound.CASH_REGISTER
                 is Celebration.Holiday -> Sound.of(celebration.day.festival.pack)
             }
         )

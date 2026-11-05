@@ -86,6 +86,7 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     fun setEngagementNotifications(enabled: Boolean) = viewModelScope.launch { settings.setEngagementNotifications(enabled) }
     fun setSoundEffects(enabled: Boolean) = viewModelScope.launch { settings.setSoundEffects(enabled) }
     fun setFestiveMode(enabled: Boolean) = viewModelScope.launch { settings.setFestiveMode(enabled) }
+    fun setFestiveIcon(enabled: Boolean) = viewModelScope.launch { settings.setFestiveIcon(enabled) }
     fun setAppLock(enabled: Boolean) = viewModelScope.launch { settings.setAppLock(enabled) }
     fun setPinAndLock(memberId: Long, pin: String) = viewModelScope.launch {
         container.memberRepository.setPin(memberId, pin)

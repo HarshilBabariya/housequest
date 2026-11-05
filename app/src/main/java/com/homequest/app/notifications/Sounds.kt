@@ -11,16 +11,16 @@ import com.homequest.app.R
 import com.homequest.app.domain.FestivalPack
 
 enum class Sound(@RawRes val res: Int) {
-    BOING(R.raw.sfx_boing),
+    COOKER_WHISTLE(R.raw.sfx_cooker_whistle),
     DOORBELL(R.raw.sfx_doorbell),
-    CHA_CHING(R.raw.sfx_cha_ching),
-    DUN_DUN(R.raw.sfx_dun_dun),
-    BOOM(R.raw.sfx_boom),
-    POWER_UP(R.raw.sfx_power_up),
-    AIRHORN(R.raw.sfx_airhorn),
-    SAD_TROMBONE(R.raw.sfx_sad_trombone),
-    FIRE(R.raw.sfx_fire),
-    WHOOSH(R.raw.sfx_whoosh),
+    DEBIT_TING(R.raw.sfx_debit_ting),
+    CREDIT_TING(R.raw.sfx_credit_ting),
+    MICROWAVE(R.raw.sfx_microwave),
+    CARD_DECLINED(R.raw.sfx_card_declined),
+    PIGGY_BANK(R.raw.sfx_piggy_bank),
+    CASH_REGISTER(R.raw.sfx_cash_register),
+    CLOCK(R.raw.sfx_clock),
+    STOVE(R.raw.sfx_stove),
     UTTARAYAN(R.raw.sfx_uttarayan),
     TIRANGA(R.raw.sfx_tiranga),
     HOLI(R.raw.sfx_holi),
@@ -31,7 +31,7 @@ enum class Sound(@RawRes val res: Int) {
     CHRISTMAS(R.raw.sfx_christmas),
     NEW_YEAR(R.raw.sfx_new_year);
 
-    fun uri(context: Context): Uri = Uri.parse("${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/$res")
+    fun uri(context: Context): Uri = Uri.parse("${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/raw/${context.resources.getResourceEntryName(res)}")
 
     companion object {
         fun of(pack: FestivalPack): Sound = when (pack) {

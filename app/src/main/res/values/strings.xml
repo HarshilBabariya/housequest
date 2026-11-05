@@ -727,7 +727,7 @@
     <string name="faq_a3">Log expenses (+10 each), keep your daily streak, create groups, settle balances, add family members, finish months under budget and unlock badges.</string>
     <string name="faq_q4">How do I add an expense by voice?</string>
     <string name="faq_a4">Tap the mic and say something like “250 groceries by UPI note Diwali shopping”. Amount, category, payment mode and title are filled in; anything after “note” goes into the note.</string>
-    <string name="faq_q5">Can it read my GPay or bank SMS?</string>
+    <string name="faq_q5">Can it read my bank SMS?</string>
     <string name="faq_q6">What does Pro give me?</string>
     <string name="faq_a6">Pro packs add points instantly, so you can unlock any theme, outfit, hair style, accessory or feature without waiting.</string>
     <string name="about_app">About app</string>
@@ -1152,7 +1152,7 @@
     <string name="capture_sub">UPI and bank alerts become drafts</string>
     <string name="capture_on">Auto-capture is on</string>
     <string name="capture_off">Auto-capture is off</string>
-    <string name="capture_explain">HomeQuest reads payment notifications from GPay, PhonePe, Paytm, BHIM, CRED, bank apps and bank SMS. Money paid out and money received (refunds, cashback, someone paying you) both become drafts here; only the amount, the other party, app name and time are kept, on this phone (and in your normal Android backup). Nothing is sent anywhere, and nothing is added until you add it.</string>
+    <string name="capture_explain">HomeQuest reads bank and UPI text messages (SMS) only — notifications from other apps, offers and \"₹250 off\" promos are ignored. Money paid out and money received (refunds, cashback, someone paying you) both become drafts here; only the amount, the other party and the time are kept, on this phone (and in your normal Android backup). Nothing is sent anywhere, and nothing is added until you add it.</string>
     <string name="capture_turn_on">Turn on notification access</string>
     <string name="capture_manage">Manage notification access</string>
     <string name="captures_review">To review</string>
@@ -1161,7 +1161,8 @@
     <string name="capture_add">Add</string>
     <string name="unknown_payee">Payment</string>
     <string name="captures_hint">Tap to add them in one go</string>
-    <string name="channel_capture">Captured payments</string>
+    <string name="channel_capture">Money spent (SMS)</string>
+    <string name="channel_capture_credit">Money received (SMS)</string>
     <string name="notif_captured_title">Payment spotted 👀</string>
     <string name="notif_captured_credit_title">Money in 💸</string>
     <string name="notif_captured_body">%1$s to %2$s. Tap to add it.</string>
@@ -1228,7 +1229,7 @@
     <string name="fest_claim">Claim my gifts · +%1$d ⭐</string>
     <string name="fest_wear">Wear the festive look</string>
     <string name="later">Maybe later</string>
-    <string name="fest_upcoming_hint">Festive theme, outfit and +%1$d ⭐ unlock on the day</string>
+    <string name="fest_upcoming_hint">Festive theme, outfit and +%1$d ⭐ unlock when celebrations begin</string>
     <string name="fest_tap_to_celebrate">Tap to celebrate 🎉</string>
     <string name="reason_festival">Festival gift: %1$s</string>
     <string name="claim_free">🎁 Free today</string>
@@ -1284,6 +1285,8 @@
     <string name="streak_next">Next: %1$d 🔥</string>
     <string name="festive_mode">Festive mode</string>
     <string name="festive_mode_sub">Festival themes and celebrations on Diwali, Holi, Christmas and more</string>
+    <string name="festive_icon">Festival app icon</string>
+    <string name="festive_icon_sub">The home-screen icon dresses up for each festival, and the opening animation matches (Android 13+). Some launchers move the icon back to the app drawer when it changes</string>
     <string name="sound_effects">Sound effects</string>
     <string name="sound_effects_sub">In-app sounds for streaks, level-ups and festivals (quiet in silent mode). Notification sounds can be changed per kind in phone settings</string>
     <string name="streaks_festivals">Streaks &amp; festivals</string>

@@ -727,7 +727,7 @@
     <string name="faq_a3">खर्च दर्ज करें (हर एक पर +10), रोज़ की स्ट्रीक बनाए रखें, ग्रुप बनाएँ, हिसाब चुकता करें, परिवार के सदस्य जोड़ें, महीने बजट के अंदर पूरे करें और बैज अनलॉक करें।</string>
     <string name="faq_q4">बोलकर खर्च कैसे जोड़ूँ?</string>
     <string name="faq_a4">माइक पर टैप करें और कुछ ऐसा बोलें “250 किराना UPI से नोट दिवाली शॉपिंग”। रकम, श्रेणी, भुगतान का तरीका और शीर्षक अपने-आप भर जाते हैं; “नोट” के बाद जो भी बोलें वह नोट में जाता है।</string>
-    <string name="faq_q5">क्या यह मेरे GPay या बैंक SMS पढ़ सकता है?</string>
+    <string name="faq_q5">क्या यह मेरे बैंक SMS पढ़ सकता है?</string>
     <string name="faq_q6">Pro से मुझे क्या मिलता है?</string>
     <string name="faq_a6">Pro पैक तुरंत पॉइंट जोड़ देते हैं, ताकि आप बिना इंतज़ार कोई भी थीम, पोशाक, हेयर स्टाइल, एक्सेसरी या फ़ीचर अनलॉक कर सकें।</string>
     <string name="about_app">ऐप के बारे में</string>
@@ -1152,7 +1152,7 @@
     <string name="capture_sub">UPI और बैंक अलर्ट ड्राफ़्ट बन जाते हैं</string>
     <string name="capture_on">ऑटो-कैप्चर चालू है</string>
     <string name="capture_off">ऑटो-कैप्चर बंद है</string>
-    <string name="capture_explain">HomeQuest, GPay, PhonePe, Paytm, BHIM, CRED, बैंक ऐप्स और बैंक SMS की पेमेंट नोटिफ़िकेशन पढ़ता है। भेजे गए और मिले पैसे (रिफ़ंड, कैशबैक, किसी का आपको भुगतान) दोनों यहाँ ड्राफ़्ट बनते हैं; सिर्फ़ रकम, दूसरा पक्ष, ऐप का नाम और समय इसी फ़ोन पर (और आपके सामान्य Android बैकअप में) रखे जाते हैं। कुछ भी कहीं भेजा नहीं जाता, और जब तक आप जोड़ें नहीं, कुछ नहीं जुड़ता।</string>
+    <string name="capture_explain">HomeQuest सिर्फ़ बैंक और UPI के टेक्स्ट मैसेज (SMS) पढ़ता है — दूसरे ऐप्स की नोटिफ़िकेशन, ऑफ़र और “₹250 छूट” वाले प्रोमो अनदेखे होते हैं। भेजे गए और मिले पैसे (रिफ़ंड, कैशबैक, किसी का आपको भुगतान) दोनों यहाँ ड्राफ़्ट बनते हैं; सिर्फ़ रकम, दूसरा पक्ष और समय इसी फ़ोन पर (और आपके सामान्य Android बैकअप में) रखे जाते हैं। कुछ भी कहीं भेजा नहीं जाता, और जब तक आप जोड़ें नहीं, कुछ नहीं जुड़ता।</string>
     <string name="capture_turn_on">सूचना एक्सेस चालू करें</string>
     <string name="capture_manage">सूचना एक्सेस प्रबंधित करें</string>
     <string name="captures_review">देखना बाकी</string>
@@ -1161,7 +1161,8 @@
     <string name="capture_add">जोड़ें</string>
     <string name="unknown_payee">भुगतान</string>
     <string name="captures_hint">सबको एक साथ जोड़ने के लिए टैप करें</string>
-    <string name="channel_capture">पकड़े गए भुगतान</string>
+    <string name="channel_capture">ख़र्च हुए पैसे (SMS)</string>
+    <string name="channel_capture_credit">मिले पैसे (SMS)</string>
     <string name="notif_captured_title">भुगतान पकड़ा गया 👀</string>
     <string name="notif_captured_credit_title">पैसे आए 💸</string>
     <string name="notif_captured_body">%2$s को %1$s। जोड़ने के लिए टैप करें।</string>
@@ -1228,7 +1229,7 @@
     <string name="fest_claim">मेरे गिफ़्ट लो · +%1$d ⭐</string>
     <string name="fest_wear">त्योहारी लुक पहनें</string>
     <string name="later">बाद में</string>
-    <string name="fest_upcoming_hint">त्योहार के दिन थीम, आउटफ़िट और +%1$d ⭐ खुलेंगे</string>
+    <string name="fest_upcoming_hint">उत्सव शुरू होते ही थीम, आउटफ़िट और +%1$d ⭐ खुलेंगे</string>
     <string name="fest_tap_to_celebrate">जश्न के लिए टैप करें 🎉</string>
     <string name="reason_festival">त्योहार का गिफ़्ट: %1$s</string>
     <string name="claim_free">🎁 आज मुफ़्त</string>
@@ -1284,6 +1285,8 @@
     <string name="streak_next">अगला: %1$d 🔥</string>
     <string name="festive_mode">त्योहारी मोड</string>
     <string name="festive_mode_sub">दिवाली, होली, क्रिसमस और बाक़ी त्योहारों पर थीम और जश्न</string>
+    <string name="festive_icon">त्योहारी ऐप आइकॉन</string>
+    <string name="festive_icon_sub">हर त्योहार पर होम-स्क्रीन आइकॉन सज जाता है और खुलने का एनिमेशन भी (Android 13+)। कुछ लॉन्चर आइकॉन बदलने पर उसे ऐप ड्रॉअर में वापस भेज देते हैं</string>
     <string name="sound_effects">साउंड इफ़ेक्ट</string>
     <string name="sound_effects_sub">स्ट्रीक, लेवल-अप और त्योहारों की ऐप में आवाज़ें (साइलेंट मोड में चुप)। नोटिफ़िकेशन की आवाज़ फ़ोन सेटिंग में हर तरह के लिए बदल सकते हैं</string>
     <string name="streaks_festivals">स्ट्रीक और त्योहार</string>

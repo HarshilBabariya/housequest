@@ -1,6 +1,7 @@
 package com.homequest.app
 
 import android.Manifest
+import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -23,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homequest.app.data.repository.avatar
 import com.homequest.app.ui.Gate
@@ -35,10 +38,11 @@ import com.homequest.app.ui.navigation.HomeQuestNavHost
 import com.homequest.app.ui.screens.onboarding.OnboardingScreen
 import com.homequest.app.ui.screens.profile.LockScreen
 import com.homequest.app.ui.theme.HomeQuestTheme
+import com.homequest.app.util.FestiveLauncher
 import com.homequest.app.util.LocaleHelper
 import java.util.Locale
 
-class MainActivity : ComponentActivity() {
+class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -58,6 +62,8 @@ private fun HomeQuestRoot() {
     val erasing by vm.erasing.collectAsStateWithLifecycle()
     val festival by vm.festival.collectAsStateWithLifecycle()
     val celebrations by vm.celebrations.collectAsStateWithLifecycle()
+    val activity = LocalContext.current as Activity
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { FestiveLauncher.apply(activity, FestiveLauncher.packFor(settings, festival)) }
     val baseContext = LocalContext.current
     val localized = remember(settings.language) {
         Locale.setDefault(Locale.forLanguageTag(settings.language))

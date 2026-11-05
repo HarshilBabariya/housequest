@@ -17,7 +17,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.homequest.app.BuildConfig
-import com.homequest.app.MainActivity
+import com.homequest.app.HomeActivity
 import com.homequest.app.R
 import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.domain.Badge
@@ -28,18 +28,23 @@ import com.homequest.app.util.money
 import java.time.LocalDate
 import kotlin.math.abs
 
-private enum class Channel(val id: String, @StringRes val nameRes: Int, val importance: Int, val sound: Sound, val replaces: String? = null) {
-    NUDGES("nudges", R.string.channel_nudges, NotificationManager.IMPORTANCE_HIGH, Sound.BOING, "reminders"),
-    BILLS("bills", R.string.channel_bills, NotificationManager.IMPORTANCE_HIGH, Sound.DOORBELL, "reminders"),
-    AUTO_LOGGED("auto_logged", R.string.channel_autolog, NotificationManager.IMPORTANCE_DEFAULT, Sound.CHA_CHING, "reminders"),
-    BUDGET_WARNING("budget_warning", R.string.channel_budget_warn, NotificationManager.IMPORTANCE_HIGH, Sound.DUN_DUN, "budget"),
-    OVER_BUDGET("over_budget", R.string.channel_budget_over, NotificationManager.IMPORTANCE_HIGH, Sound.BOOM, "budget"),
-    BADGES("badges", R.string.channel_badges, NotificationManager.IMPORTANCE_DEFAULT, Sound.POWER_UP, "rewards"),
-    LEVELS("levels", R.string.channel_levels, NotificationManager.IMPORTANCE_DEFAULT, Sound.AIRHORN, "rewards"),
-    STREAK_RISK("streak_risk", R.string.channel_streak_risk, NotificationManager.IMPORTANCE_HIGH, Sound.SAD_TROMBONE),
-    STREAK_WIN("streak_win", R.string.channel_streak_win, NotificationManager.IMPORTANCE_DEFAULT, Sound.FIRE),
-    CAPTURED("captured_payments", R.string.channel_capture, NotificationManager.IMPORTANCE_DEFAULT, Sound.WHOOSH, "capture")
+private enum class Channel(val base: String, @StringRes val nameRes: Int, val importance: Int, val sound: Sound, val predecessors: List<String> = emptyList()) {
+    NUDGES("nudges", R.string.channel_nudges, NotificationManager.IMPORTANCE_HIGH, Sound.COOKER_WHISTLE, listOf("reminders")),
+    BILLS("bills", R.string.channel_bills, NotificationManager.IMPORTANCE_HIGH, Sound.DOORBELL, listOf("reminders")),
+    AUTO_LOGGED("auto_logged", R.string.channel_autolog, NotificationManager.IMPORTANCE_DEFAULT, Sound.DEBIT_TING, listOf("reminders")),
+    BUDGET_WARNING("budget_warning", R.string.channel_budget_warn, NotificationManager.IMPORTANCE_HIGH, Sound.MICROWAVE, listOf("budget")),
+    OVER_BUDGET("over_budget", R.string.channel_budget_over, NotificationManager.IMPORTANCE_HIGH, Sound.CARD_DECLINED, listOf("budget")),
+    BADGES("badges", R.string.channel_badges, NotificationManager.IMPORTANCE_DEFAULT, Sound.PIGGY_BANK, listOf("rewards")),
+    LEVELS("levels", R.string.channel_levels, NotificationManager.IMPORTANCE_DEFAULT, Sound.CASH_REGISTER, listOf("rewards")),
+    STREAK_RISK("streak_risk", R.string.channel_streak_risk, NotificationManager.IMPORTANCE_HIGH, Sound.CLOCK),
+    STREAK_WIN("streak_win", R.string.channel_streak_win, NotificationManager.IMPORTANCE_DEFAULT, Sound.STOVE),
+    SPENT("captured_payments", R.string.channel_capture, NotificationManager.IMPORTANCE_DEFAULT, Sound.DEBIT_TING, listOf("capture")),
+    RECEIVED("captured_credit", R.string.channel_capture_credit, NotificationManager.IMPORTANCE_DEFAULT, Sound.CREDIT_TING, listOf("capture", "captured_payments"));
+
+    val id: String get() = channelId(base, sound)
 }
+
+private fun channelId(base: String, sound: Sound) = "$base.${sound.name.lowercase()}"
 
 class NotificationHelper(private val context: Context) {
 
@@ -55,24 +60,30 @@ class NotificationHelper(private val context: Context) {
 
     fun createChannels() {
         val manager = context.getSystemService(NotificationManager::class.java)
-        val legacy = Channel.entries.mapNotNull { it.replaces }.toSet()
-        val muted = legacy.filter { manager.getNotificationChannel(it)?.importance == NotificationManager.IMPORTANCE_NONE }.toSet()
-        legacy.forEach(manager::deleteNotificationChannel)
-        manager.createNotificationChannelGroup(NotificationChannelGroup(GROUP_FESTIVALS, context.getString(R.string.channel_group_festivals)))
-        val app = Channel.entries.filter { it != Channel.CAPTURED || BuildConfig.PAYMENT_CAPTURE }.map {
-            channel(it.id, context.getString(it.nameRes), if (it.replaces in muted) NotificationManager.IMPORTANCE_NONE else it.importance, it.sound)
-        }
+        val app = Channel.entries.filter { (it != Channel.SPENT && it != Channel.RECEIVED) || BuildConfig.PAYMENT_CAPTURE }
+            .map { Triple(it.base, it.predecessors, channel(it.id, context.getString(it.nameRes), it.importance, it.sound)) }
         val festivals = FestivalPack.entries.map { pack ->
-            channel(festivalChannel(pack), context.getString(R.string.channel_festival, context.getString(pack.nameRes)), NotificationManager.IMPORTANCE_DEFAULT, Sound.of(pack)).apply { group = GROUP_FESTIVALS }
+            val name = context.getString(R.string.channel_festival, context.getString(pack.nameRes))
+            Triple(festivalBase(pack), emptyList<String>(), channel(festivalChannel(pack), name, NotificationManager.IMPORTANCE_DEFAULT, Sound.of(pack)).apply { group = GROUP_FESTIVALS })
         }
-        manager.createNotificationChannels(app + festivals)
+        val wanted = app + festivals
+        val ids = wanted.map { it.third.id }.toSet()
+        val stale = manager.notificationChannels.filter { it.id !in ids && it.id != NotificationChannel.DEFAULT_CHANNEL_ID }
+        val lowered = stale.groupBy({ it.id.substringBefore('.') }, { it.importance }).mapValues { (_, values) -> values.min() }
+        stale.forEach { manager.deleteNotificationChannel(it.id) }
+        manager.createNotificationChannelGroup(NotificationChannelGroup(GROUP_FESTIVALS, context.getString(R.string.channel_group_festivals)))
+        manager.createNotificationChannels(wanted.map { (base, predecessors, channel) ->
+            channel.apply { (predecessors + base).mapNotNull(lowered::get).minOrNull()?.takeIf { it < importance }?.let { importance = it } }
+        })
     }
 
     private fun channel(id: String, name: String, importance: Int, sound: Sound) = NotificationChannel(id, name, importance).apply {
         setSound(sound.uri(context), AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
     }
 
-    private fun festivalChannel(pack: FestivalPack) = "festival_${pack.name.lowercase()}"
+    private fun festivalBase(pack: FestivalPack) = "festival_${pack.name.lowercase()}"
+
+    private fun festivalChannel(pack: FestivalPack) = channelId(festivalBase(pack), Sound.of(pack))
 
     fun canPost(): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
@@ -104,7 +115,7 @@ class NotificationHelper(private val context: Context) {
             merchant.isBlank() -> res.getString(R.string.notif_captured_body_plain, value)
             else -> res.getString(R.string.notif_captured_body, value, merchant)
         }
-        post(ID_CAPTURE, Channel.CAPTURED.id, res.getString(if (amount < 0) R.string.notif_captured_credit_title else R.string.notif_captured_title), body)
+        post(ID_CAPTURE, if (amount < 0) Channel.RECEIVED.id else Channel.SPENT.id, res.getString(if (amount < 0) R.string.notif_captured_credit_title else R.string.notif_captured_title), body)
     }
 
     fun showBudgetAlert(language: String, label: String, spent: String, limit: String, exceeded: Boolean) {
@@ -158,7 +169,7 @@ class NotificationHelper(private val context: Context) {
     @SuppressLint("MissingPermission")
     private fun post(id: Int, channel: String, title: String, body: String) {
         if (!canPost()) return
-        val intent = Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        val intent = Intent(context, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val pending = PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val notification = NotificationCompat.Builder(context, channel)
             .setSmallIcon(R.drawable.ic_notification)

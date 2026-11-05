@@ -727,7 +727,7 @@
     <string name="faq_a3">ખર્ચ નોંધો (દરેક પર +10), રોજની સ્ટ્રીક જાળવો, ગ્રુપ બનાવો, હિસાબ ચૂકતે કરો, પરિવારના સભ્યો ઉમેરો, મહિના બજેટમાં પૂરા કરો અને બેજ અનલૉક કરો.</string>
     <string name="faq_q4">બોલીને ખર્ચ કેવી રીતે ઉમેરું?</string>
     <string name="faq_a4">માઇક પર ટૅપ કરો અને કંઈક આવું બોલો “250 કરિયાણું UPIથી નોંધ દિવાળી શોપિંગ”. રકમ, શ્રેણી, ચુકવણીની રીત અને શીર્ષક આપમેળે ભરાઈ જાય છે; “નોંધ” પછી જે બોલો તે નોંધમાં જાય છે.</string>
-    <string name="faq_q5">શું તે મારા GPay કે બેંક SMS વાંચી શકે?</string>
+    <string name="faq_q5">શું તે મારા બેંક SMS વાંચી શકે?</string>
     <string name="faq_q6">Proથી મને શું મળે?</string>
     <string name="faq_a6">Pro પેક તરત પોઇન્ટ ઉમેરે છે, જેથી તમે રાહ જોયા વગર કોઈ પણ થીમ, પોશાક, હેર સ્ટાઇલ, એક્સેસરી કે ફીચર અનલૉક કરી શકો.</string>
     <string name="about_app">એપ વિશે</string>
@@ -1152,7 +1152,7 @@
     <string name="capture_sub">UPI અને બેંક અલર્ટ ડ્રાફ્ટ બની જાય છે</string>
     <string name="capture_on">ઓટો-કૅપ્ચર ચાલુ છે</string>
     <string name="capture_off">ઓટો-કૅપ્ચર બંધ છે</string>
-    <string name="capture_explain">HomeQuest, GPay, PhonePe, Paytm, BHIM, CRED, બેંક એપ્સ અને બેંક SMS ની પેમેન્ટ નોટિફિકેશન વાંચે છે. ચૂકવેલા અને મળેલા પૈસા (રિફંડ, કેશબેક, કોઈએ તમને ચૂકવ્યા હોય) બંને અહીં ડ્રાફ્ટ બને છે; ફક્ત રકમ, સામેનો પક્ષ, એપનું નામ અને સમય આ જ ફોનમાં (અને તમારા સામાન્ય Android બેકઅપમાં) રહે છે. કંઈ ક્યાંય મોકલાતું નથી, અને તમે ઉમેરો નહીં ત્યાં સુધી કંઈ ઉમેરાતું નથી.</string>
+    <string name="capture_explain">HomeQuest ફક્ત બેંક અને UPI ના ટેક્સ્ટ મેસેજ (SMS) વાંચે છે — બીજી એપ્સની નોટિફિકેશન, ઑફર અને “₹250 છૂટ” જેવા પ્રોમો અવગણાય છે. ચૂકવેલા અને મળેલા પૈસા (રિફંડ, કેશબેક, કોઈએ તમને ચૂકવ્યા હોય) બંને અહીં ડ્રાફ્ટ બને છે; ફક્ત રકમ, સામેનો પક્ષ અને સમય આ જ ફોનમાં (અને તમારા સામાન્ય Android બેકઅપમાં) રહે છે. કંઈ ક્યાંય મોકલાતું નથી, અને તમે ઉમેરો નહીં ત્યાં સુધી કંઈ ઉમેરાતું નથી.</string>
     <string name="capture_turn_on">સૂચના ઍક્સેસ ચાલુ કરો</string>
     <string name="capture_manage">સૂચના ઍક્સેસ સંભાળો</string>
     <string name="captures_review">જોવાનું બાકી</string>
@@ -1161,7 +1161,8 @@
     <string name="capture_add">ઉમેરો</string>
     <string name="unknown_payee">ચુકવણી</string>
     <string name="captures_hint">બધી એકસાથે ઉમેરવા ટૅપ કરો</string>
-    <string name="channel_capture">પકડાયેલી ચુકવણીઓ</string>
+    <string name="channel_capture">ખર્ચાયેલા પૈસા (SMS)</string>
+    <string name="channel_capture_credit">મળેલા પૈસા (SMS)</string>
     <string name="notif_captured_title">ચુકવણી પકડાઈ 👀</string>
     <string name="notif_captured_credit_title">પૈસા આવ્યા 💸</string>
     <string name="notif_captured_body">%2$s ને %1$s. ઉમેરવા ટૅપ કરો.</string>
@@ -1228,7 +1229,7 @@
     <string name="fest_claim">મારી ગિફ્ટ લો · +%1$d ⭐</string>
     <string name="fest_wear">તહેવારનો લુક પહેરો</string>
     <string name="later">પછી</string>
-    <string name="fest_upcoming_hint">તહેવારના દિવસે થીમ, આઉટફિટ અને +%1$d ⭐ ખુલશે</string>
+    <string name="fest_upcoming_hint">ઉજવણી શરૂ થતાં જ થીમ, આઉટફિટ અને +%1$d ⭐ ખુલશે</string>
     <string name="fest_tap_to_celebrate">ઉજવણી માટે ટૅપ કરો 🎉</string>
     <string name="reason_festival">તહેવારની ગિફ્ટ: %1$s</string>
     <string name="claim_free">🎁 આજે મફત</string>
@@ -1284,6 +1285,8 @@
     <string name="streak_next">આગળ: %1$d 🔥</string>
     <string name="festive_mode">તહેવાર મોડ</string>
     <string name="festive_mode_sub">દિવાળી, હોળી, ક્રિસમસ અને બીજા તહેવારોમાં થીમ અને ઉજવણી</string>
+    <string name="festive_icon">તહેવારનો એપ આઇકન</string>
+    <string name="festive_icon_sub">દરેક તહેવારે હોમ-સ્ક્રીન આઇકન સજે છે અને ખૂલવાનું એનિમેશન પણ (Android 13+). કેટલાક લૉન્ચર આઇકન બદલાય ત્યારે તેને એપ ડ્રૉઅરમાં પાછો મોકલે છે</string>
     <string name="sound_effects">સાઉન્ડ ઇફેક્ટ</string>
     <string name="sound_effects_sub">સ્ટ્રીક, લેવલ-અપ અને તહેવારોના એપમાં અવાજ (સાઇલન્ટ મોડમાં ચૂપ). નોટિફિકેશનનો અવાજ ફોન સેટિંગમાં દરેક પ્રકાર માટે બદલી શકાય</string>
     <string name="streaks_festivals">સ્ટ્રીક અને તહેવારો</string>
