@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -83,7 +82,7 @@ fun FestivalBanner(day: FestivalDay, themeId: String, upcoming: Boolean, today: 
             FestiveEffect(pack.look(), Modifier.matchParentSize())
             Box(Modifier.matchParentSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent))))
             Row(
-                Modifier.align(Alignment.CenterStart).padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = if (onSwitchLook != null) 38.dp else 14.dp),
+                Modifier.align(Alignment.CenterStart).padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = if (onSwitchLook != null) 30.dp else 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 FestivalEmblem(pack, 48.dp)
@@ -110,8 +109,8 @@ fun FestivalBanner(day: FestivalDay, themeId: String, upcoming: Boolean, today: 
     }
 }
 
-private val SWITCH_OVERHANG = 18.dp
-private val SWITCH_DEPTH = 5.dp
+private val SWITCH_OVERHANG = 14.dp
+private val SWITCH_DEPTH = 4.dp
 
 @Composable
 private fun SwitchLookButton(onClick: () -> Unit, modifier: Modifier) {
@@ -141,17 +140,17 @@ private fun SwitchLookButton(onClick: () -> Unit, modifier: Modifier) {
                 .clip(pill)
                 .background(Brush.verticalGradient(listOf(Color.White, face)))
                 .border(1.dp, Color.White.copy(alpha = 0.9f), pill)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Rounded.Palette, contentDescription = null, tint = ink, modifier = Modifier.size(16.dp))
+            Icon(Icons.Rounded.Palette, contentDescription = null, tint = ink, modifier = Modifier.size(14.dp))
             Text(
                 stringResource(R.string.fest_switch_look),
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 color = ink,
                 maxLines = 1,
-                modifier = Modifier.padding(start = 6.dp)
+                modifier = Modifier.padding(start = 4.dp)
             )
         }
     }

@@ -48,3 +48,13 @@ object Dates {
 fun Double.money(symbol: String): String =
     if (this < 0) "+" + (-this).money(symbol)
     else if (this % 1.0 == 0.0 && this < 100_000) "$symbol${"%,.0f".format(this)}" else "$symbol${"%,.2f".format(this)}"
+
+fun Double.compactMoney(): String = when {
+    this < 0 -> "+" + (-this).compactMoney()
+    this >= 10_000_000 -> scaled(this / 10_000_000, "Cr")
+    this >= 100_000 -> scaled(this / 100_000, "L")
+    this >= 1_000 -> scaled(this / 1_000, "k")
+    else -> "%.0f".format(this)
+}
+
+private fun scaled(value: Double, suffix: String): String = (if (value >= 10) "%.0f" else "%.1f").format(value).removeSuffix(".0") + suffix

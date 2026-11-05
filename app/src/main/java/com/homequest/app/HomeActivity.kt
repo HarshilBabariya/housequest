@@ -2,6 +2,7 @@ package com.homequest.app
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,9 +29,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homequest.app.data.repository.avatar
+import com.homequest.app.notifications.NotificationHelper
 import com.homequest.app.ui.Gate
 import com.homequest.app.ui.MainViewModel
-import com.homequest.app.ui.appViewModel
+import com.homequest.app.ui.appViewModels
 import com.homequest.app.ui.components.CelebrationHost
 import com.homequest.app.ui.components.ConfettiBurst
 import com.homequest.app.ui.components.FestiveMomentOverlay
@@ -44,16 +46,24 @@ import com.homequest.app.util.LocaleHelper
 import java.util.Locale
 
 class HomeActivity : ComponentActivity() {
+    private val vm by appViewModels { MainViewModel(it) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { HomeQuestRoot() }
+        if (savedInstanceState == null) vm.openRoute(intent.getStringExtra(NotificationHelper.EXTRA_ROUTE))
+        setContent { HomeQuestRoot(vm) }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        vm.openRoute(intent.getStringExtra(NotificationHelper.EXTRA_ROUTE))
     }
 }
 
 @Composable
-private fun HomeQuestRoot() {
-    val vm = appViewModel { MainViewModel(it) }
+private fun HomeQuestRoot(vm: MainViewModel) {
     val settings = vm.settings.collectAsStateWithLifecycle().value ?: return
     val toast by vm.toast.collectAsStateWithLifecycle()
     val confetti by vm.confetti.collectAsStateWithLifecycle()
@@ -64,6 +74,7 @@ private fun HomeQuestRoot() {
     val festival by vm.festival.collectAsStateWithLifecycle()
     val celebrations by vm.celebrations.collectAsStateWithLifecycle()
     val moment by vm.moment.collectAsStateWithLifecycle()
+    val pendingRoute by vm.pendingRoute.collectAsStateWithLifecycle()
     val activity = LocalContext.current as Activity
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { FestiveLauncher.apply(activity, FestiveLauncher.packFor(settings, festival)) }
     val baseContext = LocalContext.current
@@ -92,7 +103,7 @@ private fun HomeQuestRoot() {
                                 onUnlock = vm::unlock
                             )
                             Gate.OPEN -> {
-                                HomeQuestNavHost(onSignOut = vm::signOut, onEraseAll = vm::eraseAll)
+                                HomeQuestNavHost(pendingRoute = pendingRoute, onRouteOpened = vm::routeOpened, onSignOut = vm::signOut, onEraseAll = vm::eraseAll)
                                 ConfettiBurst(trigger = confetti)
                                 moment?.let { key(it) { FestiveMomentOverlay(it, onDone = { vm.momentDone(it) }) } }
                                 Box(Modifier.align(Alignment.TopCenter)) { RewardToast(event = toast, onDismiss = vm::dismissToast) }

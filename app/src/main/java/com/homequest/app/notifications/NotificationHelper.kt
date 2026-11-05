@@ -23,6 +23,7 @@ import com.homequest.app.data.local.ReminderEntity
 import com.homequest.app.domain.Badge
 import com.homequest.app.domain.Festival
 import com.homequest.app.domain.FestivalPack
+import com.homequest.app.ui.navigation.Routes
 import com.homequest.app.util.LocaleHelper
 import com.homequest.app.util.money
 import java.time.LocalDate
@@ -49,6 +50,7 @@ private fun channelId(base: String, sound: Sound) = "$base.${sound.name.lowercas
 class NotificationHelper(private val context: Context) {
 
     companion object {
+        const val EXTRA_ROUTE = "route"
         private const val GROUP_FESTIVALS = "festivals"
         private const val ID_BUDGET = 1000
         private const val ID_REWARD = 2000
@@ -98,12 +100,12 @@ class NotificationHelper(private val context: Context) {
         } else {
             res.rotate(R.array.notif_nudge_titles, seed) to res.rotate(R.array.notif_nudge_bodies, seed).format(reminder.title)
         }
-        post(ID_REMINDER_BASE + reminder.id.toInt(), if (amount != null) Channel.BILLS.id else Channel.NUDGES.id, title, body)
+        post(ID_REMINDER_BASE + reminder.id.toInt(), if (amount != null) Channel.BILLS.id else Channel.NUDGES.id, title, body, Routes.REMINDERS)
     }
 
     fun showAutoLogged(language: String, reminder: ReminderEntity, amount: Double, symbol: String) {
         val res = LocaleHelper.localized(context, language).resources
-        post(ID_REMINDER_BASE + reminder.id.toInt(), Channel.AUTO_LOGGED.id, res.getString(R.string.notif_autolog_title, reminder.title), res.getString(R.string.notif_autolog_body, amount.money(symbol)))
+        post(ID_REMINDER_BASE + reminder.id.toInt(), Channel.AUTO_LOGGED.id, res.getString(R.string.notif_autolog_title, reminder.title), res.getString(R.string.notif_autolog_body, amount.money(symbol)), Routes.EXPENSES)
     }
 
     fun showCaptured(language: String, amount: Double, merchant: String, symbol: String) {
@@ -115,7 +117,7 @@ class NotificationHelper(private val context: Context) {
             merchant.isBlank() -> res.getString(R.string.notif_captured_body_plain, value)
             else -> res.getString(R.string.notif_captured_body, value, merchant)
         }
-        post(ID_CAPTURE, if (amount < 0) Channel.RECEIVED.id else Channel.SPENT.id, res.getString(if (amount < 0) R.string.notif_captured_credit_title else R.string.notif_captured_title), body)
+        post(ID_CAPTURE, if (amount < 0) Channel.RECEIVED.id else Channel.SPENT.id, res.getString(if (amount < 0) R.string.notif_captured_credit_title else R.string.notif_captured_title), body, Routes.CAPTURE)
     }
 
     fun showBudgetAlert(language: String, label: String, spent: String, limit: String, exceeded: Boolean) {
@@ -123,7 +125,7 @@ class NotificationHelper(private val context: Context) {
         val seed = today() + label.hashCode()
         val title = res.rotate(if (exceeded) R.array.notif_budget_over_titles else R.array.notif_budget_warn_titles, seed)
         val body = res.rotate(if (exceeded) R.array.notif_budget_over_bodies else R.array.notif_budget_warn_bodies, seed).format(label, spent, limit)
-        post(ID_BUDGET, if (exceeded) Channel.OVER_BUDGET.id else Channel.BUDGET_WARNING.id, title, body)
+        post(ID_BUDGET, if (exceeded) Channel.OVER_BUDGET.id else Channel.BUDGET_WARNING.id, title, body, Routes.BUDGETS)
     }
 
     fun showBadge(language: String, badge: Badge) {
@@ -132,31 +134,32 @@ class NotificationHelper(private val context: Context) {
         post(
             ID_REWARD, Channel.BADGES.id,
             res.rotate(R.array.notif_badge_titles, seed).format(badge.emoji),
-            res.rotate(R.array.notif_badge_bodies, seed).format(res.getString(badge.nameRes), badge.bonusPoints)
+            res.rotate(R.array.notif_badge_bodies, seed).format(res.getString(badge.nameRes), badge.bonusPoints),
+            Routes.BADGES
         )
     }
 
     fun showLevelUp(language: String, level: Int, titleRes: Int) {
         val res = LocaleHelper.localized(context, language).resources
         val seed = today() + level
-        post(ID_REWARD, Channel.LEVELS.id, res.rotate(R.array.notif_level_titles, seed).format(level), res.rotate(R.array.notif_level_bodies, seed).format(res.getString(titleRes)))
+        post(ID_REWARD, Channel.LEVELS.id, res.rotate(R.array.notif_level_titles, seed).format(level), res.rotate(R.array.notif_level_bodies, seed).format(res.getString(titleRes)), Routes.rewards())
     }
 
     fun showStreakRisk(language: String, streak: Int) {
         val res = LocaleHelper.localized(context, language).resources
         val seed = today() + streak
-        post(ID_STREAK, Channel.STREAK_RISK.id, res.rotate(R.array.notif_streak_risk_titles, seed).format(streak), res.rotate(R.array.notif_streak_risk_bodies, seed).format(streak))
+        post(ID_STREAK, Channel.STREAK_RISK.id, res.rotate(R.array.notif_streak_risk_titles, seed).format(streak), res.rotate(R.array.notif_streak_risk_bodies, seed).format(streak), Routes.addExpense())
     }
 
     fun showStreakMilestone(language: String, streak: Int) {
         val res = LocaleHelper.localized(context, language).resources
         val seed = today() + streak
-        post(ID_STREAK, Channel.STREAK_WIN.id, res.rotate(R.array.notif_streak_win_titles, seed).format(streak), res.rotate(R.array.notif_streak_win_bodies, seed).format(streak))
+        post(ID_STREAK, Channel.STREAK_WIN.id, res.rotate(R.array.notif_streak_win_titles, seed).format(streak), res.rotate(R.array.notif_streak_win_bodies, seed).format(streak), Routes.rewards())
     }
 
     fun showFestival(language: String, festival: Festival, name: String) {
         val res = LocaleHelper.localized(context, language).resources
-        post(ID_FESTIVAL, festivalChannel(festival.pack), res.getString(festival.titleRes, name), res.getString(festival.lineRes))
+        post(ID_FESTIVAL, festivalChannel(festival.pack), res.getString(festival.titleRes, name), res.getString(festival.lineRes), Routes.DASHBOARD)
     }
 
     private fun today(): Long = LocalDate.now().toEpochDay()
@@ -167,9 +170,9 @@ class NotificationHelper(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    private fun post(id: Int, channel: String, title: String, body: String) {
+    private fun post(id: Int, channel: String, title: String, body: String, route: String) {
         if (!canPost()) return
-        val intent = Intent(context, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        val intent = Intent(context, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP).putExtra(EXTRA_ROUTE, route)
         val pending = PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val notification = NotificationCompat.Builder(context, channel)
             .setSmallIcon(R.drawable.ic_notification)

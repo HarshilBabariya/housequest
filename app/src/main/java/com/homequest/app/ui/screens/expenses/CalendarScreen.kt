@@ -60,10 +60,10 @@ import com.homequest.app.ui.components.ExpenseRow
 import com.homequest.app.ui.components.HqCard
 import com.homequest.app.ui.components.MonthGrid
 import com.homequest.app.util.Dates
+import com.homequest.app.util.compactMoney
 import com.homequest.app.util.money
 import java.time.LocalDate
 import java.time.YearMonth
-import kotlin.math.abs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -231,7 +231,7 @@ private fun DayCell(date: LocalDate, state: CalendarState, modifier: Modifier, o
             color = if (date.isAfter(state.today)) scheme.onSurfaceVariant.copy(alpha = 0.5f) else scheme.onSurface
         )
         if (total != null && tint != null) {
-            Text((if (total < 0) "+" else "") + "%,.0f".format(abs(total)), style = MaterialTheme.typography.labelSmall, color = tint, maxLines = 1, softWrap = false)
+            Text(total.compactMoney(), style = MaterialTheme.typography.labelSmall, color = tint, maxLines = 1, softWrap = false)
         }
     }
 }

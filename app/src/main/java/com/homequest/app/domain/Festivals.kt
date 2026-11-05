@@ -43,10 +43,19 @@ enum class Festival(
 
 data class FestivalDay(val festival: Festival, val start: LocalDate, val main: LocalDate, val end: LocalDate) {
     val key: String get() = "${festival.name}:$main"
-    operator fun contains(date: LocalDate): Boolean = !date.isBefore(start) && !date.isAfter(end)
+    val packFrom: LocalDate get() = start.minusDays(FestivalCalendar.PACK_WINDOW_DAYS)
+    val packUntil: LocalDate get() = end.plusDays(FestivalCalendar.PACK_WINDOW_DAYS)
+    operator fun contains(date: LocalDate): Boolean = !date.isBefore(packFrom) && !date.isAfter(packUntil)
+    fun daysOutside(date: LocalDate): Long = when {
+        date.isBefore(start) -> start.toEpochDay() - date.toEpochDay()
+        date.isAfter(end) -> date.toEpochDay() - end.toEpochDay()
+        else -> 0
+    }
 }
 
 object FestivalCalendar {
+    const val PACK_WINDOW_DAYS = 3L
+
     private class Lunar(val festival: Festival, val start: String, val main: String, val end: String)
 
     private val lunar: Map<Int, List<Lunar>> = mapOf(
@@ -104,10 +113,10 @@ object FestivalCalendar {
 
     private fun around(year: Int): List<FestivalDay> = occurrences(year) + occurrences(year + 1)
 
-    fun active(date: LocalDate): FestivalDay? = around(date.year).firstOrNull { date in it }
+    fun active(date: LocalDate): FestivalDay? = around(date.year).filter { date in it }.minByOrNull { it.daysOutside(date) }
 
     fun upcoming(date: LocalDate, withinDays: Long = 7): FestivalDay? =
-        around(date.year).filter { it.start.isAfter(date) && !it.start.isAfter(date.plusDays(withinDays)) }.minByOrNull { it.start }
+        around(date.year).filter { it.packFrom.isAfter(date) && !it.main.isAfter(date.plusDays(withinDays)) }.minByOrNull { it.start }
 
     fun nextGreeting(now: LocalDateTime): Pair<FestivalDay, LocalDateTime>? =
         around(now.year).map { it to it.main.atTime(it.festival.greetAt) }.filter { it.second.isAfter(now) }.minByOrNull { it.second }

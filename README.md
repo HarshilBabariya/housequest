@@ -25,18 +25,24 @@ The repo ships without a Gradle wrapper binary; Android Studio generates one, or
 
 ## Get an APK without a local setup
 
-Push this folder to a GitHub repository (branch `main`). The included workflow `.github/workflows/build-apk.yml` builds both debug APKs on every push; download `HomeQuest-lite-debug-apk` or `HomeQuest-full-debug-apk` from the run's **Artifacts** section under Actions, copy it to the phone and install (allow "unknown sources" when prompted).
+Push this folder to a GitHub repository (branch `main`). The included workflow `.github/workflows/build-apk.yml` builds both debug APKs on every push, uploads them as run artifacts (`HomeQuest-lite-debug-apk`, `HomeQuest-full-debug-apk`) and publishes them to a GitHub Release tagged with the app version (`HomeQuest-full.apk`, `HomeQuest-lite.apk`), so the latest build is always at `https://github.com/HarshilBabariya/housequest/releases/latest`. Copy the APK to the phone and install (allow "unknown sources" when prompted).
+
+## Website
+
+`website/` is the landing page (Vite + React + anime.js) with Download Full / Lite buttons that point at the latest release. `.github/workflows/deploy-site.yml` deploys it to GitHub Pages on every push that touches it; enable **Settings → Pages → Source: GitHub Actions** once in the repo (it must be public). Local preview: `cd website && npm install && npm run dev`.
 
 ## Docs
 
 - [docs/previews/](docs/previews/) — rendered screen mockups of the 1.2 design (`v12-*.png`), the avatar set (`avatar-sheet.png`) and the launcher icon
 
 - [docs/HOMEQUEST.md](docs/HOMEQUEST.md) — the complete reference: features, engineering handoff, working agreements and release history
+- [website/](website/) — the GitHub Pages landing page
 
 ## Version history
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.9.1 | 2026-11-05 | Festival themes, decor, icons and gifts run from 3 days before to 3 days after each festival; tapping a notification opens its own screen; smaller Switch button; Invite / Rate / Query rows removed; calendar day totals shown compactly (6.5k, 39k); new website on GitHub Pages with Full / Lite download buttons fed by GitHub Releases |
 | 1.9.0 | 2026-11-05 | Blinkit-style festival takeover: hanging decor per festival, 3D Switch theme button with two looks per festival, rocket/chakri/gulal moments; Ganesh emblem and icon; festival banner text always fits |
 | 1.8.1 | 2026-11-05 | Festival countdown fixed; home & money notification sounds (cooker whistle, debit/credit ting, doorbell, firecrackers…); auto-capture from SMS only, offers ignored; festival app icons with animated splash |
 | 1.8.0 | 2026-11-04 | Notification sounds per kind (original meme-style effects) and in-app sound effects; festival packs (themes, outfits, effects, sounds, greetings, full-screen gift moment) for Uttarayan, Tiranga days, Holi, Rakhi, Ganesh, Navratri, Diwali, Christmas, New Year; streak card, milestone celebrations and streak-in-danger alerts; category labels no longer clipped; ambient Reminders orbit redesign |

@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -95,11 +96,17 @@ import com.homequest.app.ui.screens.rewards.BadgesScreen
 import com.homequest.app.ui.screens.rewards.RewardsScreen
 
 @Composable
-fun HomeQuestNavHost(onSignOut: () -> Unit, onEraseAll: () -> Unit) {
+fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onSignOut: () -> Unit, onEraseAll: () -> Unit) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
     val showBottomBar = BottomTab.entries.any { it.route == currentRoute }
+    LaunchedEffect(pendingRoute) {
+        if (pendingRoute != null) {
+            navController.open(pendingRoute)
+            onRouteOpened()
+        }
+    }
 
     val layoutDirection = LocalLayoutDirection.current
     Scaffold(
@@ -234,6 +241,10 @@ fun HomeQuestNavHost(onSignOut: () -> Unit, onEraseAll: () -> Unit) {
             }
         }
     }
+}
+
+private fun NavHostController.open(route: String) {
+    BottomTab.entries.firstOrNull { it.route == route }?.let { openTab(it) } ?: navigate(route) { launchSingleTop = true }
 }
 
 private fun NavHostController.openTab(tab: BottomTab) {

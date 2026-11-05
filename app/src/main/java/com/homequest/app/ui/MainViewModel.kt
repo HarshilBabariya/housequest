@@ -66,6 +66,9 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
     val moment: StateFlow<FestiveMoment?> = _moment
     private var moments = 0
 
+    private val _pendingRoute = MutableStateFlow<String?>(null)
+    val pendingRoute: StateFlow<String?> = _pendingRoute
+
     private val notified = mutableSetOf<Celebration>()
 
     init {
@@ -120,6 +123,10 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun momentDone(moment: FestiveMoment) = _moment.update { if (it == moment) null else it }
+
+    fun openRoute(route: String?) { if (route != null) _pendingRoute.value = route }
+
+    fun routeOpened() { _pendingRoute.value = null }
 
     private fun posts(enabled: Boolean) = enabled && container.notificationHelper.canPost()
 

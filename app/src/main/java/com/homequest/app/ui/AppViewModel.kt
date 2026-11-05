@@ -1,5 +1,7 @@
 package com.homequest.app.ui
 
+import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
@@ -14,3 +16,6 @@ inline fun <reified VM : ViewModel> appViewModel(crossinline create: (AppContain
     val container = (LocalContext.current.applicationContext as HomeQuestApp).container
     return viewModel(factory = viewModelFactory { initializer { create(container) } })
 }
+
+inline fun <reified VM : ViewModel> ComponentActivity.appViewModels(crossinline create: (AppContainer) -> VM): Lazy<VM> =
+    viewModels { viewModelFactory { initializer { create((application as HomeQuestApp).container) } } }

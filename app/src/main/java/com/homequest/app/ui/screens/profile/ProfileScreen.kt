@@ -1,10 +1,5 @@
 package com.homequest.app.ui.screens.profile
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -36,7 +31,6 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Face
 import androidx.compose.material.icons.rounded.FamilyRestroom
-import androidx.compose.material.icons.rounded.Feedback
 import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material.icons.rounded.FileUpload
 import androidx.compose.material.icons.rounded.Folder
@@ -47,9 +41,6 @@ import androidx.compose.material.icons.rounded.MarkEmailUnread
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.QuestionAnswer
 import androidx.compose.material.icons.rounded.Savings
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material.icons.rounded.Storefront
 import androidx.compose.material.icons.rounded.ViewDay
 import androidx.compose.material3.AlertDialog
@@ -57,7 +48,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
@@ -131,7 +121,6 @@ fun ProfileScreen(
     var confirmErase by remember { mutableStateOf(false) }
     var showFaqs by remember { mutableStateOf(false) }
     var showAbout by remember { mutableStateOf(false) }
-    var rating by remember { mutableStateOf<Int?>(null) }
     val importOutcome by vm.importOutcome.collectAsStateWithLifecycle()
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let { vm.importCsv(context, it) } }
     val member = state.member
@@ -269,12 +258,6 @@ fun ProfileScreen(
 
         SectionHeader(stringResource(R.string.more_options))
         HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
-            val inviteText = stringResource(R.string.invite_text, REPO_URL)
-            NavRow(Icons.Rounded.Share, Color(0xFF22C55E), stringResource(R.string.invite_friend), stringResource(R.string.invite_sub), {
-                context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, inviteText), null))
-            })
-            NavRow(Icons.Rounded.Star, Color(0xFFF59E0B), stringResource(R.string.rate_app), stringResource(R.string.rate_sub), { rating = 0 })
-            NavRow(Icons.Rounded.Feedback, Color(0xFF6366F1), stringResource(R.string.feedback), stringResource(R.string.feedback_sub), { openLink(context, ISSUES_URL) })
             NavRow(Icons.Rounded.QuestionAnswer, Color(0xFF0EA5E9), stringResource(R.string.faqs), stringResource(R.string.faqs_sub), { showFaqs = true })
             NavRow(Icons.Rounded.Info, Color(0xFF64748B), stringResource(R.string.about_app), stringResource(R.string.about_sub), { showAbout = true }, last = true)
         }
@@ -315,29 +298,6 @@ fun ProfileScreen(
             title = { Text(stringResource(R.string.about_app)) },
             text = { Text(stringResource(R.string.about_footer, context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty())) },
             confirmButton = { TextButton(onClick = { showAbout = false }) { Text(stringResource(R.string.ok)) } }
-        )
-    }
-
-    rating?.let { stars ->
-        AlertDialog(
-            onDismissRequest = { rating = null },
-            title = { Text(stringResource(R.string.rate_title)) },
-            text = {
-                Column {
-                    Text(stringResource(R.string.rate_body), style = MaterialTheme.typography.bodyMedium)
-                    Row(Modifier.padding(top = 12.dp)) {
-                        (1..5).forEach { n ->
-                            IconButton(onClick = { rating = n }) {
-                                Icon(if (n <= stars) Icons.Rounded.Star else Icons.Rounded.StarBorder, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(32.dp))
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { rating = null; openLink(context, if (stars >= 4) REPO_URL else ISSUES_URL) }, enabled = stars > 0) { Text(stringResource(R.string.rate_submit)) }
-            },
-            dismissButton = { TextButton(onClick = { rating = null }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 
@@ -404,9 +364,6 @@ fun ProfileScreen(
     }
 }
 
-private const val REPO_URL = "https://github.com/HarshilBabariya/housequest"
-private const val ISSUES_URL = "$REPO_URL/issues"
-
 private val Faqs = listOf(
     R.string.faq_q1 to R.string.faq_a1,
     R.string.faq_q2 to R.string.faq_a2,
@@ -415,14 +372,6 @@ private val Faqs = listOf(
     R.string.faq_q5 to R.string.faq_a5,
     R.string.faq_q6 to R.string.faq_a6
 )
-
-private fun openLink(context: Context, url: String) {
-    try {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-    } catch (e: ActivityNotFoundException) {
-        Toast.makeText(context, url, Toast.LENGTH_LONG).show()
-    }
-}
 
 @Composable
 private fun ViewTile(icon: ImageVector, label: String, modifier: Modifier, onClick: () -> Unit) {

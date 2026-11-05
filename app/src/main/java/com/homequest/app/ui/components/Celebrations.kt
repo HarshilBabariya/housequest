@@ -44,6 +44,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -65,7 +66,9 @@ import com.homequest.app.domain.LedgerReasons
 import com.homequest.app.domain.PointPacks
 import com.homequest.app.domain.PointsRules
 import com.homequest.app.domain.RewardCatalog
+import com.homequest.app.util.Dates
 import com.homequest.app.util.money
+import java.time.temporal.ChronoUnit
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
@@ -215,9 +218,10 @@ fun CelebrationHost(celebration: Celebration, avatar: AvatarConfig?, name: Strin
         }
         is Celebration.Holiday -> {
             val festival = celebration.day.festival
+            val daysToGo = ChronoUnit.DAYS.between(Dates.today(), celebration.day.main).toInt()
             CelebrationDialog(
                 look = festival.pack.look(),
-                title = stringResource(festival.titleRes, name),
+                title = if (daysToGo > 0) pluralStringResource(R.plurals.fest_countdown, daysToGo, stringResource(festival.nameRes), daysToGo) else stringResource(festival.titleRes, name),
                 body = stringResource(festival.lineRes) + "\n\n" + stringResource(R.string.fest_gift_hint, stringResource(festival.pack.nameRes), PointsRules.FESTIVAL_GIFT),
                 action = if (celebration.day.key == giftedKey) stringResource(R.string.fest_wear) else stringResource(R.string.fest_claim, PointsRules.FESTIVAL_GIFT),
                 onAction = onAction,
