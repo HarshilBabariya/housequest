@@ -96,7 +96,7 @@ import com.homequest.app.ui.screens.rewards.BadgesScreen
 import com.homequest.app.ui.screens.rewards.RewardsScreen
 
 @Composable
-fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onSignOut: () -> Unit, onEraseAll: () -> Unit) {
+fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onCelebrateFestival: () -> Unit, onSwitchFestiveLook: () -> Unit, onSignOut: () -> Unit, onEraseAll: () -> Unit) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
@@ -147,7 +147,9 @@ fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onSignOut
                     onOpenReminders = { navController.navigate(Routes.REMINDERS) },
                     onOpenRewards = { navController.navigate(Routes.rewards()) },
                     onOpenProfile = { navController.openTab(BottomTab.PROFILE) },
-                    onOpenCapture = { navController.navigate(Routes.CAPTURE) }
+                    onOpenCapture = { navController.navigate(Routes.CAPTURE) },
+                    onCelebrateFestival = onCelebrateFestival,
+                    onSwitchFestiveLook = onSwitchFestiveLook
                 )
             }
             composable(Routes.EXPENSES) {

@@ -14,7 +14,7 @@
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
     <string name="continue_">Continue</string>
-    <string name="skip_for_now">Skip for now</string>
+    <string name="get_started">Get started</string>
     <string name="am">AM</string>
     <string name="pm">PM</string>
     <string name="title">Title</string>
@@ -209,9 +209,6 @@
     <string name="money_setup_body">Pick your currency and an optional monthly budget. Your avatar reacts to how close you get to it.</string>
     <string name="currency">Currency</string>
     <string name="monthly_budget_optional">Monthly budget (optional)</string>
-    <string name="protect_title">Protect your profile</string>
-    <string name="protect_body">A PIN keeps your profile private when family members share this phone. You can add one later from Edit profile.</string>
-    <string name="numbers_only">Numbers only</string>
     <string name="pin_create">Create a 4-digit PIN</string>
     <string name="pin_confirm">Confirm your PIN</string>
     <string name="pin_weak">Too easy to guess — avoid repeats and sequences</string>

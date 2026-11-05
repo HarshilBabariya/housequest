@@ -9,11 +9,12 @@ export default function Downloads() {
       <div className="section-head">
         <span className="eyebrow">Get HomeQuest {APP_VERSION}</span>
         <h2>Two builds, one app.</h2>
-        <p>Both share the same app id, so either installs over the other and keeps your data. Debug-signed, free, no ads, no account.</p>
+        <p>Both share the same app id, so either installs over the other and keeps your data. Free, no ads, no account, open source.</p>
       </div>
       <div className="builds">
         {builds.map((b) => (
           <article className={`build build-${b.key}`} key={b.key}>
+            {b.key === 'lite' && <span className="ribbon">Recommended</span>}
             <h3>{b.title}</h3>
             <p>{b.tagline}</p>
             <ul>{b.rows.map((r) => <li key={r}>{r}</li>)}</ul>

@@ -42,6 +42,7 @@ Push this folder to a GitHub repository (branch `main`). The included workflow `
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.9.2 | 2026-11-05 | Switch button stays for the whole festival and launches a garland rocket while the theme flips; tapping the festival banner sends the same rocket up with a soft sparkler sound (no dialog); onboarding without the PIN step; website redesign with animated showcases and an interactive Switch demo |
 | 1.9.1 | 2026-11-05 | Festival themes, decor, icons and gifts run from 3 days before to 3 days after each festival; tapping a notification opens its own screen; smaller Switch button; Invite / Rate / Query rows removed; calendar day totals shown compactly (6.5k, 39k); new website on GitHub Pages with Full / Lite download buttons fed by GitHub Releases |
 | 1.9.0 | 2026-11-05 | Blinkit-style festival takeover: hanging decor per festival, 3D Switch theme button with two looks per festival, rocket/chakri/gulal moments; Ganesh emblem and icon; festival banner text always fits |
 | 1.8.1 | 2026-11-05 | Festival countdown fixed; home & money notification sounds (cooker whistle, debit/credit ting, doorbell, firecrackers…); auto-capture from SMS only, offers ignored; festival app icons with animated splash |

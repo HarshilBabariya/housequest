@@ -413,6 +413,20 @@ def sfx_ganesh():
     return reverb(buf, 0.25)
 
 
+def sfx_sparkler():
+    buf = blank(2.4)
+    d = 2.4
+    t = t_axis(d)
+    swell = np.clip(t / 0.35, 0, 1) * np.clip((d - t) / 0.9, 0, 1)
+    place(buf, bp(noise(d), 2800, 9000) * swell * 0.22, 0.0)
+    for _ in range(140):
+        place(buf, hp(noise(0.003), 4000) * rng.uniform(0.05, 0.18), rng.uniform(0.1, 2.1))
+    for _ in range(6):
+        f = rng.uniform(2400, 3600)
+        place(buf, ting(f, 0.5) * 0.12, rng.uniform(0.3, 1.7))
+    return reverb(buf, 0.2)
+
+
 SOUNDS = {name: fn for name, fn in globals().items() if name.startswith("sfx_") and callable(fn)}
 
 

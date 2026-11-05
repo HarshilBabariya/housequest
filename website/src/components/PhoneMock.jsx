@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { animate, createTimeline, stagger } from 'animejs'
+import { reducedMotion } from '../hooks/useReveal.js'
 
 const bars = [38, 62, 30, 80, 54, 92, 46]
 const rows = [
@@ -19,6 +20,7 @@ export default function PhoneMock() {
       .add(root.querySelector('.pm-ring-fill'), { strokeDashoffset: [226, 226 * 0.36], duration: 1400, ease: 'inOutQuart' }, '-=500')
       .add(root.querySelectorAll('.pm-bar'), { scaleY: [0, 1], duration: 800, delay: stagger(60) }, '-=1200')
       .add(root.querySelectorAll('.pm-row'), { opacity: [0, 1], translateX: [-14, 0], duration: 600, delay: stagger(90) }, '-=900')
+    if (reducedMotion()) return () => tl.cancel()
     animate(root, { translateY: [0, -8], duration: 2600, loop: true, alternate: true, ease: 'inOutSine', delay: 1200 })
     animate(root.querySelectorAll('.pm-coin'), {
       translateY: [0, -14],
@@ -49,7 +51,8 @@ export default function PhoneMock() {
         <div className="pm-xp pm-fade"><span>Level 6 · Accountant</span><i /></div>
         <div className="pm-banner pm-fade">
           <span>🪔</span>
-          <div><b>Diwali in 3 days</b><small>Tap to celebrate · +50 ⭐ gift</small></div>
+          <div><b>Diwali in 3 days</b><small>Tap to celebrate 🎉</small></div>
+          <em className="pm-switch">🎨 Switch</em>
         </div>
         <div className="pm-card pm-fade">
           <svg className="pm-ring" viewBox="0 0 80 80">

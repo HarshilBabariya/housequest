@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 import { animate } from 'animejs'
+import DownloadButton from './components/DownloadButton.jsx'
 import Nav from './components/Nav.jsx'
 import Hero from './components/Hero.jsx'
+import Showcase from './components/Showcase.jsx'
 import Features from './components/Features.jsx'
 import Festivals from './components/Festivals.jsx'
 import Rewards from './components/Rewards.jsx'
@@ -50,12 +52,14 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
+        <Showcase />
         <Features />
         <Festivals />
         <Rewards />
         <Downloads />
       </main>
       <Footer />
+      <div className="sticky-cta"><span>HomeQuest for Android</span><DownloadButton kind="lite" primary compact /></div>
     </>
   )
 }

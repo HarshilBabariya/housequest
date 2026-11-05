@@ -103,7 +103,7 @@ private fun HomeQuestRoot(vm: MainViewModel) {
                                 onUnlock = vm::unlock
                             )
                             Gate.OPEN -> {
-                                HomeQuestNavHost(pendingRoute = pendingRoute, onRouteOpened = vm::routeOpened, onSignOut = vm::signOut, onEraseAll = vm::eraseAll)
+                                HomeQuestNavHost(pendingRoute = pendingRoute, onRouteOpened = vm::routeOpened, onCelebrateFestival = vm::celebrateFestival, onSwitchFestiveLook = vm::switchFestiveLook, onSignOut = vm::signOut, onEraseAll = vm::eraseAll)
                                 ConfettiBurst(trigger = confetti)
                                 moment?.let { key(it) { FestiveMomentOverlay(it, onDone = { vm.momentDone(it) }) } }
                                 Box(Modifier.align(Alignment.TopCenter)) { RewardToast(event = toast, onDismiss = vm::dismissToast) }

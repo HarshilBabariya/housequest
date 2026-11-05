@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { animate, onScroll } from 'animejs'
 import Logo from './Logo.jsx'
 import DownloadButton from './DownloadButton.jsx'
 import { REPO_URL } from '../content.js'
 
 const links = [
+  ['#showcase', 'Why HomeQuest'],
   ['#features', 'Features'],
   ['#festivals', 'Festivals'],
   ['#rewards', 'Rewards'],
@@ -12,14 +14,21 @@ const links = [
 
 export default function Nav() {
   const [solid, setSolid] = useState(false)
+  const bar = useRef(null)
   useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > 24)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const onScrollY = () => setSolid(window.scrollY > 24)
+    onScrollY()
+    window.addEventListener('scroll', onScrollY, { passive: true })
+    const progress = animate(bar.current, {
+      scaleX: [0, 1],
+      ease: 'linear',
+      autoplay: onScroll({ target: document.body, enter: 'top top', leave: 'bottom bottom', sync: true })
+    })
+    return () => { window.removeEventListener('scroll', onScrollY); progress.revert() }
   }, [])
   return (
     <header className={`nav ${solid ? 'nav-solid' : ''}`}>
+      <i className="scroll-progress" ref={bar} />
       <a className="brand" href="#top">
         <Logo size={34} />
         <span>HomeQuest</span>

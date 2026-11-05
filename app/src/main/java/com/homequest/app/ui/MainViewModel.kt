@@ -20,13 +20,12 @@ import com.homequest.app.ui.components.FestiveMoment
 import com.homequest.app.ui.components.MomentKind
 import com.homequest.app.util.Dates
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -34,6 +33,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 enum class Gate { ONBOARDING, LOCKED, OPEN }
+
+private const val SWITCH_FLIP_DELAY_MS = 650L
 
 class MainViewModel(private val container: AppContainer) : ViewModel() {
     val settings: StateFlow<AppSettings?> =
@@ -111,15 +112,30 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
                 .distinctUntilChanged()
                 .collect { day -> if (day != null) celebrate(Celebration.Holiday(day)) }
         }
-        viewModelScope.launch {
-            container.settingsRepository.settings.distinctUntilChangedBy { it.festiveLookAlt }.drop(1).collect { playMoment(it, MomentKind.SWITCHED) }
-        }
     }
 
-    private fun playMoment(settings: AppSettings, kind: MomentKind) {
-        val day = festival.value ?: return
-        if (!settings.onboarded || !settings.festiveMode) return
+    private fun playMoment(settings: AppSettings, kind: MomentKind): Boolean {
+        val day = festival.value ?: return false
+        if (!settings.onboarded || !settings.festiveMode) return false
         _moment.value = FestiveMoment(day.festival.pack, kind, ++moments)
+        return true
+    }
+
+    fun celebrateFestival() = viewModelScope.launch {
+        val s = container.settingsRepository.current()
+        if (playMoment(s, MomentKind.TAPPED) && s.soundEffectsEnabled) container.sounds.play(Sound.SPARKLER)
+    }
+
+    fun switchFestiveLook() = viewModelScope.launch {
+        val day = festival.value ?: return@launch
+        val s = container.settingsRepository.current()
+        if (playMoment(s, MomentKind.SWITCHED)) delay(SWITCH_FLIP_DELAY_MS)
+        if (s.festiveThemeSkipped == day.key) {
+            container.settingsRepository.setFestiveThemeSkipped("")
+            container.settingsRepository.setFestiveLookAlt("")
+        } else {
+            container.settingsRepository.setFestiveLookAlt(if (s.festiveLookAlt == day.key) "" else day.key)
+        }
     }
 
     fun momentDone(moment: FestiveMoment) = _moment.update { if (it == moment) null else it }
@@ -199,11 +215,10 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         _erasing.value = false
     }
 
-    fun completeOnboarding(name: String, phone: String, gender: Gender, currency: String, budget: Double, pin: String?, nudgeTitle: String) = viewModelScope.launch {
+    fun completeOnboarding(name: String, phone: String, gender: Gender, currency: String, budget: Double, nudgeTitle: String) = viewModelScope.launch {
         container.memberRepository.ensureOwner()
         val owner = container.memberRepository.members.first { it.isNotEmpty() }.first { it.isOwner }
         container.memberRepository.updateDetails(owner, name, owner.relation, phone, gender)
-        pin?.let { container.memberRepository.setPin(owner.id, it) }
         container.memberRepository.signIn(owner.id)
         _sessionUnlocked.value = true
         container.settingsRepository.setCurrency(currency)

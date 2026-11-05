@@ -14,7 +14,7 @@
     <string name="today">આજે</string>
     <string name="yesterday">ગઈકાલે</string>
     <string name="continue_">આગળ વધો</string>
-    <string name="skip_for_now">હમણાં છોડો</string>
+    <string name="get_started">શરૂ કરો</string>
     <string name="am">AM</string>
     <string name="pm">PM</string>
     <string name="title">શીર્ષક</string>
@@ -210,9 +210,6 @@
     <string name="money_setup_body">તમારું ચલણ અને ઇચ્છો તો માસિક બજેટ પસંદ કરો. તમારો અવતાર તેની નજીક પહોંચતાં પ્રતિક્રિયા આપે છે.</string>
     <string name="currency">ચલણ</string>
     <string name="monthly_budget_optional">માસિક બજેટ (વૈકલ્પિક)</string>
-    <string name="protect_title">તમારી પ્રોફાઇલ સુરક્ષિત કરો</string>
-    <string name="protect_body">કુટુંબ આ જ ફોન વાપરે ત્યારે PIN તમારી પ્રોફાઇલ ખાનગી રાખે છે. પછીથી ‘પ્રોફાઇલ બદલો’માંથી પણ ઉમેરી શકો.</string>
-    <string name="numbers_only">ફક્ત અંક</string>
     <string name="pin_create">4 અંકનો PIN બનાવો</string>
     <string name="pin_confirm">PIN ફરી નાખો</string>
     <string name="pin_weak">બહુ સહેલો છે — પુનરાવર્તન અને ક્રમ ટાળો</string>

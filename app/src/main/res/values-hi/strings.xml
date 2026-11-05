@@ -14,7 +14,7 @@
     <string name="today">आज</string>
     <string name="yesterday">कल</string>
     <string name="continue_">आगे बढ़ें</string>
-    <string name="skip_for_now">अभी छोड़ें</string>
+    <string name="get_started">शुरू करें</string>
     <string name="am">AM</string>
     <string name="pm">PM</string>
     <string name="title">शीर्षक</string>
@@ -210,9 +210,6 @@
     <string name="money_setup_body">अपनी मुद्रा और चाहें तो मासिक बजट चुनें। आपका अवतार उसके करीब पहुँचने पर प्रतिक्रिया देता है।</string>
     <string name="currency">मुद्रा</string>
     <string name="monthly_budget_optional">मासिक बजट (वैकल्पिक)</string>
-    <string name="protect_title">अपनी प्रोफ़ाइल सुरक्षित करें</string>
-    <string name="protect_body">जब परिवार यही फ़ोन साझा करे तो PIN आपकी प्रोफ़ाइल निजी रखता है। इसे बाद में ‘प्रोफ़ाइल बदलें’ से भी जोड़ सकते हैं।</string>
-    <string name="numbers_only">सिर्फ़ अंक</string>
     <string name="pin_create">4 अंकों का PIN बनाएँ</string>
     <string name="pin_confirm">PIN दोबारा डालें</string>
     <string name="pin_weak">बहुत आसान है — दोहराव और क्रम से बचें</string>

@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 data class PayerShare(val member: MemberEntity, val total: Double)
 
@@ -184,13 +183,6 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
             upcomingFestival = FestivalCalendar.upcoming(slice.today)
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
-
-    fun replayFestival() = viewModelScope.launch { container.settingsRepository.setFestivalSeen("") }
-
-    fun switchFestiveLook() = viewModelScope.launch {
-        val day = state.value.festival ?: return@launch
-        container.settingsRepository.setFestiveLookAlt(if (container.settingsRepository.current().festiveLookAlt == day.key) "" else day.key)
-    }
 
     private data class SpendSlice(
         val today: LocalDate,

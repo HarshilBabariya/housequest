@@ -102,7 +102,9 @@ fun DashboardScreen(
     onOpenReminders: () -> Unit,
     onOpenRewards: () -> Unit,
     onOpenProfile: () -> Unit,
-    onOpenCapture: () -> Unit
+    onOpenCapture: () -> Unit,
+    onCelebrateFestival: () -> Unit,
+    onSwitchFestiveLook: () -> Unit
 ) {
     val vm = appViewModel { DashboardViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -128,8 +130,8 @@ fun DashboardScreen(
                         upcoming = state.festival == null,
                         today = state.today,
                         name = state.member?.name.orEmpty(),
-                        onCelebrate = if (state.festival != null && state.settings.festiveMode) { { vm.replayFestival() } } else null,
-                        onSwitchLook = if (state.settings.festiveThemeOn(state.festival)) { { vm.switchFestiveLook() } } else null,
+                        onCelebrate = if (state.festival != null && state.settings.festiveMode) onCelebrateFestival else null,
+                        onSwitchLook = if (state.festival != null && state.settings.festiveMode) onSwitchFestiveLook else null,
                         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)
                     )
                 }

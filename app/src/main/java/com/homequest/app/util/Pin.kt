@@ -13,8 +13,6 @@ object Pin {
         return stored.isNotEmpty() && hash(pin, salt) == stored
     }
 
-    fun isValid(pin: String): Boolean = pin.length == LENGTH && pin.all { it.isDigit() }
-
     fun isWeak(pin: String): Boolean = pin.toSet().size == 1 || pin in listOf("1234", "4321", "0123", "9876")
 
     private fun newSalt(): String = ByteArray(8).also { SecureRandom().nextBytes(it) }.joinToString("") { "%02x".format(it) }
