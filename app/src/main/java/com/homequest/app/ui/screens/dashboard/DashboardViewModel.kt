@@ -187,6 +187,11 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
 
     fun replayFestival() = viewModelScope.launch { container.settingsRepository.setFestivalSeen("") }
 
+    fun switchFestiveLook() = viewModelScope.launch {
+        val day = state.value.festival ?: return@launch
+        container.settingsRepository.setFestiveLookAlt(if (container.settingsRepository.current().festiveLookAlt == day.key) "" else day.key)
+    }
+
     private data class SpendSlice(
         val today: LocalDate,
         val todayTotal: Double,

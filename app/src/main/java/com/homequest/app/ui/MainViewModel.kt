@@ -11,10 +11,13 @@ import com.homequest.app.data.repository.avatar
 import com.homequest.app.domain.FestivalCalendar
 import com.homequest.app.domain.FestivalDay
 import com.homequest.app.domain.Gender
+import com.homequest.app.domain.LedgerReasons
 import com.homequest.app.domain.RepeatRule
 import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.notifications.Sound
 import com.homequest.app.ui.components.Celebration
+import com.homequest.app.ui.components.FestiveMoment
+import com.homequest.app.ui.components.MomentKind
 import com.homequest.app.util.Dates
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +25,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -57,6 +62,10 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
 
     val festival: StateFlow<FestivalDay?> = container.festival.stateIn(viewModelScope, SharingStarted.Eagerly, FestivalCalendar.active(Dates.today()))
 
+    private val _moment = MutableStateFlow<FestiveMoment?>(null)
+    val moment: StateFlow<FestiveMoment?> = _moment
+    private var moments = 0
+
     private val notified = mutableSetOf<Celebration>()
 
     init {
@@ -86,6 +95,10 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
                         if (posts(s.rewardNotificationsEnabled)) container.notificationHelper.showBadge(s.language, event.badge)
                         else if (s.soundEffectsEnabled) container.sounds.play(Sound.PIGGY_BANK)
                     }
+                    is RewardEvent.PointsAwarded -> {
+                        _toast.value = event
+                        if (LedgerReasons.kind(event.reason) == LedgerReasons.LOG_EXPENSE) playMoment(s, MomentKind.LOGGED)
+                    }
                     else -> _toast.value = event
                 }
             }
@@ -95,7 +108,18 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
                 .distinctUntilChanged()
                 .collect { day -> if (day != null) celebrate(Celebration.Holiday(day)) }
         }
+        viewModelScope.launch {
+            container.settingsRepository.settings.distinctUntilChangedBy { it.festiveLookAlt }.drop(1).collect { playMoment(it, MomentKind.SWITCHED) }
+        }
     }
+
+    private fun playMoment(settings: AppSettings, kind: MomentKind) {
+        val day = festival.value ?: return
+        if (!settings.onboarded || !settings.festiveMode) return
+        _moment.value = FestiveMoment(day.festival.pack, kind, ++moments)
+    }
+
+    fun momentDone(moment: FestiveMoment) = _moment.update { if (it == moment) null else it }
 
     private fun posts(enabled: Boolean) = enabled && container.notificationHelper.canPost()
 

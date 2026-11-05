@@ -13,18 +13,26 @@
         <path android:fillColor="#FFE8386B" android:pathData="M49.5,62 h9 a2.5,2.5 0 0,1 2.5,2.5 V80 H47 V64.5 a2.5,2.5 0 0,1 2.5,-2.5 Z" />
         <path android:fillColor="#FFFFE38A" android:pathData="M57,72 m-1.1,0 a1.1,1.1 0 1,0 2.2,0 a1.1,1.1 0 1,0 -2.2,0" />
         <path android:fillColor="#FFFFD2C2" android:pathData="M40.8,60 h3.4 a1.3,1.3 0 0,1 1.3,1.3 v3.4 a1.3,1.3 0 0,1 -1.3,1.3 h-3.4 a1.3,1.3 0 0,1 -1.3,-1.3 v-3.4 a1.3,1.3 0 0,1 1.3,-1.3 Z M63.8,60 h3.4 a1.3,1.3 0 0,1 1.3,1.3 v3.4 a1.3,1.3 0 0,1 -1.3,1.3 h-3.4 a1.3,1.3 0 0,1 -1.3,-1.3 v-3.4 a1.3,1.3 0 0,1 1.3,-1.3 Z" />
-        <path android:fillColor="#FFF97316" android:pathData="M73.5,39.0 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFF97316" android:pathData="M72.64,41.65 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFF97316" android:pathData="M70.39,43.28 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFF97316" android:pathData="M67.61,43.28 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFF97316" android:pathData="M65.36,41.65 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFF97316" android:pathData="M64.5,39.0 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFF97316" android:pathData="M65.36,36.35 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFF97316" android:pathData="M67.61,34.72 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFF97316" android:pathData="M70.39,34.72 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFF97316" android:pathData="M72.64,36.35 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
-        <path android:fillColor="#FFFBBF24" android:pathData="M69,39 m-2.8800000000000003,0 a2.8800000000000003,2.8800000000000003 0 1,0 5.760000000000001,0 a2.8800000000000003,2.8800000000000003 0 1,0 -5.760000000000001,0" />
-        <path android:fillColor="#FFDC2626" android:pathData="M69,39 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+        <group android:translateX="58" android:translateY="25.5" android:scaleX="0.46" android:scaleY="0.46">
+            <path android:fillColor="#FFFBBF24" android:strokeColor="#FFB45309" android:strokeWidth="0.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M24,3 l3,5 3,-3 0,6 H18 l0,-6 3,3 Z" />
+            <path android:fillColor="#FFDC2626" android:pathData="M24,5.5 m-1.3,0 a1.3,1.3 0 1,0 2.6,0 a1.3,1.3 0 1,0 -2.6,0" />
+            <path android:fillColor="#FFFDBA74" android:strokeColor="#FFC2410C" android:strokeWidth="1" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M3,21 a8,10 0 1,0 16,0 a8,10 0 1,0 -16,0" />
+            <path android:fillColor="#FFFDBA74" android:strokeColor="#FFC2410C" android:strokeWidth="1" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M29,21 a8,10 0 1,0 16,0 a8,10 0 1,0 -16,0" />
+            <path android:fillColor="#FFFB923C" android:pathData="M7.0,21 a4.5,6.5 0 1,0 9.0,0 a4.5,6.5 0 1,0 -9.0,0" />
+            <path android:fillColor="#FFFB923C" android:pathData="M32.0,21 a4.5,6.5 0 1,0 9.0,0 a4.5,6.5 0 1,0 -9.0,0" />
+            <path android:fillColor="#FFFDBA74" android:strokeColor="#FFC2410C" android:strokeWidth="1" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M15,16 c0,-5 4,-6 9,-6 s9,1 9,6 v6 c0,4 -3,6 -5,7 H20 c-2,-1 -5,-3 -5,-7 Z" />
+            <path android:fillColor="#FFF59E0B" android:pathData="M17.7,10.6 h12.6 a1.2,1.2 0 0,1 1.2,1.2 v0.2 a1.2,1.2 0 0,1 -1.2,1.2 h-12.6 a1.2,1.2 0 0,1 -1.2,-1.2 v-0.2 a1.2,1.2 0 0,1 1.2,-1.2 Z" />
+            <path android:strokeColor="#FFDC2626" android:strokeWidth="1.6" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M24,13.5 v4" />
+            <path android:strokeColor="#FFDC2626" android:strokeWidth="1" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M21,18.5 h6" />
+            <path android:strokeColor="#FF3B1D0A" android:strokeWidth="1.2" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M18.5,21.3 q1.5,-1.2 3,0 M25.5,21.3 q1.5,-1.2 3,0" />
+            <path android:strokeColor="#FFFFF7ED" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M28.5,26.5 q2.5,1 3.5,-0.5" />
+            <path android:strokeColor="#FFFDBA74" android:strokeWidth="5" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M24,24 c0,7 0,11 -3.5,13.5 S14,40 14.5,37 s4,-2 4.5,0.5" />
+            <path android:strokeColor="#FFC2410C" android:strokeWidth="0.9" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M22,28 h4 M22,31 h4 M21.5,34 h4" />
+            <path android:fillColor="#FFFFF7ED" android:strokeColor="#FFB45309" android:strokeWidth="0.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M34,32 c1.5,2 5,4.5 5,7.5 a5,3.5 0 0,1 -10,0 c0,-3 3.5,-5.5 5,-7.5 Z" />
+            <path android:strokeColor="#FFD97706" android:strokeWidth="0.6" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M34,33 v9.5 M31.5,36 q-1,2.5 -0.3,5.5 M36.5,36 q1,2.5 0.3,5.5" />
+            <path android:fillColor="#FF16A34A" android:pathData="M21,9 m-0.9,0 a0.9,0.9 0 1,0 1.8,0 a0.9,0.9 0 1,0 -1.8,0" />
+            <path android:fillColor="#FF16A34A" android:pathData="M27,9 m-0.9,0 a0.9,0.9 0 1,0 1.8,0 a0.9,0.9 0 1,0 -1.8,0" />
+        </group>
     </group>
     <group android:name="burst0" android:pivotX="30" android:pivotY="34" android:scaleX="0.8" android:scaleY="0.8">
         <path android:name="rays0" android:strokeColor="#FFDC2626" android:strokeWidth="1.6" android:strokeLineCap="round" android:pathData="M33.00,34.00 L38.50,34.00 M32.12,36.12 L36.01,40.01 M30.00,37.00 L30.00,42.50 M27.88,36.12 L23.99,40.01 M27.00,34.00 L21.50,34.00 M27.88,31.88 L23.99,27.99 M30.00,31.00 L30.00,25.50 M32.12,31.88 L36.01,27.99" />

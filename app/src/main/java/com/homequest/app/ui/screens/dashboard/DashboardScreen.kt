@@ -71,6 +71,7 @@ import com.homequest.app.ui.components.CategoryIcon
 import com.homequest.app.ui.components.DonutChart
 import com.homequest.app.ui.components.EmptyState
 import com.homequest.app.ui.components.ExpenseRow
+import com.homequest.app.ui.components.FestiveBackdrop
 import com.homequest.app.ui.components.HqCard
 import com.homequest.app.ui.components.LevelProgress
 import com.homequest.app.ui.components.ProgressRing
@@ -112,9 +113,26 @@ fun DashboardScreen(
 
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 40.dp)) {
-            item { Header(state, onOpenProfile, onVoiceExpense, onOpenRewards) }
+            item {
+                val pack = state.festival?.takeIf { state.settings.festiveMode }?.festival?.pack
+                Box {
+                    pack?.let { FestiveBackdrop(it, Modifier.matchParentSize()) }
+                    Header(state, onOpenProfile, onVoiceExpense, onOpenRewards, decorated = pack != null)
+                }
+            }
             (state.festival ?: state.upcomingFestival)?.let { day ->
-                item { FestivalBanner(day, upcoming = state.festival == null, today = state.today, name = state.member?.name.orEmpty(), onCelebrate = if (state.festival != null && state.settings.festiveMode) { { vm.replayFestival() } } else null, modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)) }
+                item {
+                    FestivalBanner(
+                        day,
+                        themeId = state.settings.festiveLookFor(day),
+                        upcoming = state.festival == null,
+                        today = state.today,
+                        name = state.member?.name.orEmpty(),
+                        onCelebrate = if (state.festival != null && state.settings.festiveMode) { { vm.replayFestival() } } else null,
+                        onSwitchLook = if (state.settings.festiveThemeOn(state.festival)) { { vm.switchFestiveLook() } } else null,
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)
+                    )
+                }
             }
             item { StreakCard(state.streak, state.loggedToday, state.today, onClick = onOpenRewards, modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)) }
 
@@ -333,7 +351,7 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun Header(state: DashboardState, onOpenProfile: () -> Unit, onVoice: () -> Unit, onOpenRewards: () -> Unit) {
+private fun Header(state: DashboardState, onOpenProfile: () -> Unit, onVoice: () -> Unit, onOpenRewards: () -> Unit, decorated: Boolean) {
     val scheme = MaterialTheme.colorScheme
     val mood = state.mood
     var play by remember { mutableStateOf<AvatarPlay?>(null) }
@@ -341,7 +359,7 @@ private fun Header(state: DashboardState, onOpenProfile: () -> Unit, onVoice: ()
     val hour = LocalTime.now().hour
     val greeting = stringResource(when (hour) { in 5..11 -> R.string.good_morning; in 12..16 -> R.string.good_afternoon; in 17..21 -> R.string.good_evening; else -> R.string.still_up })
 
-    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 20.dp, end = 20.dp, top = 8.dp)) {
+    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 20.dp, end = 20.dp, top = if (decorated) 44.dp else 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.border(2.dp, scheme.primary.copy(alpha = 0.35f), CircleShape).padding(3.dp).clip(CircleShape).clickable(onClick = onOpenProfile)) {
                 state.member?.let { AvatarView(it.avatar(), size = 56.dp, animated = true, mood = mood, play = play, idleActions = true) }

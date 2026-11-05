@@ -6,16 +6,16 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-enum class FestivalPack(@StringRes val nameRes: Int, val emoji: String, val themeId: String) {
-    UTTARAYAN(R.string.fest_uttarayan, "🪁", ThemeIds.KITES),
-    TIRANGA(R.string.pack_tiranga, "🇮🇳", ThemeIds.TIRANGA),
-    HOLI(R.string.fest_holi, "🎨", ThemeIds.HOLI),
-    RAKHI(R.string.fest_rakhi, "🎀", ThemeIds.RAKHI),
-    GANESH(R.string.fest_ganesh, "🌺", ThemeIds.BAPPA),
-    NAVRATRI(R.string.fest_navratri, "💃", ThemeIds.GARBA),
-    DIWALI(R.string.fest_diwali, "🪔", ThemeIds.DIWALI),
-    CHRISTMAS(R.string.fest_christmas, "🎄", ThemeIds.CHRISTMAS),
-    NEW_YEAR(R.string.fest_new_year, "🎆", ThemeIds.NEW_YEAR)
+enum class FestivalPack(@StringRes val nameRes: Int, val emoji: String, val themeId: String, val altThemeId: String) {
+    UTTARAYAN(R.string.fest_uttarayan, "🪁", ThemeIds.KITES, ThemeIds.KITES_SUNSET),
+    TIRANGA(R.string.pack_tiranga, "🇮🇳", ThemeIds.TIRANGA, ThemeIds.TIRANGA_GREEN),
+    HOLI(R.string.fest_holi, "🎨", ThemeIds.HOLI, ThemeIds.HOLI_SPLASH),
+    RAKHI(R.string.fest_rakhi, "🎀", ThemeIds.RAKHI, ThemeIds.RAKHI_SILK),
+    GANESH(R.string.fest_ganesh, "🌺", ThemeIds.BAPPA, ThemeIds.BAPPA_MODAK),
+    NAVRATRI(R.string.fest_navratri, "💃", ThemeIds.GARBA, ThemeIds.GARBA_NIGHT),
+    DIWALI(R.string.fest_diwali, "🪔", ThemeIds.DIWALI, ThemeIds.DIWALI_NIGHT),
+    CHRISTMAS(R.string.fest_christmas, "🎄", ThemeIds.CHRISTMAS, ThemeIds.CHRISTMAS_PINE),
+    NEW_YEAR(R.string.fest_new_year, "🎆", ThemeIds.NEW_YEAR, ThemeIds.NEW_YEAR_SPARKLE)
 }
 
 enum class Festival(

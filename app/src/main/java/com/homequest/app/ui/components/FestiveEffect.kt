@@ -48,9 +48,9 @@ fun FestivalPack.look(): FestiveLook = when (this) {
 
 private class Mote(val x: Float, val y: Float, val phase: Float, val speed: Int, val size: Float, val color: Int)
 
-private const val TAU = 2f * PI.toFloat()
+internal const val TAU = 2f * PI.toFloat()
 
-private fun frac(v: Float) = v - floor(v)
+internal fun frac(v: Float) = v - floor(v)
 
 @Composable
 fun FestiveEffect(look: FestiveLook, modifier: Modifier = Modifier) {

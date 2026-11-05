@@ -174,6 +174,52 @@ object Palettes {
             lightBackground = Color(0xFFF3F0FF), lightSurface = Color(0xFFFFFFFF),
             darkBackground = Color(0xFF0C0A1F), darkSurface = Color(0xFF17143A),
             glass = true
+        ),
+        ThemeIds.DIWALI_NIGHT to Palette(
+            primary = Color(0xFF4338CA), secondary = Color(0xFFF5B301), tertiary = Color(0xFFDB2777),
+            lightBackground = Color(0xFFF5F3FF), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF0C0A24), darkSurface = Color(0xFF181538)
+        ),
+        ThemeIds.HOLI_SPLASH to Palette(
+            primary = Color(0xFF7C3AED), secondary = Color(0xFF22C55E), tertiary = Color(0xFFF97316),
+            lightBackground = Color(0xFFF7F3FF), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF140A22), darkSurface = Color(0xFF22143A)
+        ),
+        ThemeIds.GARBA_NIGHT to Palette(
+            primary = Color(0xFF9D174D), secondary = Color(0xFFFACC15), tertiary = Color(0xFF0EA5E9),
+            lightBackground = Color(0xFFFDF2F8), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF1A0812), darkSurface = Color(0xFF2A1020)
+        ),
+        ThemeIds.KITES_SUNSET to Palette(
+            primary = Color(0xFFEA580C), secondary = Color(0xFF0EA5E9), tertiary = Color(0xFFDB2777),
+            lightBackground = Color(0xFFFFF7ED), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF1C0F06), darkSurface = Color(0xFF2B190C)
+        ),
+        ThemeIds.RAKHI_SILK to Palette(
+            primary = Color(0xFF9333EA), secondary = Color(0xFFF59E0B), tertiary = Color(0xFFF472B6),
+            lightBackground = Color(0xFFFAF5FF), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF150A1F), darkSurface = Color(0xFF23132F)
+        ),
+        ThemeIds.BAPPA_MODAK to Palette(
+            primary = Color(0xFFB91C1C), secondary = Color(0xFFFBBF24), tertiary = Color(0xFF16A34A),
+            lightBackground = Color(0xFFFEF6F0), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF1A0A08), darkSurface = Color(0xFF2A1410)
+        ),
+        ThemeIds.TIRANGA_GREEN to Palette(
+            primary = Color(0xFF138808), secondary = Color(0xFFF26B0F), tertiary = Color(0xFF1E3A8A),
+            lightBackground = Color(0xFFF4FAF3), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF0B130C), darkSurface = Color(0xFF142016)
+        ),
+        ThemeIds.CHRISTMAS_PINE to Palette(
+            primary = Color(0xFF166534), secondary = Color(0xFFC62828), tertiary = Color(0xFFD4A017),
+            lightBackground = Color(0xFFF2F8F3), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF08130C), darkSurface = Color(0xFF112016)
+        ),
+        ThemeIds.NEW_YEAR_SPARKLE to Palette(
+            primary = Color(0xFFA16207), secondary = Color(0xFF7C3AED), tertiary = Color(0xFFE879F9),
+            lightBackground = Color(0xFFFFF8EB), lightSurface = Color(0xFFFFFFFF),
+            darkBackground = Color(0xFF140F05), darkSurface = Color(0xFF221A0B),
+            glass = true
         )
     )
 

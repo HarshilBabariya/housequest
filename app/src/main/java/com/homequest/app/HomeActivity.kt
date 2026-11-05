@@ -33,6 +33,7 @@ import com.homequest.app.ui.MainViewModel
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.CelebrationHost
 import com.homequest.app.ui.components.ConfettiBurst
+import com.homequest.app.ui.components.FestiveMomentOverlay
 import com.homequest.app.ui.components.RewardToast
 import com.homequest.app.ui.navigation.HomeQuestNavHost
 import com.homequest.app.ui.screens.onboarding.OnboardingScreen
@@ -62,6 +63,7 @@ private fun HomeQuestRoot() {
     val erasing by vm.erasing.collectAsStateWithLifecycle()
     val festival by vm.festival.collectAsStateWithLifecycle()
     val celebrations by vm.celebrations.collectAsStateWithLifecycle()
+    val moment by vm.moment.collectAsStateWithLifecycle()
     val activity = LocalContext.current as Activity
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { FestiveLauncher.apply(activity, FestiveLauncher.packFor(settings, festival)) }
     val baseContext = LocalContext.current
@@ -76,7 +78,7 @@ private fun HomeQuestRoot() {
     }
 
     CompositionLocalProvider(LocalContext provides localized, LocalConfiguration provides localized.resources.configuration) {
-        HomeQuestTheme(themeId = settings.themeFor(festival), darkMode = settings.darkMode) {
+        HomeQuestTheme(themeId = settings.shownThemeFor(festival), darkMode = settings.darkMode) {
             Surface(Modifier.fillMaxSize()) {
                 Crossfade(targetState = vm.gate(settings, unlocked, erasing), animationSpec = tween(350), label = "gate") { gate ->
                     Box(Modifier.fillMaxSize()) {
@@ -92,6 +94,7 @@ private fun HomeQuestRoot() {
                             Gate.OPEN -> {
                                 HomeQuestNavHost(onSignOut = vm::signOut, onEraseAll = vm::eraseAll)
                                 ConfettiBurst(trigger = confetti)
+                                moment?.let { key(it) { FestiveMomentOverlay(it, onDone = { vm.momentDone(it) }) } }
                                 Box(Modifier.align(Alignment.TopCenter)) { RewardToast(event = toast, onDismiss = vm::dismissToast) }
                                 celebrations.firstOrNull()?.let { celebration ->
                                     val member = members.firstOrNull { it.id == settings.activeMemberId }

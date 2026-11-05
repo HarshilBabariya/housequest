@@ -1231,6 +1231,7 @@
     <string name="later">बाद में</string>
     <string name="fest_upcoming_hint">उत्सव शुरू होते ही थीम, आउटफ़िट और +%1$d ⭐ खुलेंगे</string>
     <string name="fest_tap_to_celebrate">जश्न के लिए टैप करें 🎉</string>
+    <string name="fest_switch_look">थीम बदलें</string>
     <string name="reason_festival">त्योहार का गिफ़्ट: %1$s</string>
     <string name="claim_free">🎁 आज मुफ़्त</string>
     <string name="pack_only">सिर्फ़ %1$s पर</string>

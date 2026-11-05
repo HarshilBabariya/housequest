@@ -37,6 +37,7 @@ Push this folder to a GitHub repository (branch `main`). The included workflow `
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.9.0 | 2026-11-05 | Blinkit-style festival takeover: hanging decor per festival, 3D Switch theme button with two looks per festival, rocket/chakri/gulal moments; Ganesh emblem and icon; festival banner text always fits |
 | 1.8.1 | 2026-11-05 | Festival countdown fixed; home & money notification sounds (cooker whistle, debit/credit ting, doorbell, firecrackers…); auto-capture from SMS only, offers ignored; festival app icons with animated splash |
 | 1.8.0 | 2026-11-04 | Notification sounds per kind (original meme-style effects) and in-app sound effects; festival packs (themes, outfits, effects, sounds, greetings, full-screen gift moment) for Uttarayan, Tiranga days, Holi, Rakhi, Ganesh, Navratri, Diwali, Christmas, New Year; streak card, milestone celebrations and streak-in-danger alerts; category labels no longer clipped; ambient Reminders orbit redesign |
 | 1.7.1 | 2026-11-02 | Credits that subtract from totals (form, voice, capture); stricter capture rules; shares add up with credits; tint-only bottom tabs; calendar icon tile; date chips fit; points and streak below the level on Me; `full` and `lite` (no auto-capture, installs past Play Protect) builds |

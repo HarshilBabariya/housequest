@@ -226,7 +226,7 @@ fun CelebrationHost(celebration: Celebration, avatar: AvatarConfig?, name: Strin
             ) {
                 Box(contentAlignment = Alignment.TopCenter) {
                     avatar?.let { AvatarView(RewardCatalog.dressFor(festival.pack, it), size = 150.dp, animated = true, play = AvatarPlay(AvatarAction.CHEER, 1), modifier = Modifier.padding(top = 30.dp)) }
-                    Text(festival.pack.emoji, fontSize = 44.sp)
+                    FestivalEmblem(festival.pack, 52.dp)
                 }
             }
         }
