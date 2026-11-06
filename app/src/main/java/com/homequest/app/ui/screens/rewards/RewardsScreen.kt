@@ -40,6 +40,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -71,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homequest.app.R
+import com.homequest.app.data.local.PointsLedgerEntity
 import com.homequest.app.domain.BadgeStatus
 import com.homequest.app.domain.PointPack
 import com.homequest.app.domain.PointPacks
@@ -80,11 +82,15 @@ import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AnimatedCount
 import com.homequest.app.ui.components.ProCard
 import com.homequest.app.ui.components.SectionHeader
+import com.homequest.app.ui.components.reasonEmoji
 import com.homequest.app.ui.components.reasonLabel
 import com.homequest.app.ui.screens.expenses.OptionSheet
 import com.homequest.app.ui.theme.Palettes
+import com.homequest.app.util.Dates
 import com.homequest.app.util.Upi
 import com.homequest.app.util.UpiResult
+import java.time.Instant
+import java.time.ZoneId
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -233,18 +239,43 @@ fun RewardsScreen(openPro: Boolean, onBack: () -> Unit, onOpenAvatar: (Long) -> 
                 SectionHeader(stringResource(R.string.topup_title))
                 ProCard({ showPlans = true }, Modifier.padding(horizontal = 20.dp))
             }
-            item { SectionHeader(stringResource(R.string.points_history)) }
-            items(state.ledger, key = { "led_${it.id}" }) { entry ->
-                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) {
-                    Text(reasonLabel(entry.reason), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(
-                        (if (entry.delta > 0) "+" else "") + entry.delta,
-                        color = if (entry.delta > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.titleSmall
-                    )
+            if (state.ledger.isNotEmpty()) item { SectionHeader(stringResource(R.string.points_history)) }
+            itemsIndexed(state.ledger, key = { _, it -> "led_${it.id}" }) { i, entry ->
+                val first = i == 0
+                val last = i == state.ledger.lastIndex
+                val shape = RoundedCornerShape(topStart = if (first) 22.dp else 0.dp, topEnd = if (first) 22.dp else 0.dp, bottomStart = if (last) 22.dp else 0.dp, bottomEnd = if (last) 22.dp else 0.dp)
+                Column(Modifier.padding(horizontal = 20.dp).fillMaxWidth().clip(shape).background(MaterialTheme.colorScheme.surfaceContainerLowest)) {
+                    LedgerRow(entry)
+                    if (!last) HorizontalDivider(Modifier.padding(start = 68.dp), color = MaterialTheme.colorScheme.outlineVariant)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LedgerRow(entry: PointsLedgerEntity) {
+    val scheme = MaterialTheme.colorScheme
+    val gain = entry.delta > 0
+    Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(40.dp).background(scheme.primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+            Text(reasonEmoji(entry.reason), style = MaterialTheme.typography.titleMedium)
+        }
+        Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+            Text(reasonLabel(entry.reason), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                Dates.relativeLabel(Instant.ofEpochMilli(entry.at).atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay(), stringResource(R.string.today), stringResource(R.string.yesterday)),
+                style = MaterialTheme.typography.bodySmall,
+                color = scheme.onSurfaceVariant,
+                maxLines = 1
+            )
+        }
+        Text(
+            (if (gain) "+" else "") + "%,d".format(entry.delta),
+            style = MaterialTheme.typography.labelLarge,
+            color = if (gain) scheme.primary else scheme.error,
+            modifier = Modifier.clip(RoundedCornerShape(50)).background((if (gain) scheme.primary else scheme.error).copy(alpha = 0.12f)).padding(horizontal = 10.dp, vertical = 4.dp)
+        )
     }
 }
 

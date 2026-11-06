@@ -321,15 +321,6 @@ object ThemeIds {
     const val TIRANGA = "theme_tiranga"
     const val CHRISTMAS = "theme_christmas"
     const val NEW_YEAR = "theme_new_year"
-    const val DIWALI_NIGHT = "theme_diwali_night"
-    const val HOLI_SPLASH = "theme_holi_splash"
-    const val GARBA_NIGHT = "theme_garba_night"
-    const val KITES_SUNSET = "theme_kites_sunset"
-    const val RAKHI_SILK = "theme_rakhi_silk"
-    const val BAPPA_MODAK = "theme_bappa_modak"
-    const val TIRANGA_GREEN = "theme_tiranga_green"
-    const val CHRISTMAS_PINE = "theme_christmas_pine"
-    const val NEW_YEAR_SPARKLE = "theme_new_year_sparkle"
 }
 
 val SkinTones = listOf(

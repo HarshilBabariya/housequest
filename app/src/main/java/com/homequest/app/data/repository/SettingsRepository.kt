@@ -40,16 +40,11 @@ data class AppSettings(
     val festiveIcon: Boolean = true,
     val festivalSeen: String = "",
     val festivalGifted: String = "",
-    val festiveThemeSkipped: String = "",
-    val festiveLookAlt: String = ""
+    val festiveThemeSkipped: String = ""
 ) {
     fun festiveThemeOn(festival: FestivalDay?): Boolean = festival != null && festiveMode && festiveThemeSkipped != festival.key
 
     fun themeFor(festival: FestivalDay?): String = festival?.takeIf { festiveThemeOn(it) }?.festival?.pack?.themeId ?: themeId
-
-    fun festiveLookFor(day: FestivalDay): String = if (festiveThemeOn(day) && festiveLookAlt == day.key) day.festival.pack.altThemeId else day.festival.pack.themeId
-
-    fun shownThemeFor(festival: FestivalDay?): String = festival?.takeIf { festiveThemeOn(it) }?.let(::festiveLookFor) ?: themeId
 }
 
 class SettingsRepository(private val context: Context) {
@@ -74,7 +69,6 @@ class SettingsRepository(private val context: Context) {
         val FESTIVAL_SEEN = stringPreferencesKey("festival_seen")
         val FESTIVAL_GIFTED = stringPreferencesKey("festival_gifted")
         val FESTIVE_THEME_SKIPPED = stringPreferencesKey("festive_theme_skipped")
-        val FESTIVE_LOOK_ALT = stringPreferencesKey("festive_look_alt")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -97,8 +91,7 @@ class SettingsRepository(private val context: Context) {
             festiveIcon = p[Keys.FESTIVE_ICON] ?: true,
             festivalSeen = p[Keys.FESTIVAL_SEEN] ?: "",
             festivalGifted = p[Keys.FESTIVAL_GIFTED] ?: "",
-            festiveThemeSkipped = p[Keys.FESTIVE_THEME_SKIPPED] ?: "",
-            festiveLookAlt = p[Keys.FESTIVE_LOOK_ALT] ?: ""
+            festiveThemeSkipped = p[Keys.FESTIVE_THEME_SKIPPED] ?: ""
         )
     }
 
@@ -125,5 +118,4 @@ class SettingsRepository(private val context: Context) {
     suspend fun setFestivalSeen(key: String) = context.dataStore.edit { it[Keys.FESTIVAL_SEEN] = key }
     suspend fun setFestivalGifted(key: String) = context.dataStore.edit { it[Keys.FESTIVAL_GIFTED] = key }
     suspend fun setFestiveThemeSkipped(key: String) = context.dataStore.edit { it[Keys.FESTIVE_THEME_SKIPPED] = key }
-    suspend fun setFestiveLookAlt(key: String) = context.dataStore.edit { it[Keys.FESTIVE_LOOK_ALT] = key }
 }

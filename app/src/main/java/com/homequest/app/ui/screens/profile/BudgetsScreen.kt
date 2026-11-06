@@ -1,17 +1,21 @@
 package com.homequest.app.ui.screens.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -22,7 +26,6 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -35,7 +38,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -159,27 +164,32 @@ fun BudgetsScreen(onBack: () -> Unit) {
                 val limit = state.limits[c.id] ?: 0.0
                 val spent = state.spent[c.id] ?: 0.0
                 val fraction = if (limit > 0) (spent / limit).toFloat() else 0f
+                val over = limit > 0 && spent > limit
                 HqCard(Modifier.padding(horizontal = 20.dp, vertical = 5.dp).fillMaxWidth(), onClick = { editCategory = c }, padding = 14) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         CategoryIcon(c, 44)
                         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                             Text(c.label(), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            if (limit > 0) {
-                                LinearProgressIndicator(
-                                    progress = { fraction.coerceIn(0f, 1f) },
-                                    modifier = Modifier.fillMaxWidth().height(6.dp).padding(top = 6.dp),
-                                    color = if (fraction > 1f) scheme.error else c.color,
-                                    trackColor = scheme.surfaceContainerHigh
-                                )
-                            } else {
-                                Text(stringResource(R.string.tap_to_set_limit), style = MaterialTheme.typography.labelSmall, color = scheme.primary, modifier = Modifier.padding(top = 4.dp))
-                            }
+                            Text(
+                                when {
+                                    limit <= 0 -> stringResource(R.string.tap_to_set_limit)
+                                    over -> stringResource(R.string.over_budget_by, (spent - limit).money(state.symbol))
+                                    else -> stringResource(R.string.left_of, (limit - spent).money(state.symbol), limit.money(state.symbol))
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = when { limit <= 0 -> scheme.primary; over -> scheme.error; else -> scheme.onSurfaceVariant },
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 2.dp)
+                            )
                         }
-                        Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = 4.dp)) {
-                            Text(spent.money(state.symbol), style = MaterialTheme.typography.titleSmall, color = if (fraction > 1f) scheme.error else scheme.onSurface, maxLines = 1)
-                            if (limit > 0) Text(stringResource(R.string.of_limit, limit.money(state.symbol)), style = MaterialTheme.typography.labelSmall, color = scheme.onSurfaceVariant, maxLines = 1)
-                        }
+                        Text(spent.money(state.symbol), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = if (over) scheme.error else scheme.onSurface, maxLines = 1)
                         Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = scheme.onSurfaceVariant)
+                    }
+                    if (limit > 0) {
+                        Box(Modifier.padding(top = 10.dp).fillMaxWidth().height(8.dp).clip(RoundedCornerShape(50)).background(scheme.surfaceContainerHigh)) {
+                            Box(Modifier.fillMaxWidth(fraction.coerceIn(0f, 1f)).fillMaxHeight().background(if (over) scheme.error else c.color))
+                        }
                     }
                 }
             }

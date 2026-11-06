@@ -17,10 +17,8 @@ import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.notifications.Sound
 import com.homequest.app.ui.components.Celebration
 import com.homequest.app.ui.components.FestiveMoment
-import com.homequest.app.ui.components.MOMENT_FLIP_DELAY_MS
 import com.homequest.app.util.Dates
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -64,8 +62,6 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
     private val _moment = MutableStateFlow<FestiveMoment?>(null)
     val moment: StateFlow<FestiveMoment?> = _moment
     private var moments = 0
-
-    private var switching = false
 
     private val _pendingRoute = MutableStateFlow<String?>(null)
     val pendingRoute: StateFlow<String?> = _pendingRoute
@@ -121,23 +117,11 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         return true
     }
 
-    fun switchFestiveLook() = viewModelScope.launch {
+    fun celebrateFestival() = viewModelScope.launch {
         val day = festival.value ?: return@launch
-        if (switching) return@launch
-        switching = true
-        val before = container.settingsRepository.current()
-        if (playMoment(before)) {
-            if (before.soundEffectsEnabled) container.sounds.play(Sound.SPARKLER)
-            delay(MOMENT_FLIP_DELAY_MS)
-        }
+        if (_moment.value != null) return@launch
         val s = container.settingsRepository.current()
-        if (s.festiveThemeSkipped == day.key) {
-            container.settingsRepository.setFestiveThemeSkipped("")
-            container.settingsRepository.setFestiveLookAlt("")
-        } else {
-            container.settingsRepository.setFestiveLookAlt(if (s.festiveLookAlt == day.key) "" else day.key)
-        }
-        switching = false
+        if (playMoment(s) && s.soundEffectsEnabled) container.sounds.play(Sound.of(day.festival.pack))
     }
 
     fun momentDone(moment: FestiveMoment) = _moment.update { if (it == moment) null else it }

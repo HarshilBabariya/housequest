@@ -154,6 +154,19 @@ fun RewardToast(event: RewardEvent?, onDismiss: () -> Unit) {
     }
 }
 
+fun reasonEmoji(reason: String): String = when (LedgerReasons.kind(reason)) {
+    LedgerReasons.LOG_EXPENSE -> "🧾"
+    LedgerReasons.GROUP -> "👥"
+    LedgerReasons.SETTLE -> "🤝"
+    LedgerReasons.MEMBER -> "🧑‍🤝‍🧑"
+    LedgerReasons.BUDGET -> "🎯"
+    LedgerReasons.BADGE -> "🏅"
+    LedgerReasons.UNLOCK -> "🎨"
+    LedgerReasons.PURCHASE -> "💳"
+    LedgerReasons.FESTIVAL -> "🎁"
+    else -> "⭐"
+}
+
 @Composable
 fun reasonLabel(reason: String): String {
     val arg = LedgerReasons.arg(reason)

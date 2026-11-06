@@ -52,7 +52,6 @@ export default function PhoneMock() {
         <div className="pm-banner pm-fade">
           <span>🪔</span>
           <div><b>Diwali in 3 days</b><small>Light diyas, not your savings ✨</small></div>
-          <em className="pm-switch">🎨 Switch</em>
         </div>
         <div className="pm-card pm-fade">
           <svg className="pm-ring" viewBox="0 0 80 80">

@@ -61,10 +61,11 @@ private val ROPE = Color(0xFF7C2D12)
 private val LEAF = Color(0xFF16A34A)
 
 @Composable
-fun FestiveBackdrop(pack: FestivalPack, modifier: Modifier = Modifier, inset: Dp = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()) {
+fun FestiveBackdrop(pack: FestivalPack, modifier: Modifier = Modifier) {
     val decor = pack.decor()
     val colors = pack.look().colors
     val scheme = MaterialTheme.colorScheme
+    val inset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val seconds by produceState(0f) {
         val start = withInfiniteAnimationFrameNanos { it }
         while (true) withInfiniteAnimationFrameNanos { value = (it - start) / 1_000_000_000f }

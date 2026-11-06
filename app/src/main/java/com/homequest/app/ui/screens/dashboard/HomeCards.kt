@@ -1,45 +1,29 @@
 package com.homequest.app.ui.screens.dashboard
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,90 +43,39 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 @Composable
-fun FestivalBanner(day: FestivalDay, themeId: String, upcoming: Boolean, today: LocalDate, name: String, onSwitchLook: (() -> Unit)?, modifier: Modifier = Modifier) {
+fun FestivalBanner(day: FestivalDay, upcoming: Boolean, today: LocalDate, name: String, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     val pack = day.festival.pack
-    val palette = Palettes.forId(themeId)
+    val palette = Palettes.forId(pack.themeId)
     val shape = RoundedCornerShape(22.dp)
-    Box(modifier.fillMaxWidth()) {
-        Box(
-            Modifier
-                .padding(bottom = if (onSwitchLook != null) SWITCH_OVERHANG else 0.dp)
-                .fillMaxWidth()
-                .heightIn(min = 112.dp)
-                .clip(shape)
-                .background(Brush.linearGradient(listOf(palette.primary, palette.tertiary.copy(alpha = 0.9f), palette.secondary)))
-        ) {
-            FestiveEffect(pack.look(), Modifier.matchParentSize())
-            Box(Modifier.matchParentSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent))))
-            Row(
-                Modifier.align(Alignment.CenterStart).padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = if (onSwitchLook != null) 30.dp else 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                FestivalEmblem(pack, 48.dp)
-                Column(Modifier.padding(start = 14.dp)) {
-                    val days = ChronoUnit.DAYS.between(today, day.main).toInt()
-                    Text(
-                        if (days > 0) pluralStringResource(R.plurals.fest_countdown, days, stringResource(day.festival.nameRes), days) else stringResource(day.festival.titleRes, name),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        if (upcoming) stringResource(R.string.fest_upcoming_hint, PointsRules.FESTIVAL_GIFT) else stringResource(day.festival.lineRes),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.9f),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
-        onSwitchLook?.let { SwitchLookButton(it, Modifier.align(Alignment.BottomCenter)) }
-    }
-}
-
-private val SWITCH_OVERHANG = 14.dp
-private val SWITCH_DEPTH = 4.dp
-
-@Composable
-private fun SwitchLookButton(onClick: () -> Unit, modifier: Modifier) {
-    val scheme = MaterialTheme.colorScheme
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    val sink by animateDpAsState(if (pressed) SWITCH_DEPTH - 1.dp else 0.dp, label = "sink")
-    val pill = RoundedCornerShape(50)
-    val face = lerp(scheme.secondary, Color.White, 0.78f)
-    val side = lerp(scheme.secondary, Color.Black, 0.3f)
-    val ink = lerp(scheme.primary, Color.Black, 0.35f)
     Box(
         modifier
-            .shadow(if (pressed) 2.dp else 10.dp, pill, ambientColor = side, spotColor = side)
-            .drawBehind {
-                val depth = SWITCH_DEPTH.toPx()
-                drawRoundRect(side, topLeft = Offset(0f, depth), size = Size(size.width, size.height - depth), cornerRadius = CornerRadius((size.height - depth) / 2))
-            }
-            .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick)
-            .padding(bottom = SWITCH_DEPTH)
+            .fillMaxWidth()
+            .heightIn(min = 112.dp)
+            .clip(shape)
+            .background(Brush.linearGradient(listOf(palette.primary, palette.tertiary.copy(alpha = 0.9f), palette.secondary)))
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
     ) {
-        Row(
-            Modifier
-                .offset(y = sink)
-                .clip(pill)
-                .background(Brush.verticalGradient(listOf(Color.White, face)))
-                .border(1.dp, Color.White.copy(alpha = 0.9f), pill)
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Rounded.Palette, contentDescription = null, tint = ink, modifier = Modifier.size(14.dp))
-            Text(
-                stringResource(R.string.fest_switch_look),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = ink,
-                maxLines = 1,
-                modifier = Modifier.padding(start = 4.dp)
-            )
+        FestiveEffect(pack.look(), Modifier.matchParentSize())
+        Box(Modifier.matchParentSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent))))
+        Row(Modifier.align(Alignment.CenterStart).padding(horizontal = 18.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            FestivalEmblem(pack, 48.dp)
+            Column(Modifier.padding(start = 14.dp)) {
+                val days = ChronoUnit.DAYS.between(today, day.main).toInt()
+                Text(
+                    if (days > 0) pluralStringResource(R.plurals.fest_countdown, days, stringResource(day.festival.nameRes), days) else stringResource(day.festival.titleRes, name),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    if (upcoming) stringResource(R.string.fest_upcoming_hint, PointsRules.FESTIVAL_GIFT) else stringResource(day.festival.lineRes),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.9f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }

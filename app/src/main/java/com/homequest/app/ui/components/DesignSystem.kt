@@ -152,7 +152,7 @@ fun ProCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
             Icon(Icons.Rounded.WorkspacePremium, contentDescription = null, tint = gold, modifier = Modifier.size(28.dp))
         }
         Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
-            Text(stringResource(R.string.pro_title), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(R.string.pro_title), style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text(stringResource(R.string.pro_sub), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = gold)

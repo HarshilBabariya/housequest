@@ -349,7 +349,6 @@
     <string name="household">ઘર-કુટુંબ</string>
     <string name="rewards_sub">બેજ, દુકાન અને પોઇન્ટ ઇતિહાસ</string>
     <string name="family_members">કુટુંબ સભ્યો</string>
-    <string name="family_sub">%1$d લોકો · દરેકનું પોતાનું લૉગિન</string>
     <string name="budgets">બજેટ</string>
     <string name="budgets_sub">માસિક અને શ્રેણી મુજબ મર્યાદા</string>
     <string name="reminders_bills">રિમાઇન્ડર અને બિલ</string>
@@ -1166,8 +1165,9 @@
     <string name="add_credit">જમા ઉમેરો</string>
     <string name="save_credit">જમા સેવ કરો</string>
     <string name="credit_hint">કેશબેક, રિફંડ કે મળેલા પૈસા — તે તમારા કુલ ખર્ચમાંથી બાદ થાય છે.</string>
-    <string name="points_label">⭐ %1$d પોઇન્ટ્સ</string>
-    <string name="streak_label">🔥 %1$d દિવસની સ્ટ્રીક</string>
+    <string name="stat_points">પોઇન્ટ્સ</string>
+    <string name="stat_streak">દિવસની સ્ટ્રીક</string>
+    <string name="stat_level">લેવલ</string>
     <string name="notif_captured_credit">%2$s તરફથી +%1$s. જમા તરીકે ઉમેરવા ટૅપ કરો.</string>
     <string name="notif_captured_credit_plain">+%1$s મળ્યા. જમા તરીકે ઉમેરવા ટૅપ કરો.</string>
     <string name="channel_nudges">રોજની યાદ</string>
@@ -1217,31 +1217,6 @@
     <string name="fest_wear">તહેવારનો લુક પહેરો</string>
     <string name="later">પછી</string>
     <string name="fest_upcoming_hint">ઉજવણી શરૂ થતાં જ થીમ, આઉટફિટ અને +%1$d ⭐ ખુલશે</string>
-    <string name="fest_switch_look">બદલો</string>
-    <string name="festival_packs">તહેવાર પેક</string>
-    <string name="festival_packs_sub">દરેક તહેવારનો લુક, પોશાક, આઇકન અને ઉજવણી જુઓ</string>
-    <string name="preview_hint">કોઈ તહેવાર પસંદ કરો અને જુઓ કે ત્રણ દિવસ પહેલાંથી ત્રણ દિવસ પછી સુધી હોમ કેવું દેખાશે અને પેકમાં શું-શું મળશે.</string>
-    <string name="preview_showing">હમણાં %1$s · બદલો થી %2$s</string>
-    <string name="preview_pack_brings">પેકમાં શું મળે છે</string>
-    <string name="preview_looks">બે લુક</string>
-    <string name="preview_outfit">અવતારનો પોશાક</string>
-    <string name="preview_icon">એપ આઇકન</string>
-    <string name="preview_icon_sub">પેક ચાલુ હોય ત્યાં સુધી તમારો હોમ-સ્ક્રીન આઇકન</string>
-    <string name="preview_celebration">ઉજવણી</string>
-    <string name="preview_celebration_sub">ખર્ચ લૉગ કરો કે બદલો દબાવો ત્યારે આખી સ્ક્રીન પર</string>
-    <string name="preview_sound">તહેવારનો અવાજ</string>
-    <string name="preview_sound_sub">તહેવારની શુભેચ્છા સાથે વાગે છે</string>
-    <string name="preview_gift">ભેટ</string>
-    <string name="preview_window">પેક %1$s – %2$s સુધી ચાલુ</string>
-    <string name="look_kites_sunset">પતંગ સનસેટ</string>
-    <string name="look_tiranga_green">તિરંગો લીલો</string>
-    <string name="look_holi_splash">હોળી સ્પ્લેશ</string>
-    <string name="look_rakhi_silk">રાખી સિલ્ક</string>
-    <string name="look_bappa_modak">મોદક લાલ</string>
-    <string name="look_garba_night">મિડનાઇટ રોઝ</string>
-    <string name="look_diwali_night">ઇન્ડિગો નાઇટ</string>
-    <string name="look_christmas_pine">પાઇન ગ્રીન</string>
-    <string name="look_new_year_sparkle">સ્પાર્કલ</string>
     <string name="reason_festival">તહેવારની ગિફ્ટ: %1$s</string>
     <string name="claim_free">🎁 તહેવારમાં મફત</string>
     <string name="pack_only">ફક્ત %1$s પર</string>
@@ -1355,6 +1330,10 @@
         <item>તમારું વૉલેટ ખુશીથી નાચે છે 💃</item>
         <item>આગલો માઇલસ્ટોન બહુ દૂર નથી 👀</item>
     </string-array>
+    <plurals name="family_sub">
+        <item quantity="one">ફક્ત તમે · વહેંચવા માટે પરિવાર ઉમેરો</item>
+        <item quantity="other">%1$d લોકો · દરેકનું પોતાનું લૉગિન</item>
+    </plurals>
     <plurals name="fest_countdown">
         <item quantity="one">%1$s કાલે છે!</item>
         <item quantity="other">%1$s %2$d દિવસમાં</item>

@@ -90,7 +90,6 @@ import com.homequest.app.ui.screens.household.SavingsScreen
 import com.homequest.app.ui.screens.household.ServicesScreen
 import com.homequest.app.ui.screens.profile.AccountScreen
 import com.homequest.app.ui.screens.profile.BudgetsScreen
-import com.homequest.app.ui.screens.profile.FestivalPreviewScreen
 import com.homequest.app.ui.screens.profile.InsightsScreen
 import com.homequest.app.ui.screens.profile.ProfileScreen
 import com.homequest.app.ui.screens.reminders.RemindersScreen
@@ -102,7 +101,7 @@ import com.homequest.app.ui.theme.glassSource
 import com.homequest.app.ui.theme.glassSurface
 
 @Composable
-fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onSwitchFestiveLook: () -> Unit, onSignOut: () -> Unit, onEraseAll: () -> Unit) {
+fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onCelebrateFestival: () -> Unit, onSignOut: () -> Unit, onEraseAll: () -> Unit) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
@@ -158,7 +157,7 @@ fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onSwitchF
                         onOpenRewards = { navController.navigate(Routes.rewards()) },
                         onOpenProfile = { navController.openTab(BottomTab.PROFILE) },
                         onOpenCapture = { navController.navigate(Routes.CAPTURE) },
-                        onSwitchFestiveLook = onSwitchFestiveLook
+                        onCelebrateFestival = onCelebrateFestival
                     )
                 }
                 composable(Routes.EXPENSES) {
@@ -198,8 +197,7 @@ fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onSwitchF
                         onOpenKhata = { navController.navigate(Routes.KHATA) },
                         onOpenServices = { navController.navigate(Routes.SERVICES) },
                         onOpenSavings = { navController.navigate(Routes.SAVINGS) },
-                        onOpenCapture = { navController.navigate(Routes.CAPTURE) },
-                        onOpenFestivals = { navController.navigate(Routes.FESTIVALS) }
+                        onOpenCapture = { navController.navigate(Routes.CAPTURE) }
                     )
                 }
                 composable(
@@ -248,7 +246,6 @@ fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onSwitchF
                 composable(Routes.KHATA) { KhataScreen(onBack = { navController.popBackStack() }) }
                 composable(Routes.SERVICES) { ServicesScreen(onBack = { navController.popBackStack() }) }
                 composable(Routes.SAVINGS) { SavingsScreen(onBack = { navController.popBackStack() }) }
-                composable(Routes.FESTIVALS) { FestivalPreviewScreen(onBack = { navController.popBackStack() }) }
                 composable(Routes.CALENDAR) {
                     CalendarScreen(onBack = { navController.popBackStack() }, onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) })
                 }

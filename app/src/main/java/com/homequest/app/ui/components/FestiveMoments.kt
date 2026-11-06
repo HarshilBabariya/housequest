@@ -27,19 +27,23 @@ import kotlin.random.Random
 
 data class FestiveMoment(val pack: FestivalPack, val id: Int)
 
-const val MOMENT_FLIP_DELAY_MS = 650L
-
-private enum class Show(val millis: Int) { ROCKET(2800), BALLOONS(2600), MODAKS(2600), KITE(2800), TIRANGA(2400), RAKHI(2600), DANDIYA(2600), SNOW(2800) }
+private enum class Show(val millis: Int) { ROCKET(2800), BALLOONS(2600), KITE(2800), TIRANGA(2400), SHOWER(2800) }
 
 private fun FestivalPack.show(): Show = when (this) {
     FestivalPack.DIWALI, FestivalPack.NEW_YEAR -> Show.ROCKET
     FestivalPack.HOLI -> Show.BALLOONS
-    FestivalPack.GANESH -> Show.MODAKS
     FestivalPack.UTTARAYAN -> Show.KITE
     FestivalPack.TIRANGA -> Show.TIRANGA
-    FestivalPack.RAKHI -> Show.RAKHI
-    FestivalPack.NAVRATRI -> Show.DANDIYA
-    FestivalPack.CHRISTMAS -> Show.SNOW
+    FestivalPack.GANESH, FestivalPack.RAKHI, FestivalPack.NAVRATRI, FestivalPack.CHRISTMAS -> Show.SHOWER
+}
+
+private class Shower(val colors: List<Color>, val petals: Boolean, val rope: Color, val lanterns: Boolean)
+
+private fun FestivalPack.shower(): Shower = when (this) {
+    FestivalPack.GANESH -> Shower(listOf(Color(0xFFF97316), Color(0xFFFBBF24)), petals = true, rope = Color(0xFF16A34A), lanterns = false)
+    FestivalPack.RAKHI -> Shower(listOf(Color(0xFFF9A8D4), Color(0xFFFBCFE8)), petals = true, rope = Color(0xFFDC2626), lanterns = false)
+    FestivalPack.NAVRATRI -> Shower(look().colors, petals = false, rope = Color(0xFFFACC15), lanterns = true)
+    else -> Shower(listOf(Color.White), petals = false, rope = Color(0xFFDC2626), lanterns = false)
 }
 
 private class Spark(val angle: Float, val speed: Float, val color: Int, val phase: Float)
@@ -61,12 +65,9 @@ fun FestiveMomentOverlay(moment: FestiveMoment, onDone: () -> Unit) {
         when (show) {
             Show.ROCKET -> rocket(p, sparks, colors)
             Show.BALLOONS -> balloons(p, sparks, colors)
-            Show.MODAKS -> modaks(p, sparks)
             Show.KITE -> kite(p, sparks, colors)
             Show.TIRANGA -> tiranga(p, sparks)
-            Show.RAKHI -> rakhi(p, sparks)
-            Show.DANDIYA -> dandiya(p, sparks, colors)
-            Show.SNOW -> snow(p, sparks)
+            Show.SHOWER -> shower(p, sparks, moment.pack.shower())
         }
     }
 }
@@ -158,39 +159,6 @@ private fun DrawScope.balloons(p: Float, sparks: List<Spark>, colors: List<Color
     }
 }
 
-private fun DrawScope.modak(center: Offset, r: Float, alpha: Float) {
-    val body = Brush.radialGradient(listOf(Color(0xFFFFF3C4), Color(0xFFFBBF24), Color(0xFFD97706)), Offset(center.x - r * 0.3f, center.y - r * 0.2f), r * 1.4f)
-    drawPath(Path().apply {
-        moveTo(center.x - r, center.y + r * 0.3f)
-        quadraticTo(center.x - r * 0.6f, center.y - r * 0.6f, center.x, center.y - r * 1.3f)
-        quadraticTo(center.x + r * 0.6f, center.y - r * 0.6f, center.x + r, center.y + r * 0.3f)
-        quadraticTo(center.x, center.y + r * 1.1f, center.x - r, center.y + r * 0.3f)
-        close()
-    }, body, alpha = alpha)
-    repeat(5) { k ->
-        val a = -TAU / 4 + (k - 2) * 0.32f
-        drawLine(Color(0xFFB45309).copy(alpha = 0.6f * alpha), Offset(center.x, center.y - r * 1.2f), Offset(center.x + cos(a + TAU / 2) * r * 0.9f, center.y - sin(a + TAU / 2) * r * 0.9f + r * 0.1f), 1.dp.toPx())
-    }
-}
-
-private fun DrawScope.modaks(p: Float, sparks: List<Spark>) {
-    val unit = 1.dp.toPx()
-    val alpha = fadeOut(p)
-    sparks.take(26).forEach { s ->
-        val fall = frac(s.phase + p * 0.6f * s.speed)
-        val at = Offset(size.width * (s.angle / TAU), size.height * fall)
-        rotate(fall * 540f, at) { drawOval(if (s.color % 2 == 0) Color(0xFFF97316) else Color(0xFFFBBF24), Offset(at.x - 5 * unit, at.y - 3 * unit), Size(10 * unit, 6 * unit), alpha = alpha * 0.9f) }
-    }
-    repeat(7) { i ->
-        val fx = 0.14f + i * 0.12f
-        val rise = smooth((p - i * 0.05f) / 0.75f)
-        val x = size.width * fx + sin(p * 6f + i) * 10 * unit
-        val y = size.height + 50 * unit - (size.height + 100 * unit) * rise
-        val r = (22f + (i % 3) * 5f) * unit
-        rotate(sin(p * 5f + i) * 12f, Offset(x, y)) { modak(Offset(x, y), r, alpha) }
-    }
-}
-
 private fun DrawScope.kite(p: Float, sparks: List<Spark>, colors: List<Color>) {
     val unit = 1.dp.toPx()
     val t = smooth(p / 0.85f)
@@ -233,76 +201,37 @@ private fun DrawScope.tiranga(p: Float, sparks: List<Spark>) {
     }
 }
 
-private fun DrawScope.rakhi(p: Float, sparks: List<Spark>) {
-    val unit = 1.dp.toPx()
-    val alpha = fadeOut(p)
-    sparks.forEach { s ->
-        val fall = frac(s.phase + p * 0.5f * s.speed)
-        val at = Offset(size.width * (s.angle / TAU) + sin(p * 6f + s.phase * 5f) * 18 * unit, size.height * fall)
-        rotate(fall * 400f, at) { drawOval(if (s.color % 2 == 0) Color(0xFFF9A8D4) else Color(0xFFFBCFE8), Offset(at.x - 6 * unit, at.y - 3.5f * unit), Size(12 * unit, 7 * unit), alpha = alpha * 0.9f) }
-    }
-    val t = smooth(p / 0.8f)
-    val c = Offset(size.width / 2 + sin(p * 5f) * 12 * unit, size.height + 60 * unit - (size.height * 0.7f + 60 * unit) * t)
-    val r = 30 * unit
-    val thread = Color(0xFFDC2626)
-    drawLine(thread.copy(alpha = alpha), Offset(0f, c.y + sin(p * 4f) * 20 * unit), Offset(c.x - r, c.y), 3 * unit)
-    drawLine(thread.copy(alpha = alpha), Offset(c.x + r, c.y), Offset(size.width, c.y - sin(p * 4f) * 20 * unit), 3 * unit)
-    repeat(12) { k ->
-        val a = k * TAU / 12 + p * 2f
-        drawCircle(Color(0xFFF59E0B).copy(alpha = alpha), 6 * unit, Offset(c.x + cos(a) * r, c.y + sin(a) * r))
-    }
-    drawCircle(Brush.radialGradient(listOf(Color(0xFFFDE68A), Color(0xFFDC2626)), c, r * 0.85f), r * 0.85f, c, alpha = alpha)
-    repeat(8) { k ->
-        val a = k * TAU / 8 - p * 3f
-        drawCircle(Color(0xFFFBCFE8).copy(alpha = alpha), 4 * unit, Offset(c.x + cos(a) * r * 0.5f, c.y + sin(a) * r * 0.5f))
-    }
-    drawCircle(Color(0xFF7C2D12).copy(alpha = alpha), 5 * unit, c)
-}
-
-private fun DrawScope.dandiya(p: Float, sparks: List<Spark>, colors: List<Color>) {
-    val unit = 1.dp.toPx()
-    val alpha = fadeOut(p)
-    sparks.take(30).forEach { s ->
-        val tw = 0.4f + 0.6f * sin(p * 25f + s.phase * TAU).coerceAtLeast(0f)
-        drawCircle(colors[s.color].copy(alpha = alpha * tw), (3f + 2f * s.speed) * unit, Offset(size.width * (s.angle / TAU), size.height * (0.06f + 0.14f * s.phase)))
-    }
-    val t = smooth(p / 0.8f)
-    val c = Offset(size.width / 2, size.height + 90 * unit - (size.height * 0.62f + 90 * unit) * t)
-    val len = 150 * unit
-    listOf(-1f, 1f).forEachIndexed { i, side ->
-        rotate(side * (28f + 12f * sin(p * 9f)) + p * 180f * side, c) {
-            drawRoundRect(Brush.verticalGradient(listOf(Color(0xFFFACC15), Color(0xFFDC2626), Color(0xFF16A34A), Color(0xFFFACC15)), c.y - len / 2, c.y + len / 2), Offset(c.x - 5 * unit, c.y - len / 2), Size(10 * unit, len), CornerRadius(5 * unit), alpha = alpha)
-            repeat(3) { k ->
-                val ty = c.y - len / 2 + k * 10 * unit
-                drawLine(colors[(i + k) % colors.size].copy(alpha = alpha), Offset(c.x + 5 * unit, ty), Offset(c.x + (26 + k * 8) * unit + sin(p * 14f + k) * 8 * unit, ty + (10 + k * 6) * unit), 2 * unit)
-            }
-        }
-    }
-    val clash = frac(p * 4f)
-    if (clash < 0.25f) sparks.drop(30).take(16).forEach { s ->
-        val r = clash * 4f * 60 * unit * s.speed
-        drawCircle(Color(0xFFFFE08A).copy(alpha = alpha * (1f - clash * 4f)), 2.5f * unit, Offset(c.x + cos(s.angle) * r, c.y - len / 2 + sin(s.angle) * r))
-    }
-}
-
-private fun DrawScope.snow(p: Float, sparks: List<Spark>) {
+private fun DrawScope.shower(p: Float, sparks: List<Spark>, look: Shower) {
     val unit = 1.dp.toPx()
     val alpha = fadeOut(p, 0.8f)
     sparks.forEach { s ->
         val fall = frac(s.phase + p * 0.55f * s.speed)
         val at = Offset(size.width * (s.angle / TAU) + sin(p * 5f + s.phase * 6f) * 22 * unit, size.height * fall)
-        drawCircle(Color.White.copy(alpha = alpha * (0.5f + 0.5f * s.speed)), (2f + 3f * s.speed) * unit, at)
+        val color = look.colors[s.color % look.colors.size].copy(alpha = alpha * (0.5f + 0.5f * s.speed))
+        if (look.petals) rotate(fall * 400f, at) { drawOval(color, Offset(at.x - 6 * unit, at.y - 3.5f * unit), Size(12 * unit, 7 * unit)) }
+        else drawCircle(color, (2f + 3f * s.speed) * unit, at)
     }
     listOf(0.3f, 0.7f).forEachIndexed { i, fx ->
         val top = Offset(size.width * fx, -4 * unit)
         val swing = sin(p * 10f + i * 2f) * 0.35f
         val c = Offset(top.x + sin(swing) * 70 * unit, top.y + cos(swing) * 70 * unit)
-        drawLine(Color(0xFFDC2626).copy(alpha = alpha), top, c, 3 * unit)
-        rotate(swing * 57f, c) {
-            drawCircle(Brush.radialGradient(listOf(Color(0xFFFDE68A), Color(0xFFD4A017), Color(0xFF92400E)), Offset(c.x - 6 * unit, c.y - 6 * unit), 30 * unit), 24 * unit, c, alpha = alpha)
-            drawRect(Color(0xFF92400E).copy(alpha = alpha), Offset(c.x - 2 * unit, c.y + 16 * unit), Size(4 * unit, 10 * unit))
-            drawCircle(Color(0xFF92400E).copy(alpha = alpha), 4 * unit, Offset(c.x, c.y + 26 * unit))
-            drawPath(Path().apply { moveTo(c.x - 10 * unit, c.y - 26 * unit); lineTo(c.x + 10 * unit, c.y - 26 * unit); lineTo(c.x, c.y - 14 * unit); close() }, Color(0xFF16A34A).copy(alpha = alpha))
-        }
+        drawLine(look.rope.copy(alpha = alpha), top, c, 3 * unit)
+        rotate(swing * 57f, c) { if (look.lanterns) lantern(c, look.colors[i % look.colors.size], alpha) else bell(c, alpha) }
     }
+}
+
+private fun DrawScope.bell(c: Offset, alpha: Float) {
+    val unit = 1.dp.toPx()
+    drawCircle(Brush.radialGradient(listOf(Color(0xFFFDE68A), Color(0xFFD4A017), Color(0xFF92400E)), Offset(c.x - 6 * unit, c.y - 6 * unit), 30 * unit), 24 * unit, c, alpha = alpha)
+    drawRect(Color(0xFF92400E).copy(alpha = alpha), Offset(c.x - 2 * unit, c.y + 16 * unit), Size(4 * unit, 10 * unit))
+    drawCircle(Color(0xFF92400E).copy(alpha = alpha), 4 * unit, Offset(c.x, c.y + 26 * unit))
+    drawPath(Path().apply { moveTo(c.x - 10 * unit, c.y - 26 * unit); lineTo(c.x + 10 * unit, c.y - 26 * unit); lineTo(c.x, c.y - 14 * unit); close() }, Color(0xFF16A34A).copy(alpha = alpha))
+}
+
+private fun DrawScope.lantern(c: Offset, color: Color, alpha: Float) {
+    val unit = 1.dp.toPx()
+    drawCircle(Brush.radialGradient(listOf(color.copy(alpha = 0.45f * alpha), Color.Transparent), c, 48 * unit), 48 * unit, c)
+    drawPath(Path().apply { moveTo(c.x, c.y - 28 * unit); lineTo(c.x + 18 * unit, c.y); lineTo(c.x, c.y + 28 * unit); lineTo(c.x - 18 * unit, c.y); close() }, Brush.verticalGradient(listOf(Color(0xFFFFF3C4), color), c.y - 28 * unit, c.y + 28 * unit), alpha = alpha)
+    drawLine(Color.White.copy(alpha = 0.6f * alpha), Offset(c.x - 18 * unit, c.y), Offset(c.x + 18 * unit, c.y), unit)
+    drawLine(color.copy(alpha = alpha), Offset(c.x, c.y + 28 * unit), Offset(c.x, c.y + 44 * unit), 2 * unit)
 }

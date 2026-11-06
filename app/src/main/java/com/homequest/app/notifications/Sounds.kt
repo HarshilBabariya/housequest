@@ -21,7 +21,6 @@ enum class Sound(@RawRes val res: Int) {
     CASH_REGISTER(R.raw.sfx_cash_register),
     CLOCK(R.raw.sfx_clock),
     STOVE(R.raw.sfx_stove),
-    SPARKLER(R.raw.sfx_sparkler),
     UTTARAYAN(R.raw.sfx_uttarayan),
     TIRANGA(R.raw.sfx_tiranga),
     HOLI(R.raw.sfx_holi),

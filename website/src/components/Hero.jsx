@@ -75,9 +75,8 @@ export default function Hero() {
         <div className="hero-copy">
           <span className="eyebrow pill">v{APP_VERSION} · Android 8+ · {languages.join(' · ')}</span>
           <h1>
-            {['Household', 'expenses,', 'turned', 'into', 'a', 'game.'].map((w, i) => (
-              <span className={`title-word ${w === 'game.' ? 'grad' : ''}`} key={i}>{w}</span>
-            ))}
+            <span className="line"><span className="title-word">Household</span><span className="title-word">expenses,</span></span>
+            <span className="line"><span className="title-word">turned</span><span className="title-word">into</span><span className="nowrap"><span className="title-word">a</span><span className="title-word grad">game.</span></span></span>
           </h1>
           <p className="lead">
             Log a spend in five seconds — by voice if you like — split it with family, keep budgets, and earn points that unlock

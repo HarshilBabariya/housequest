@@ -3,12 +3,12 @@ package com.homequest.app.ui.screens.profile
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +25,6 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Category
-import androidx.compose.material.icons.rounded.Celebration
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Diamond
 import androidx.compose.material.icons.rounded.Edit
@@ -57,6 +56,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,7 +69,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -91,7 +93,6 @@ import com.homequest.app.ui.screens.expenses.OptionSheet
 import com.homequest.app.ui.theme.LocalBottomBarInset
 import com.homequest.app.util.Dates
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProfileScreen(
     onSignOut: () -> Unit,
@@ -110,8 +111,7 @@ fun ProfileScreen(
     onOpenKhata: () -> Unit,
     onOpenServices: () -> Unit,
     onOpenSavings: () -> Unit,
-    onOpenCapture: () -> Unit,
-    onOpenFestivals: () -> Unit
+    onOpenCapture: () -> Unit
 ) {
     val vm = appViewModel { ProfileViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -137,8 +137,8 @@ fun ProfileScreen(
                 .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 8.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.background(scheme.surfaceContainerLowest, CircleShape).padding(4.dp).clip(CircleShape).clickable { member?.let { onOpenAvatar(it.id) } }) {
-                    member?.let { AvatarView(it.avatar(), size = 84.dp) }
+                Box(Modifier.border(2.dp, scheme.primary.copy(alpha = 0.35f), CircleShape).padding(3.dp).clip(CircleShape).clickable { member?.let { onOpenAvatar(it.id) } }) {
+                    member?.let { AvatarView(it.avatar(), size = 72.dp) }
                 }
                 Column(Modifier.weight(1f).padding(start = 16.dp)) {
                     Text(member?.name.orEmpty(), style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -149,22 +149,32 @@ fun ProfileScreen(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Column(Modifier.padding(top = 4.dp).clip(RoundedCornerShape(8.dp)).clickable(onClick = onOpenRewards)) {
+                    Row(
+                        Modifier.padding(top = 6.dp).clip(RoundedCornerShape(50)).background(scheme.primary.copy(alpha = 0.12f)).clickable(onClick = onOpenRewards).padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Rounded.EmojiEvents, contentDescription = null, tint = scheme.primary, modifier = Modifier.size(14.dp))
                         Text(
                             stringResource(R.string.xp_level_label, state.level.level, stringResource(state.level.titleRes)),
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.labelMedium,
                             color = scheme.primary,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(start = 4.dp)
                         )
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text(stringResource(R.string.points_label, state.points), style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant)
-                            Text(stringResource(R.string.streak_label, state.streak), style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant)
-                        }
                     }
                 }
             }
-            Row(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            HqCard(Modifier.padding(top = 14.dp).fillMaxWidth(), onClick = onOpenRewards, padding = 0) {
+                Row(Modifier.height(IntrinsicSize.Min)) {
+                    StatTile("⭐", "%,d".format(state.points), stringResource(R.string.stat_points), Modifier.weight(1f))
+                    VerticalDivider(Modifier.padding(vertical = 10.dp), color = scheme.outlineVariant)
+                    StatTile("🔥", state.streak.toString(), stringResource(R.string.stat_streak), Modifier.weight(1f))
+                    VerticalDivider(Modifier.padding(vertical = 10.dp), color = scheme.outlineVariant)
+                    StatTile("🏆", state.level.level.toString(), stringResource(R.string.stat_level), Modifier.weight(1f))
+                }
+            }
+            Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 FilledTonalButton(onClick = onOpenAccount, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.size(6.dp))
@@ -190,7 +200,7 @@ fun ProfileScreen(
         SectionHeader(stringResource(R.string.household))
         HqCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), padding = 0) {
             NavRow(Icons.Rounded.EmojiEvents, Color(0xFFF59E0B), stringResource(R.string.rewards), stringResource(R.string.rewards_sub), onOpenRewards)
-            NavRow(Icons.Rounded.FamilyRestroom, Color(0xFF8B5CF6), stringResource(R.string.family_members), stringResource(R.string.family_sub, state.memberCount), onOpenFamily)
+            NavRow(Icons.Rounded.FamilyRestroom, Color(0xFF8B5CF6), stringResource(R.string.family_members), pluralStringResource(R.plurals.family_sub, state.memberCount, state.memberCount), onOpenFamily)
             NavRow(Icons.Rounded.Category, Color(0xFF0EA5E9), stringResource(R.string.categories), stringResource(R.string.categories_sub), onOpenCategories)
             NavRow(Icons.Rounded.Savings, Color(0xFFEF4444), stringResource(R.string.budgets), stringResource(R.string.budgets_sub), onOpenBudgets)
             NavRow(Icons.Rounded.NotificationsActive, Color(0xFFF97316), stringResource(R.string.reminders_bills), stringResource(R.string.reminders_sub), onOpenReminders)
@@ -241,8 +251,7 @@ fun ProfileScreen(
         HqCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp).fillMaxWidth(), padding = 0) {
             ToggleRow(stringResource(R.string.festive_mode), stringResource(R.string.festive_mode_sub), state.settings.festiveMode, onChange = vm::setFestiveMode)
             ToggleRow(stringResource(R.string.festive_icon), stringResource(R.string.festive_icon_sub), state.settings.festiveIcon, onChange = vm::setFestiveIcon)
-            ToggleRow(stringResource(R.string.sound_effects), stringResource(R.string.sound_effects_sub), state.settings.soundEffectsEnabled, onChange = vm::setSoundEffects)
-            NavRow(Icons.Rounded.Celebration, Color(0xFFEC4899), stringResource(R.string.festival_packs), stringResource(R.string.festival_packs_sub), onOpenFestivals, last = true)
+            ToggleRow(stringResource(R.string.sound_effects), stringResource(R.string.sound_effects_sub), state.settings.soundEffectsEnabled, onChange = vm::setSoundEffects, last = true)
         }
 
         SectionHeader(stringResource(R.string.currency))
@@ -378,6 +387,14 @@ private val Faqs = listOf(
 )
 
 @Composable
+private fun StatTile(emoji: String, value: String, label: String, modifier: Modifier) {
+    Column(modifier.padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("$emoji $value", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
 private fun ViewTile(icon: ImageVector, label: String, modifier: Modifier, onClick: () -> Unit) {
     HqCard(modifier, onClick = onClick, padding = 12) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -400,7 +417,7 @@ private fun NavRow(icon: ImageVector, tint: Color, title: String, subtitle: Stri
         }
         Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }

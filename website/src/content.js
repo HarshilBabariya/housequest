@@ -113,60 +113,23 @@ export const features = [
 ]
 
 export const festivals = [
-  {
-    key: 'uttarayan', fx: 'kite', emoji: '🪁', name: 'Uttarayan', when: '13–15 Jan', decor: 'kites', effect: 'A kite climbs across the sky with a fluttering tail', sound: 'Kite flutter and whistles',
-    icon: 'A kite over the HomeQuest house', outfit: 'Kite-flyer tee', accessory: null, title: 'Happy Uttarayan!', line: 'Cut the budget strings, not the kite.',
-    looks: [{ name: 'Kite Sky', c: ['#0284C7', '#FACC15', '#EF4444', '#0F2031'] }, { name: 'Kite Sunset', c: ['#EA580C', '#0EA5E9', '#DB2777', '#2B190C'] }]
-  },
-  {
-    key: 'tiranga', fx: 'confetti', emoji: '🇮🇳', name: 'Republic & Independence Day', when: '26 Jan · 15 Aug', decor: 'bunting', effect: 'A shower of tricolour confetti', sound: 'Bugle fanfare',
-    icon: 'The tricolour on the roof', outfit: 'Tiranga jacket', accessory: null, title: 'Jai Hind!', line: 'Freedom from overspending, one log at a time.',
-    looks: [{ name: 'Tiranga', c: ['#F26B0F', '#138808', '#1E3A8A', '#181E1A'] }, { name: 'Tiranga Green', c: ['#138808', '#F26B0F', '#1E3A8A', '#142016'] }]
-  },
-  {
-    key: 'holi', fx: 'balloons', emoji: '🎨', name: 'Holi', when: 'March', decor: 'gulal', effect: 'Water balloons fly up and burst into colour', sound: 'Dhol, pichkari and a water-balloon splash',
-    icon: 'Colour splashes on the house', outfit: 'Holi white kurta', accessory: 'Gulal face', title: 'Happy Holi!', line: 'Bura na mano, budget hai.',
-    looks: [{ name: 'Holi Rang', c: ['#E91E8C', '#FFC400', '#00B8D4', '#2A1224'] }, { name: 'Holi Splash', c: ['#7C3AED', '#22C55E', '#F97316', '#22143A'] }]
-  },
-  {
-    key: 'rakhi', fx: 'rakhi', emoji: '🎀', name: 'Raksha Bandhan', when: 'August', decor: 'toran', effect: 'A rakhi floats up through falling pink petals', sound: 'Temple bell and santoor plucks',
-    icon: 'A rakhi on the house', outfit: 'Rakhi pastel kurta', accessory: null, title: 'Happy Raksha Bandhan!', line: 'Protect the savings too.',
-    looks: [{ name: 'Rakhi Pastel', c: ['#DB2777', '#F59E0B', '#FB923C', '#2B1720'] }, { name: 'Rakhi Silk', c: ['#9333EA', '#F59E0B', '#F472B6', '#23132F'] }]
-  },
-  {
-    key: 'ganesh', fx: 'modaks', emoji: '🌺', name: 'Ganesh Chaturthi', when: '10 days, Aug–Sep', decor: 'marigold', effect: 'Modaks rise through a rain of marigold petals', sound: 'Dhol-tasha and bell',
-    icon: 'Ganesh on the roof', outfit: 'Bappa kurta', accessory: null, title: 'Ganpati Bappa Morya!', line: 'Modak budget: approved.',
-    looks: [{ name: 'Bappa Saffron', c: ['#EA580C', '#DC2626', '#EAB308', '#2B190C'] }, { name: 'Modak Red', c: ['#B91C1C', '#FBBF24', '#16A34A', '#2A1410'] }]
-  },
-  {
-    key: 'navratri', fx: 'dandiya', emoji: '💃', name: 'Navratri', when: '9 nights, Sep–Oct', decor: 'toran', effect: 'Spinning dandiya and twinkling garba lights', sound: 'Garba dhol with dandiya clicks',
-    icon: 'Crossed dandiya on the house', outfit: 'Garba kediyu', accessory: null, title: 'Happy Navratri!', line: 'Nine nights of garba, zero nights of guilt.',
-    looks: [{ name: 'Garba Nights', c: ['#D9271C', '#FF9F1C', '#16A34A', '#291512'] }, { name: 'Midnight Rose', c: ['#9D174D', '#FACC15', '#0EA5E9', '#2A1020'] }]
-  },
-  {
-    key: 'diwali', fx: 'rocket', emoji: '🪔', name: 'Diwali', when: 'Dhanteras → Bhai Dooj', decor: 'lamps', effect: 'A Diwali rocket that bursts into fireworks', sound: 'Anaar, rocket and a string of firecrackers',
-    icon: 'A diya and firecracker bursts', outfit: 'Diwali silk kurta', accessory: null, title: 'Happy Diwali!', line: 'Pataka budget > actual budget? Light diyas, not your savings.',
-    looks: [{ name: 'Diwali Glow', c: ['#B4231F', '#F5B301', '#FF7A1A', '#2A130C'] }, { name: 'Indigo Night', c: ['#4338CA', '#F5B301', '#DB2777', '#181538'] }]
-  },
-  {
-    key: 'christmas', fx: 'snow', emoji: '🎄', name: 'Christmas', when: '24–26 Dec', decor: 'lights', effect: 'Snowfall with swinging jingle bells', sound: 'Sleigh bells and chimes',
-    icon: 'A Santa hat on the roof', outfit: 'Santa suit', accessory: 'Santa hat', title: 'Merry Christmas!', line: 'Gifts under the tree, not under the budget.',
-    looks: [{ name: 'Jingle Red', c: ['#C62828', '#2E7D32', '#D4A017', '#16201A'] }, { name: 'Pine Green', c: ['#166534', '#C62828', '#D4A017', '#112016'] }]
-  },
-  {
-    key: 'newyear', fx: 'rocket', emoji: '🎆', name: 'New Year', when: '31 Dec – 1 Jan', decor: 'stars', effect: 'A rocket that bursts into fireworks', sound: 'Countdown beeps, popper and party horn',
-    icon: 'A gold star with fireworks', outfit: 'Sequin party jacket', accessory: 'Party hat', title: 'Happy New Year!', line: 'New year, same budget — this time for real.',
-    looks: [{ name: 'New Year Gold', c: ['#7C3AED', '#F5C451', '#E879F9', '#17143A'] }, { name: 'Sparkle', c: ['#A16207', '#7C3AED', '#E879F9', '#221A0B'] }]
-  }
+  { key: 'uttarayan', emoji: '🪁', name: 'Uttarayan', when: '13–15 Jan', effect: 'A kite climbs across the sky with a fluttering tail', sound: 'Kite flutter and whistles', outfit: 'Kite-flyer tee', look: { name: 'Kite Sky', c: ['#0284C7', '#FACC15', '#EF4444', '#0F2031'] } },
+  { key: 'tiranga', emoji: '🇮🇳', name: 'Republic & Independence Day', when: '26 Jan · 15 Aug', effect: 'A shower of tricolour confetti', sound: 'Bugle fanfare', outfit: 'Tiranga jacket', look: { name: 'Tiranga', c: ['#F26B0F', '#138808', '#1E3A8A', '#181E1A'] } },
+  { key: 'holi', emoji: '🎨', name: 'Holi', when: 'March', effect: 'Water balloons fly up and burst into colour', sound: 'Dhol, pichkari and a water-balloon splash', outfit: 'Holi white kurta + gulal face', look: { name: 'Holi Rang', c: ['#E91E8C', '#FFC400', '#00B8D4', '#2A1224'] } },
+  { key: 'rakhi', emoji: '🎀', name: 'Raksha Bandhan', when: 'August', effect: 'Rose petals drift down past swinging temple bells', sound: 'Temple bell and santoor plucks', outfit: 'Rakhi pastel kurta', look: { name: 'Rakhi Pastel', c: ['#DB2777', '#F59E0B', '#FB923C', '#2B1720'] } },
+  { key: 'ganesh', emoji: '🌺', name: 'Ganesh Chaturthi', when: '10 days, Aug–Sep', effect: 'Marigold petals shower down past swinging temple bells', sound: 'Dhol-tasha and bell', outfit: 'Bappa kurta', look: { name: 'Bappa Saffron', c: ['#EA580C', '#DC2626', '#EAB308', '#2B190C'] } },
+  { key: 'navratri', emoji: '💃', name: 'Navratri', when: '9 nights, Sep–Oct', effect: 'Colour lights fall past swinging garba lanterns', sound: 'Garba dhol with dandiya clicks', outfit: 'Garba kediyu', look: { name: 'Garba Nights', c: ['#D9271C', '#FF9F1C', '#16A34A', '#291512'] } },
+  { key: 'diwali', emoji: '🪔', name: 'Diwali', when: 'Dhanteras → Bhai Dooj', effect: 'A pataka rocket that bursts into fireworks', sound: 'Anaar, rocket and a string of firecrackers', outfit: 'Diwali silk kurta', look: { name: 'Diwali Glow', c: ['#B4231F', '#F5B301', '#FF7A1A', '#2A130C'] } },
+  { key: 'christmas', emoji: '🎄', name: 'Christmas', when: '24–26 Dec', effect: 'Snowfall with swinging jingle bells', sound: 'Sleigh bells and chimes', outfit: 'Santa suit + Santa hat', look: { name: 'Jingle Red', c: ['#C62828', '#2E7D32', '#D4A017', '#16201A'] } },
+  { key: 'newyear', emoji: '🎆', name: 'New Year', when: '31 Dec – 1 Jan', effect: 'A rocket that bursts into fireworks', sound: 'Countdown beeps, popper and party horn', outfit: 'Sequin party jacket + party hat', look: { name: 'New Year Gold', c: ['#7C3AED', '#F5C451', '#E879F9', '#17143A'] } }
 ]
 
 export const festivalPerks = [
   'Themes, decorations and the festival app icon switch on 3 days before the festival and stay for 3 days after',
   'A full-screen celebration on first open, with the festival’s own sound and your avatar already dressed up',
+  'Tap the festival banner on Home any time to replay the celebration — a pataka rocket, colour balloons, a kite, tricolour confetti, petal showers or snow',
   'Claim my gifts: the pack, +50 ⭐ and the outfit — free during the window, yours for good',
-  'A 3D Switch button flips between two looks per festival and plays its own full-screen moment — a pataka rocket, colour balloons, modaks, a kite, tricolour confetti, a rakhi, dandiya or snow',
-  'Hanging decor on Home — garlands and diyas, torans, kites, bunting, fairy lights, stars',
-  'The same preview lives in the app: Me → Appearance → Festival packs shows any pack’s Home, Switch and gifts on any day'
+  'Hanging decor on Home — garlands and diyas, torans, kites, bunting, fairy lights, stars'
 ]
 
 export const points = [

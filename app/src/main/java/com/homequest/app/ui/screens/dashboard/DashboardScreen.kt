@@ -104,7 +104,7 @@ fun DashboardScreen(
     onOpenRewards: () -> Unit,
     onOpenProfile: () -> Unit,
     onOpenCapture: () -> Unit,
-    onSwitchFestiveLook: () -> Unit
+    onCelebrateFestival: () -> Unit
 ) {
     val vm = appViewModel { DashboardViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -126,11 +126,10 @@ fun DashboardScreen(
                 item {
                     FestivalBanner(
                         day,
-                        themeId = state.settings.festiveLookFor(day),
                         upcoming = state.festival == null,
                         today = state.today,
                         name = state.member?.name.orEmpty(),
-                        onSwitchLook = if (state.festival != null && state.settings.festiveMode) onSwitchFestiveLook else null,
+                        onClick = if (state.festival != null && state.settings.festiveMode) onCelebrateFestival else null,
                         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)
                     )
                 }
@@ -360,25 +359,25 @@ private fun Header(state: DashboardState, onOpenProfile: () -> Unit, onVoice: ()
     val hour = LocalTime.now().hour
     val greeting = stringResource(when (hour) { in 5..11 -> R.string.good_morning; in 12..16 -> R.string.good_afternoon; in 17..21 -> R.string.good_evening; else -> R.string.still_up })
 
-    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(start = 20.dp, end = 20.dp, top = if (decorated) 44.dp else 8.dp)) {
+    HqCard(Modifier.statusBarsPadding().padding(start = 20.dp, end = 20.dp, top = if (decorated) 56.dp else 8.dp).fillMaxWidth(), padding = 14) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.border(2.dp, scheme.primary.copy(alpha = 0.35f), CircleShape).padding(3.dp).clip(CircleShape).clickable(onClick = onOpenProfile)) {
                 state.member?.let { AvatarView(it.avatar(), size = 56.dp, animated = true, mood = mood, play = play, idleActions = true) }
             }
             Column(Modifier.weight(1f).padding(start = 12.dp)) {
                 Text(state.member?.name.orEmpty(), style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Row(
-                    Modifier
-                        .padding(top = 4.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(scheme.primaryContainer)
-                        .clickable(onClick = onOpenRewards)
-                        .padding(horizontal = 10.dp, vertical = 3.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("⭐ ", style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer)
-                    AnimatedCount(state.profile.points, MaterialTheme.typography.labelMedium, scheme.onPrimaryContainer)
-                    Text(" · 🔥 ${state.streak}", style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer, maxLines = 1)
+                Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(Modifier.clip(RoundedCornerShape(50)).background(scheme.primaryContainer).clickable(onClick = onOpenRewards).padding(horizontal = 10.dp, vertical = 3.dp)) {
+                        Text("⭐ ", style = MaterialTheme.typography.labelMedium, color = scheme.onPrimaryContainer)
+                        AnimatedCount(state.profile.points, MaterialTheme.typography.labelMedium, scheme.onPrimaryContainer)
+                    }
+                    Text(
+                        "🔥 ${state.streak}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = scheme.onTertiaryContainer,
+                        maxLines = 1,
+                        modifier = Modifier.clip(RoundedCornerShape(50)).background(scheme.tertiaryContainer).clickable(onClick = onOpenRewards).padding(horizontal = 10.dp, vertical = 3.dp)
+                    )
                 }
             }
             IconButton(onClick = onVoice, modifier = Modifier.size(44.dp).border(1.dp, scheme.tertiary.copy(alpha = 0.5f), CircleShape).background(scheme.tertiaryContainer.copy(alpha = 0.5f), CircleShape)) {
@@ -387,20 +386,12 @@ private fun Header(state: DashboardState, onOpenProfile: () -> Unit, onVoice: ()
         }
         LevelProgress(state.level, state.profile.lifetimePoints, Modifier.padding(top = 12.dp).clip(RoundedCornerShape(8.dp)).clickable(onClick = onOpenRewards))
         AnimatedVisibility(visible = state.member != null, enter = fadeIn() + slideInVertically { it / 2 }) {
-            Row(
-                Modifier
-                    .padding(top = 10.dp)
-                    .fillMaxWidth()
-                    .background(scheme.surfaceContainerLowest, RoundedCornerShape(topStart = 6.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
-                    .border(1.dp, scheme.outlineVariant.copy(alpha = 0.6f), RoundedCornerShape(topStart = 6.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(Modifier.padding(top = 12.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(mood.emoji, fontSize = 20.sp, modifier = Modifier.padding(end = 10.dp))
                 Text(
                     "$greeting ${moodLine(mood, state.today, state.member?.name.orEmpty())}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = scheme.onSurface,
+                    color = scheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis

@@ -89,7 +89,7 @@ private fun HomeQuestRoot(vm: MainViewModel) {
     }
 
     CompositionLocalProvider(LocalContext provides localized, LocalConfiguration provides localized.resources.configuration) {
-        HomeQuestTheme(themeId = settings.shownThemeFor(festival), darkMode = settings.darkMode) {
+        HomeQuestTheme(themeId = settings.themeFor(festival), darkMode = settings.darkMode) {
             Surface(Modifier.fillMaxSize()) {
                 Crossfade(targetState = vm.gate(settings, unlocked, erasing), animationSpec = tween(350), label = "gate") { gate ->
                     Box(Modifier.fillMaxSize()) {
@@ -103,7 +103,7 @@ private fun HomeQuestRoot(vm: MainViewModel) {
                                 onUnlock = vm::unlock
                             )
                             Gate.OPEN -> {
-                                HomeQuestNavHost(pendingRoute = pendingRoute, onRouteOpened = vm::routeOpened, onSwitchFestiveLook = vm::switchFestiveLook, onSignOut = vm::signOut, onEraseAll = vm::eraseAll)
+                                HomeQuestNavHost(pendingRoute = pendingRoute, onRouteOpened = vm::routeOpened, onCelebrateFestival = vm::celebrateFestival, onSignOut = vm::signOut, onEraseAll = vm::eraseAll)
                                 ConfettiBurst(trigger = confetti)
                                 moment?.let { key(it) { FestiveMomentOverlay(it, onDone = { vm.momentDone(it) }) } }
                                 Box(Modifier.align(Alignment.TopCenter)) { RewardToast(event = toast, onDismiss = vm::dismissToast) }
