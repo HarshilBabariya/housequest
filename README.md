@@ -25,11 +25,11 @@ The repo ships without a Gradle wrapper binary; Android Studio generates one, or
 
 ## Get an APK without a local setup
 
-Push this folder to a GitHub repository (branch `main`). The included workflow `.github/workflows/build-apk.yml` builds both debug APKs on every push, uploads them as run artifacts (`HomeQuest-lite-debug-apk`, `HomeQuest-full-debug-apk`) and publishes them to a GitHub Release tagged with the app version (`HomeQuest-full.apk`, `HomeQuest-lite.apk`), so the latest build is always at `https://github.com/HarshilBabariya/housequest/releases/latest`. Copy the APK to the phone and install (allow "unknown sources" when prompted).
+Push this folder to a GitHub repository (branch `main`). The included workflow `.github/workflows/build-apk.yml` builds both debug APKs on every push and uploads them as run artifacts (`HomeQuest-lite-debug-apk`, `HomeQuest-full-debug-apk`); when it succeeds, the website is republished with those APKs, so the Download buttons on the site always give the latest successful build. Copy the APK to the phone and install (allow "unknown sources" when prompted).
 
 ## Website
 
-`website/` is the landing page (Vite + React + anime.js) with Download Full / Lite buttons that point at the latest release. `.github/workflows/deploy-site.yml` deploys it to GitHub Pages on every push that touches it; enable **Settings → Pages → Source: GitHub Actions** once in the repo (it must be public). Local preview: `cd website && npm install && npm run dev`.
+`website/` is the landing page (Vite + React + anime.js) with Download Full / Lite buttons that serve the APKs from the site itself. `.github/workflows/deploy-site.yml` deploys it to GitHub Pages after every successful APK build (and on manual dispatch); enable **Settings → Pages → Source: GitHub Actions** once in the repo (it must be public). Local preview: `cd website && npm install && npm run dev`.
 
 ## Docs
 
@@ -42,7 +42,7 @@ Push this folder to a GitHub repository (branch `main`). The included workflow `
 
 | Version | Date | Notes |
 |---|---|---|
-| 1.9.2 | 2026-11-05 | Switch button stays for the whole festival and launches a garland rocket while the theme flips; tapping the festival banner sends the same rocket up with a soft sparkler sound (no dialog); onboarding without the PIN step; website redesign with animated showcases and an interactive Switch demo |
+| 1.9.2 | 2026-11-05 | Glass theme rebuilt as iOS-style frosted glass (blurred, translucent bottom bar that content scrolls under on Android 12+); Switch button stays for the whole festival (no bobbing) and launches a full-screen festival moment while the theme flips (Diwali rocket and fireworks, Holi balloons, Ganesh modaks, Uttarayan kite, tricolour confetti, rakhi, dandiya, Christmas snow), with a soft sparkler sound; festival banner no longer tappable; onboarding without the PIN step; website redesign with animated showcases and a festival picker that previews each pack's Home look, Switch and features; site deploys only after a successful APK build and hosts the APKs itself |
 | 1.9.1 | 2026-11-05 | Festival themes, decor, icons and gifts run from 3 days before to 3 days after each festival; tapping a notification opens its own screen; smaller Switch button; Invite / Rate / Query rows removed; calendar day totals shown compactly (6.5k, 39k); new website on GitHub Pages with Full / Lite download buttons fed by GitHub Releases |
 | 1.9.0 | 2026-11-05 | Blinkit-style festival takeover: hanging decor per festival, 3D Switch theme button with two looks per festival, rocket/chakri/gulal moments; Ganesh emblem and icon; festival banner text always fits |
 | 1.8.1 | 2026-11-05 | Festival countdown fixed; home & money notification sounds (cooker whistle, debit/credit ting, doorbell, firecrackers…); auto-capture from SMS only, offers ignored; festival app icons with animated splash |

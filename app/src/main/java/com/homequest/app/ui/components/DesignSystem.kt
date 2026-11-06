@@ -71,6 +71,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.homequest.app.R
 import com.homequest.app.domain.LevelInfo
+import com.homequest.app.ui.theme.LocalGlass
+import com.homequest.app.ui.theme.glassSurface
 import com.homequest.app.util.Pin
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -81,11 +83,12 @@ val FieldShape = RoundedCornerShape(14.dp)
 @Composable
 fun HqCard(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, padding: Int = 16, content: @Composable ColumnScope.() -> Unit) {
     val scheme = MaterialTheme.colorScheme
+    val glass = LocalGlass.current != null
     Surface(
-        modifier = modifier.then(if (onClick != null) Modifier.clip(CardShape).clickable(onClick = onClick) else Modifier),
+        modifier = modifier.glassSurface(CardShape, elevation = 10.dp).then(if (onClick != null) Modifier.clip(CardShape).clickable(onClick = onClick) else Modifier),
         shape = CardShape,
-        color = scheme.surfaceContainerLowest,
-        border = BorderStroke(1.dp, scheme.outlineVariant.copy(alpha = 0.6f))
+        color = if (glass) Color.Transparent else scheme.surfaceContainerLowest,
+        border = if (glass) null else BorderStroke(1.dp, scheme.outlineVariant.copy(alpha = 0.6f))
     ) {
         Column(Modifier.padding(padding.dp), content = content)
     }

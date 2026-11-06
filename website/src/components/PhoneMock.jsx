@@ -51,7 +51,7 @@ export default function PhoneMock() {
         <div className="pm-xp pm-fade"><span>Level 6 · Accountant</span><i /></div>
         <div className="pm-banner pm-fade">
           <span>🪔</span>
-          <div><b>Diwali in 3 days</b><small>Tap to celebrate 🎉</small></div>
+          <div><b>Diwali in 3 days</b><small>Light diyas, not your savings ✨</small></div>
           <em className="pm-switch">🎨 Switch</em>
         </div>
         <div className="pm-card pm-fade">

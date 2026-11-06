@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -94,9 +95,13 @@ import com.homequest.app.ui.screens.profile.ProfileScreen
 import com.homequest.app.ui.screens.reminders.RemindersScreen
 import com.homequest.app.ui.screens.rewards.BadgesScreen
 import com.homequest.app.ui.screens.rewards.RewardsScreen
+import com.homequest.app.ui.theme.LocalBottomBarInset
+import com.homequest.app.ui.theme.LocalGlass
+import com.homequest.app.ui.theme.glassSource
+import com.homequest.app.ui.theme.glassSurface
 
 @Composable
-fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onCelebrateFestival: () -> Unit, onSwitchFestiveLook: () -> Unit, onSignOut: () -> Unit, onEraseAll: () -> Unit) {
+fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onSwitchFestiveLook: () -> Unit, onSignOut: () -> Unit, onEraseAll: () -> Unit) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
@@ -109,6 +114,7 @@ fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onCelebra
     }
 
     val layoutDirection = LocalLayoutDirection.current
+    val glass = LocalGlass.current != null
     Scaffold(
         contentWindowInsets = WindowInsets.navigationBars,
         bottomBar = {
@@ -121,125 +127,128 @@ fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onCelebra
             }
         }
     ) { padding ->
-        NavHost(
-            navController = navController,
-            startDestination = Routes.DASHBOARD,
-            modifier = Modifier.padding(
-                start = padding.calculateStartPadding(layoutDirection),
-                top = padding.calculateTopPadding(),
-                end = padding.calculateEndPadding(layoutDirection),
-                bottom = (padding.calculateBottomPadding() - if (showBottomBar) FabOverhang else 0.dp).coerceAtLeast(0.dp)
-            ),
-            enterTransition = { fadeIn() + slideInHorizontally { it / 8 } },
-            exitTransition = { fadeOut() },
-            popEnterTransition = { fadeIn() },
-            popExitTransition = { fadeOut() + slideOutHorizontally { it / 8 } }
-        ) {
-            composable(Routes.DASHBOARD) {
-                DashboardScreen(
-                    onAddExpense = { navController.navigate(Routes.addExpense()) },
-                    onVoiceExpense = { navController.navigate(Routes.addExpense(voice = true)) },
-                    onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) },
-                    onOpenExpenses = { navController.openTab(BottomTab.EXPENSES) },
-                    onOpenInsights = { navController.navigate(Routes.INSIGHTS) },
-                    onOpenBudgets = { navController.navigate(Routes.BUDGETS) },
-                    onOpenGroups = { navController.openTab(BottomTab.GROUPS) },
-                    onOpenReminders = { navController.navigate(Routes.REMINDERS) },
-                    onOpenRewards = { navController.navigate(Routes.rewards()) },
-                    onOpenProfile = { navController.openTab(BottomTab.PROFILE) },
-                    onOpenCapture = { navController.navigate(Routes.CAPTURE) },
-                    onCelebrateFestival = onCelebrateFestival,
-                    onSwitchFestiveLook = onSwitchFestiveLook
-                )
-            }
-            composable(Routes.EXPENSES) {
-                ExpensesScreen(
-                    onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) },
-                    onOpenCategories = { navController.navigate(Routes.CATEGORIES) },
-                    onOpenCalendar = { navController.navigate(Routes.CALENDAR) }
-                )
-            }
-            composable(Routes.GROUPS) {
-                GroupsScreen(onOpenGroup = { navController.navigate(Routes.groupDetail(it)) })
-            }
-            composable(Routes.REWARDS, arguments = listOf(navArgument("pro") { type = NavType.BoolType; defaultValue = false })) { entry ->
-                RewardsScreen(
-                    openPro = entry.arguments?.getBoolean("pro") ?: false,
-                    onBack = { navController.popBackStack() },
-                    onOpenAvatar = { navController.navigate(Routes.avatar(it)) },
-                    onOpenBadges = { navController.navigate(Routes.BADGES) }
-                )
-            }
-            composable(Routes.BADGES) { BadgesScreen(onBack = { navController.popBackStack() }) }
-            composable(Routes.PROFILE) {
-                ProfileScreen(
-                    onSignOut = onSignOut,
-                    onEraseAll = onEraseAll,
-                    onOpenAccount = { navController.navigate(Routes.ACCOUNT) },
-                    onOpenFamily = { navController.navigate(Routes.FAMILY) },
-                    onOpenAvatar = { navController.navigate(Routes.avatar(it)) },
-                    onOpenRewards = { navController.navigate(Routes.rewards()) },
-                    onOpenReminders = { navController.navigate(Routes.REMINDERS) },
-                    onOpenBudgets = { navController.navigate(Routes.BUDGETS) },
-                    onOpenCategories = { navController.navigate(Routes.CATEGORIES) },
-                    onOpenInsights = { navController.navigate(Routes.INSIGHTS) },
-                    onOpenExpenses = { navController.openTab(BottomTab.EXPENSES) },
-                    onOpenCalendar = { navController.navigate(Routes.CALENDAR) },
-                    onOpenPro = { navController.navigate(Routes.rewards(pro = true)) },
-                    onOpenKhata = { navController.navigate(Routes.KHATA) },
-                    onOpenServices = { navController.navigate(Routes.SERVICES) },
-                    onOpenSavings = { navController.navigate(Routes.SAVINGS) },
-                    onOpenCapture = { navController.navigate(Routes.CAPTURE) }
-                )
-            }
-            composable(
-                Routes.ADD_EXPENSE,
-                arguments = listOf(
-                    navArgument("expenseId") { type = NavType.LongType; defaultValue = 0L },
-                    navArgument("groupId") { type = NavType.LongType; defaultValue = 0L },
-                    navArgument("voice") { type = NavType.BoolType; defaultValue = false },
-                    navArgument("draftId") { type = NavType.LongType; defaultValue = 0L }
-                )
-            ) { entry ->
-                AddExpenseScreen(
-                    expenseId = entry.arguments?.getLong("expenseId") ?: 0L,
-                    groupId = entry.arguments?.getLong("groupId") ?: 0L,
-                    draftId = entry.arguments?.getLong("draftId") ?: 0L,
-                    startWithVoice = entry.arguments?.getBoolean("voice") ?: false,
-                    onDone = { navController.popBackStack() },
-                    onOpenCategories = { navController.navigate(Routes.CATEGORIES) }
-                )
-            }
-            composable(Routes.GROUP_DETAIL, arguments = listOf(navArgument("groupId") { type = NavType.LongType })) { entry ->
-                val groupId = entry.arguments?.getLong("groupId") ?: 0L
-                GroupDetailScreen(
-                    groupId = groupId,
-                    onBack = { navController.popBackStack() },
-                    onAddExpense = { navController.navigate(Routes.addExpense(groupId = groupId)) },
-                    onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) }
-                )
-            }
-            composable(Routes.FAMILY) {
-                FamilyScreen(onBack = { navController.popBackStack() }, onOpenAvatar = { navController.navigate(Routes.avatar(it)) })
-            }
-            composable(Routes.AVATAR, arguments = listOf(navArgument("memberId") { type = NavType.LongType })) { entry ->
-                AvatarStudioScreen(memberId = entry.arguments?.getLong("memberId") ?: 0L, onBack = { navController.popBackStack() })
-            }
-            composable(Routes.ACCOUNT) {
-                AccountScreen(onBack = { navController.popBackStack() }, onOpenAvatar = { navController.navigate(Routes.avatar(it)) })
-            }
-            composable(Routes.CATEGORIES) { CategoriesScreen(onBack = { navController.popBackStack() }) }
-            composable(Routes.REMINDERS) { RemindersScreen(onBack = { navController.popBackStack() }) }
-            composable(Routes.BUDGETS) { BudgetsScreen(onBack = { navController.popBackStack() }) }
-            composable(Routes.INSIGHTS) { InsightsScreen(onBack = { navController.popBackStack() }) }
-            composable(Routes.CAPTURE) {
-                CaptureScreen(onBack = { navController.popBackStack() }, onEdit = { navController.navigate(Routes.addExpense(draftId = it)) })
-            }
-            composable(Routes.KHATA) { KhataScreen(onBack = { navController.popBackStack() }) }
-            composable(Routes.SERVICES) { ServicesScreen(onBack = { navController.popBackStack() }) }
-            composable(Routes.SAVINGS) { SavingsScreen(onBack = { navController.popBackStack() }) }
-            composable(Routes.CALENDAR) {
-                CalendarScreen(onBack = { navController.popBackStack() }, onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) })
+        val bottom = (padding.calculateBottomPadding() - if (showBottomBar) FabOverhang else 0.dp).coerceAtLeast(0.dp)
+        val underBar = glass && showBottomBar
+        CompositionLocalProvider(LocalBottomBarInset provides if (underBar) bottom else 0.dp) {
+            NavHost(
+                navController = navController,
+                startDestination = Routes.DASHBOARD,
+                modifier = Modifier.padding(
+                    start = padding.calculateStartPadding(layoutDirection),
+                    top = padding.calculateTopPadding(),
+                    end = padding.calculateEndPadding(layoutDirection),
+                    bottom = if (underBar) 0.dp else bottom
+                ).glassSource(),
+                enterTransition = { fadeIn() + slideInHorizontally { it / 8 } },
+                exitTransition = { fadeOut() },
+                popEnterTransition = { fadeIn() },
+                popExitTransition = { fadeOut() + slideOutHorizontally { it / 8 } }
+            ) {
+                composable(Routes.DASHBOARD) {
+                    DashboardScreen(
+                        onAddExpense = { navController.navigate(Routes.addExpense()) },
+                        onVoiceExpense = { navController.navigate(Routes.addExpense(voice = true)) },
+                        onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) },
+                        onOpenExpenses = { navController.openTab(BottomTab.EXPENSES) },
+                        onOpenInsights = { navController.navigate(Routes.INSIGHTS) },
+                        onOpenBudgets = { navController.navigate(Routes.BUDGETS) },
+                        onOpenGroups = { navController.openTab(BottomTab.GROUPS) },
+                        onOpenReminders = { navController.navigate(Routes.REMINDERS) },
+                        onOpenRewards = { navController.navigate(Routes.rewards()) },
+                        onOpenProfile = { navController.openTab(BottomTab.PROFILE) },
+                        onOpenCapture = { navController.navigate(Routes.CAPTURE) },
+                        onSwitchFestiveLook = onSwitchFestiveLook
+                    )
+                }
+                composable(Routes.EXPENSES) {
+                    ExpensesScreen(
+                        onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) },
+                        onOpenCategories = { navController.navigate(Routes.CATEGORIES) },
+                        onOpenCalendar = { navController.navigate(Routes.CALENDAR) }
+                    )
+                }
+                composable(Routes.GROUPS) {
+                    GroupsScreen(onOpenGroup = { navController.navigate(Routes.groupDetail(it)) })
+                }
+                composable(Routes.REWARDS, arguments = listOf(navArgument("pro") { type = NavType.BoolType; defaultValue = false })) { entry ->
+                    RewardsScreen(
+                        openPro = entry.arguments?.getBoolean("pro") ?: false,
+                        onBack = { navController.popBackStack() },
+                        onOpenAvatar = { navController.navigate(Routes.avatar(it)) },
+                        onOpenBadges = { navController.navigate(Routes.BADGES) }
+                    )
+                }
+                composable(Routes.BADGES) { BadgesScreen(onBack = { navController.popBackStack() }) }
+                composable(Routes.PROFILE) {
+                    ProfileScreen(
+                        onSignOut = onSignOut,
+                        onEraseAll = onEraseAll,
+                        onOpenAccount = { navController.navigate(Routes.ACCOUNT) },
+                        onOpenFamily = { navController.navigate(Routes.FAMILY) },
+                        onOpenAvatar = { navController.navigate(Routes.avatar(it)) },
+                        onOpenRewards = { navController.navigate(Routes.rewards()) },
+                        onOpenReminders = { navController.navigate(Routes.REMINDERS) },
+                        onOpenBudgets = { navController.navigate(Routes.BUDGETS) },
+                        onOpenCategories = { navController.navigate(Routes.CATEGORIES) },
+                        onOpenInsights = { navController.navigate(Routes.INSIGHTS) },
+                        onOpenExpenses = { navController.openTab(BottomTab.EXPENSES) },
+                        onOpenCalendar = { navController.navigate(Routes.CALENDAR) },
+                        onOpenPro = { navController.navigate(Routes.rewards(pro = true)) },
+                        onOpenKhata = { navController.navigate(Routes.KHATA) },
+                        onOpenServices = { navController.navigate(Routes.SERVICES) },
+                        onOpenSavings = { navController.navigate(Routes.SAVINGS) },
+                        onOpenCapture = { navController.navigate(Routes.CAPTURE) }
+                    )
+                }
+                composable(
+                    Routes.ADD_EXPENSE,
+                    arguments = listOf(
+                        navArgument("expenseId") { type = NavType.LongType; defaultValue = 0L },
+                        navArgument("groupId") { type = NavType.LongType; defaultValue = 0L },
+                        navArgument("voice") { type = NavType.BoolType; defaultValue = false },
+                        navArgument("draftId") { type = NavType.LongType; defaultValue = 0L }
+                    )
+                ) { entry ->
+                    AddExpenseScreen(
+                        expenseId = entry.arguments?.getLong("expenseId") ?: 0L,
+                        groupId = entry.arguments?.getLong("groupId") ?: 0L,
+                        draftId = entry.arguments?.getLong("draftId") ?: 0L,
+                        startWithVoice = entry.arguments?.getBoolean("voice") ?: false,
+                        onDone = { navController.popBackStack() },
+                        onOpenCategories = { navController.navigate(Routes.CATEGORIES) }
+                    )
+                }
+                composable(Routes.GROUP_DETAIL, arguments = listOf(navArgument("groupId") { type = NavType.LongType })) { entry ->
+                    val groupId = entry.arguments?.getLong("groupId") ?: 0L
+                    GroupDetailScreen(
+                        groupId = groupId,
+                        onBack = { navController.popBackStack() },
+                        onAddExpense = { navController.navigate(Routes.addExpense(groupId = groupId)) },
+                        onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) }
+                    )
+                }
+                composable(Routes.FAMILY) {
+                    FamilyScreen(onBack = { navController.popBackStack() }, onOpenAvatar = { navController.navigate(Routes.avatar(it)) })
+                }
+                composable(Routes.AVATAR, arguments = listOf(navArgument("memberId") { type = NavType.LongType })) { entry ->
+                    AvatarStudioScreen(memberId = entry.arguments?.getLong("memberId") ?: 0L, onBack = { navController.popBackStack() })
+                }
+                composable(Routes.ACCOUNT) {
+                    AccountScreen(onBack = { navController.popBackStack() }, onOpenAvatar = { navController.navigate(Routes.avatar(it)) })
+                }
+                composable(Routes.CATEGORIES) { CategoriesScreen(onBack = { navController.popBackStack() }) }
+                composable(Routes.REMINDERS) { RemindersScreen(onBack = { navController.popBackStack() }) }
+                composable(Routes.BUDGETS) { BudgetsScreen(onBack = { navController.popBackStack() }) }
+                composable(Routes.INSIGHTS) { InsightsScreen(onBack = { navController.popBackStack() }) }
+                composable(Routes.CAPTURE) {
+                    CaptureScreen(onBack = { navController.popBackStack() }, onEdit = { navController.navigate(Routes.addExpense(draftId = it)) })
+                }
+                composable(Routes.KHATA) { KhataScreen(onBack = { navController.popBackStack() }) }
+                composable(Routes.SERVICES) { ServicesScreen(onBack = { navController.popBackStack() }) }
+                composable(Routes.SAVINGS) { SavingsScreen(onBack = { navController.popBackStack() }) }
+                composable(Routes.CALENDAR) {
+                    CalendarScreen(onBack = { navController.popBackStack() }, onOpenExpense = { navController.navigate(Routes.addExpense(expenseId = it)) })
+                }
             }
         }
     }
@@ -268,12 +277,14 @@ private val FabOverhang = 30.dp
 @Composable
 private fun HqBottomBar(currentRoute: String?, onTab: (BottomTab) -> Unit, onAdd: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
+    val glass = LocalGlass.current != null
+    val shape = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) NotchedBarShape(notchRadius = FabSize / 2 + 6.dp, corner = 26.dp) else RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp)
     Box(Modifier.fillMaxWidth().padding(top = FabOverhang)) {
         Surface(
-            shape = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) NotchedBarShape(notchRadius = FabSize / 2 + 6.dp, corner = 26.dp) else RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp),
-            color = scheme.surfaceContainerLowest,
-            shadowElevation = 14.dp,
-            modifier = Modifier.fillMaxWidth()
+            shape = shape,
+            color = if (glass) Color.Transparent else scheme.surfaceContainerLowest,
+            shadowElevation = if (glass) 0.dp else 14.dp,
+            modifier = Modifier.fillMaxWidth().glassSurface(shape, elevation = 18.dp, backdrop = true)
         ) {
             Row(Modifier.navigationBarsPadding().height(66.dp), verticalAlignment = Alignment.CenterVertically) {
                 val tabs = BottomTab.entries

@@ -28,7 +28,7 @@ export default function Downloads() {
         ))}
       </ol>
       <p className="download-foot">
-        Releases are built by GitHub Actions from the <a href={REPO_URL} target="_blank" rel="noreferrer">open source</a>. Want a specific version? See <a href={`${REPO_URL}/releases`} target="_blank" rel="noreferrer">all releases</a>.
+        Built by GitHub Actions from the <a href={REPO_URL} target="_blank" rel="noreferrer">open source</a> on every push; the buttons always serve the build this page was published with.
       </p>
     </section>
   )

@@ -39,6 +39,7 @@ import com.homequest.app.ui.components.ExpenseRow
 import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.ui.components.StatTile
 import com.homequest.app.ui.components.TopBarAction
+import com.homequest.app.ui.theme.LocalBottomBarInset
 import com.homequest.app.util.Dates
 import com.homequest.app.util.money
 
@@ -61,7 +62,7 @@ fun ExpensesScreen(onOpenExpense: (Long) -> Unit, onOpenCategories: () -> Unit, 
             )
         }
     ) { padding ->
-        LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 40.dp)) {
+        LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 40.dp + LocalBottomBarInset.current)) {
             item {
                 val change = if (state.lastMonthTotal > 0) (state.monthTotal - state.lastMonthTotal) / state.lastMonthTotal * 100 else null
                 Row(Modifier.padding(horizontal = 20.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

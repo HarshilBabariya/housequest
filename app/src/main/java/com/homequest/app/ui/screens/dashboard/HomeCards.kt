@@ -1,11 +1,6 @@
 package com.homequest.app.ui.screens.dashboard
 
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,7 +35,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -65,7 +59,7 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 @Composable
-fun FestivalBanner(day: FestivalDay, themeId: String, upcoming: Boolean, today: LocalDate, name: String, onCelebrate: (() -> Unit)?, onSwitchLook: (() -> Unit)?, modifier: Modifier = Modifier) {
+fun FestivalBanner(day: FestivalDay, themeId: String, upcoming: Boolean, today: LocalDate, name: String, onSwitchLook: (() -> Unit)?, modifier: Modifier = Modifier) {
     val pack = day.festival.pack
     val palette = Palettes.forId(themeId)
     val shape = RoundedCornerShape(22.dp)
@@ -77,7 +71,6 @@ fun FestivalBanner(day: FestivalDay, themeId: String, upcoming: Boolean, today: 
                 .heightIn(min = 112.dp)
                 .clip(shape)
                 .background(Brush.linearGradient(listOf(palette.primary, palette.tertiary.copy(alpha = 0.9f), palette.secondary)))
-                .then(if (onCelebrate == null) Modifier else Modifier.clickable(onClick = onCelebrate))
         ) {
             FestiveEffect(pack.look(), Modifier.matchParentSize())
             Box(Modifier.matchParentSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent))))
@@ -96,7 +89,7 @@ fun FestivalBanner(day: FestivalDay, themeId: String, upcoming: Boolean, today: 
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        when { upcoming -> stringResource(R.string.fest_upcoming_hint, PointsRules.FESTIVAL_GIFT); onCelebrate != null -> stringResource(R.string.fest_tap_to_celebrate); else -> stringResource(day.festival.lineRes) },
+                        if (upcoming) stringResource(R.string.fest_upcoming_hint, PointsRules.FESTIVAL_GIFT) else stringResource(day.festival.lineRes),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White.copy(alpha = 0.9f),
                         maxLines = 2,
@@ -118,14 +111,12 @@ private fun SwitchLookButton(onClick: () -> Unit, modifier: Modifier) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val sink by animateDpAsState(if (pressed) SWITCH_DEPTH - 1.dp else 0.dp, label = "sink")
-    val hover by rememberInfiniteTransition(label = "hover").animateFloat(0f, 1f, infiniteRepeatable(tween(1400), RepeatMode.Reverse), label = "lift")
     val pill = RoundedCornerShape(50)
     val face = lerp(scheme.secondary, Color.White, 0.78f)
     val side = lerp(scheme.secondary, Color.Black, 0.3f)
     val ink = lerp(scheme.primary, Color.Black, 0.35f)
     Box(
         modifier
-            .graphicsLayer { translationY = if (pressed) 0f else -hover * 3.dp.toPx() }
             .shadow(if (pressed) 2.dp else 10.dp, pill, ambientColor = side, spotColor = side)
             .drawBehind {
                 val depth = SWITCH_DEPTH.toPx()

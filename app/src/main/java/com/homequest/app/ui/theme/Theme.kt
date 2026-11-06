@@ -11,7 +11,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -82,26 +84,30 @@ fun HomeQuestTheme(
         typography = AppTypography,
         shapes = AppShapes
     ) {
-        if (palette.glass) GlassBackdrop(palette, dark, content) else content()
+        if (palette.glass) {
+            val glass = remember(dark) { Glass(dark) }
+            CompositionLocalProvider(LocalGlass provides glass) { GlassBackdrop(palette, dark, content) }
+        } else content()
     }
 }
 
 @Composable
 private fun GlassBackdrop(palette: Palette, dark: Boolean, content: @Composable () -> Unit) {
-    val glow = if (dark) 0.45f else 0.38f
+    val glow = if (dark) 0.55f else 0.5f
     Box(
         Modifier
             .fillMaxSize()
             .background(if (dark) palette.darkBackground else palette.lightBackground)
             .drawBehind {
                 listOf(
-                    Triple(palette.primary, Offset(0.1f, 0.1f), 0.85f),
-                    Triple(palette.tertiary, Offset(0.95f, 0.45f), 0.7f),
-                    Triple(palette.secondary, Offset(0.25f, 0.92f), 0.8f)
+                    Triple(palette.primary, Offset(0.08f, 0.12f), 0.7f),
+                    Triple(palette.tertiary, Offset(0.96f, 0.4f), 0.55f),
+                    Triple(palette.secondary, Offset(0.3f, 0.95f), 0.65f),
+                    Triple(Color.White, Offset(0.75f, 0.8f), 0.3f)
                 ).forEach { (color, at, r) ->
                     val center = Offset(size.width * at.x, size.height * at.y)
                     val radius = size.width * r
-                    drawCircle(Brush.radialGradient(listOf(color.copy(alpha = glow), Color.Transparent), center, radius), radius, center)
+                    drawCircle(Brush.radialGradient(listOf(color.copy(alpha = glow), color.copy(alpha = glow * 0.5f), Color.Transparent), center, radius), radius, center)
                 }
             }
     ) { content() }

@@ -87,6 +87,7 @@ import com.homequest.app.ui.components.ProCard
 import com.homequest.app.ui.components.SectionHeader
 import com.homequest.app.ui.components.relationLabel
 import com.homequest.app.ui.screens.expenses.OptionSheet
+import com.homequest.app.ui.theme.LocalBottomBarInset
 import com.homequest.app.util.Dates
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -279,7 +280,7 @@ fun ProfileScreen(
                 Text(stringResource(R.string.erase_all), maxLines = 1)
             }
         }
-        Spacer(Modifier.height(36.dp))
+        Spacer(Modifier.height(36.dp + LocalBottomBarInset.current))
     }
 
     if (showFaqs) {

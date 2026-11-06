@@ -17,7 +17,6 @@ import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.notifications.Sound
 import com.homequest.app.ui.components.Celebration
 import com.homequest.app.ui.components.FestiveMoment
-import com.homequest.app.ui.components.MomentKind
 import com.homequest.app.util.Dates
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -67,6 +66,8 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
     val moment: StateFlow<FestiveMoment?> = _moment
     private var moments = 0
 
+    private var switching = false
+
     private val _pendingRoute = MutableStateFlow<String?>(null)
     val pendingRoute: StateFlow<String?> = _pendingRoute
 
@@ -101,7 +102,7 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
                     }
                     is RewardEvent.PointsAwarded -> {
                         _toast.value = event
-                        if (LedgerReasons.kind(event.reason) == LedgerReasons.LOG_EXPENSE) playMoment(s, MomentKind.LOGGED)
+                        if (LedgerReasons.kind(event.reason) == LedgerReasons.LOG_EXPENSE) playMoment(s)
                     }
                     else -> _toast.value = event
                 }
@@ -114,28 +115,30 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    private fun playMoment(settings: AppSettings, kind: MomentKind): Boolean {
+    private fun playMoment(settings: AppSettings): Boolean {
         val day = festival.value ?: return false
         if (!settings.onboarded || !settings.festiveMode) return false
-        _moment.value = FestiveMoment(day.festival.pack, kind, ++moments)
+        _moment.value = FestiveMoment(day.festival.pack, ++moments)
         return true
-    }
-
-    fun celebrateFestival() = viewModelScope.launch {
-        val s = container.settingsRepository.current()
-        if (playMoment(s, MomentKind.TAPPED) && s.soundEffectsEnabled) container.sounds.play(Sound.SPARKLER)
     }
 
     fun switchFestiveLook() = viewModelScope.launch {
         val day = festival.value ?: return@launch
+        if (switching) return@launch
+        switching = true
+        val before = container.settingsRepository.current()
+        if (playMoment(before)) {
+            if (before.soundEffectsEnabled) container.sounds.play(Sound.SPARKLER)
+            delay(SWITCH_FLIP_DELAY_MS)
+        }
         val s = container.settingsRepository.current()
-        if (playMoment(s, MomentKind.SWITCHED)) delay(SWITCH_FLIP_DELAY_MS)
         if (s.festiveThemeSkipped == day.key) {
             container.settingsRepository.setFestiveThemeSkipped("")
             container.settingsRepository.setFestiveLookAlt("")
         } else {
             container.settingsRepository.setFestiveLookAlt(if (s.festiveLookAlt == day.key) "" else day.key)
         }
+        switching = false
     }
 
     fun momentDone(moment: FestiveMoment) = _moment.update { if (it == moment) null else it }

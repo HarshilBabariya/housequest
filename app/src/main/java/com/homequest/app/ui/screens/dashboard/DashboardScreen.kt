@@ -79,6 +79,7 @@ import com.homequest.app.ui.components.SectionHeader
 import com.homequest.app.ui.components.StatTile
 import com.homequest.app.ui.components.label
 import com.homequest.app.ui.components.moodLine
+import com.homequest.app.ui.theme.LocalBottomBarInset
 import com.homequest.app.util.Dates
 import com.homequest.app.util.Sharing
 import com.homequest.app.util.WeeklyCard
@@ -103,7 +104,6 @@ fun DashboardScreen(
     onOpenRewards: () -> Unit,
     onOpenProfile: () -> Unit,
     onOpenCapture: () -> Unit,
-    onCelebrateFestival: () -> Unit,
     onSwitchFestiveLook: () -> Unit
 ) {
     val vm = appViewModel { DashboardViewModel(it) }
@@ -114,7 +114,7 @@ fun DashboardScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { padding ->
-        LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 40.dp)) {
+        LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 40.dp + LocalBottomBarInset.current)) {
             item {
                 val pack = state.festival?.takeIf { state.settings.festiveMode }?.festival?.pack
                 Box {
@@ -130,7 +130,6 @@ fun DashboardScreen(
                         upcoming = state.festival == null,
                         today = state.today,
                         name = state.member?.name.orEmpty(),
-                        onCelebrate = if (state.festival != null && state.settings.festiveMode) onCelebrateFestival else null,
                         onSwitchLook = if (state.festival != null && state.settings.festiveMode) onSwitchFestiveLook else null,
                         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)
                     )

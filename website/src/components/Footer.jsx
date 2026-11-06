@@ -12,7 +12,7 @@ export default function Footer() {
       <nav>
         <a href={REPO_URL} target="_blank" rel="noreferrer">Source on GitHub</a>
         <a href={`${REPO_URL}/issues`} target="_blank" rel="noreferrer">Report a bug</a>
-        <a href={`${REPO_URL}/releases`} target="_blank" rel="noreferrer">Releases</a>
+        <a href={`${REPO_URL}/actions`} target="_blank" rel="noreferrer">Builds</a>
       </nav>
     </footer>
   )

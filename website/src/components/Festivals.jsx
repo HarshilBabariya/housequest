@@ -1,7 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import { animate, createTimeline, stagger, utils } from 'animejs'
+import { animate, stagger, utils } from 'animejs'
 import { festivalPerks, festivals } from '../content.js'
 import { reducedMotion, useReveal } from '../hooks/useReveal.js'
+import { EffectMarkup, playEffect } from './FestiveEffect.jsx'
+
+const decorNames = {
+  kites: 'Kites on strings',
+  bunting: 'Tricolour bunting',
+  gulal: 'Drifting colour clouds',
+  toran: 'Flower toran',
+  marigold: 'Marigold and mango-leaf toran',
+  lamps: 'Garland with kandils and diyas',
+  lights: 'Fairy lights and snow',
+  stars: 'Twinkling stars'
+}
 
 function Sparks() {
   const ref = useRef(null)
@@ -25,83 +37,114 @@ function Sparks() {
   )
 }
 
-function SwitchDemo() {
+function Decor({ kind }) {
+  return (
+    <div className={`decor decor-${kind}`} aria-hidden="true">
+      {Array.from({ length: 7 }, (_, i) => <i key={i} style={{ left: `${8 + i * 14}%`, '--d': `${28 + (i * 13) % 30}px` }} />)}
+    </div>
+  )
+}
+
+function SwitchDemo({ festival }) {
   const ref = useRef(null)
   const [alt, setAlt] = useState(false)
   const busy = useRef(false)
+  const look = festival.looks[alt ? 1 : 0]
+  useEffect(() => { setAlt(false) }, [festival])
   useEffect(() => {
     if (reducedMotion()) return
-    animate(ref.current.querySelectorAll('.lamp'), {
+    const sway = animate(ref.current.querySelectorAll('.decor i'), {
       rotate: () => [utils.random(-4, -1, 1), utils.random(1, 4, 1)],
       duration: () => utils.random(1800, 2600),
       loop: true,
       alternate: true,
       ease: 'inOutSine'
     })
-    animate(ref.current.querySelector('.switch-pill'), { translateY: [0, -4], duration: 1200, loop: true, alternate: true, ease: 'inOutSine' })
-  }, [])
+    return () => sway.revert()
+  }, [festival])
   const fly = () => {
     if (busy.current) return
     busy.current = true
-    const root = ref.current
-    const rocket = root.querySelector('.garland')
-    const beam = root.querySelector('.beam')
-    const h = root.clientHeight
-    const tl = createTimeline({ onComplete: () => { busy.current = false } })
-    tl.add(beam, { opacity: [0, 0.9], scaleY: [0, 1], duration: 700, ease: 'outQuad' }, 0)
-      .add(rocket, { translateY: [h + 40, -220], duration: 1500, ease: 'inQuad' }, 0)
-      .add(root.querySelectorAll('.spark-d'), { opacity: [0, 1, 0], translateY: [0, 120], scale: [0.4, 1.2], duration: 1500, delay: stagger(40) }, 100)
-      .add(beam, { opacity: 0, duration: 600, ease: 'outQuad' }, 1100)
-      .call(() => setAlt((v) => !v), 650)
+    playEffect(festival.fx, ref.current.querySelector('.fx'), ref.current.clientHeight, () => setAlt((v) => !v), () => { busy.current = false })
   }
+  const [p1, p2, p3, bg] = look.c
   return (
-    <div className={`switch-demo ${alt ? 'alt' : ''}`} ref={ref} onClick={fly} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fly() }}>
-      <div className="lamps" aria-hidden="true">{Array.from({ length: 7 }, (_, i) => <i className="lamp" key={i} style={{ left: `${8 + i * 14}%`, height: `${28 + (i * 13) % 30}px` }} />)}</div>
+    <div className="switch-demo" style={{ '--p1': p1, '--p2': p2, '--p3': p3, '--bg1': bg }} ref={ref} onClick={fly} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fly() }}>
+      <Decor kind={festival.decor} />
       <div className="demo-head">
         <span className="demo-avatar">🧑</span>
         <div><b>Harshil</b><small>⭐ 2,967 · 🔥 12</small></div>
       </div>
       <div className="demo-banner">
-        <span>🪔</span>
-        <div><b>Diwali in 3 days</b><small>Tap to celebrate 🎉</small></div>
+        <span>{festival.emoji}</span>
+        <div><b>{festival.title.replace('!', ', Harshil!')}</b><small>{festival.line}</small></div>
       </div>
       <span className="switch-pill">🎨 Switch</span>
-      <p className="demo-hint">Tap anywhere — this is what Switch (and the banner) does in the app</p>
-      <i className="beam" aria-hidden="true" />
-      <div className="sparks-d" aria-hidden="true">{Array.from({ length: 14 }, (_, i) => <i className="spark-d" key={i} style={{ left: `${38 + (i * 11) % 24}%`, top: `${(i * 17) % 90}%` }} />)}</div>
-      <div className="garland" aria-hidden="true">
-        <i className="leaf" /><i className="band" />
-        <i className="ball" /><i className="ball y" /><i className="ball" /><i className="ball y" />
-        <i className="tassel" />
-      </div>
+      <p className="demo-hint">Look: <b>{look.name}</b> · tap to switch to {festival.looks[alt ? 0 : 1].name}</p>
+      <div className="fx" aria-hidden="true" key={festival.key}><EffectMarkup kind={festival.fx} colors={[p1, p2, p3]} /></div>
     </div>
+  )
+}
+
+function PackDetails({ festival }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    if (reducedMotion()) return
+    animate(ref.current.querySelectorAll('li'), { opacity: [0, 1], translateX: [-14, 0], duration: 500, delay: stagger(50), ease: 'outExpo' })
+  }, [festival])
+  const rows = [
+    ['🎨', 'Two looks', `${festival.looks[0].name} ↔ ${festival.looks[1].name}`],
+    ['🏮', 'Home decor', decorNames[festival.decor]],
+    ['📱', 'App icon', festival.icon],
+    ['👕', 'Outfit', festival.accessory ? `${festival.outfit} + ${festival.accessory}` : festival.outfit],
+    ['✨', 'Celebration', festival.effect],
+    ['🔊', 'Sound', festival.sound],
+    ['🎁', 'Gift', '+50 ⭐ and the pack, free during the window']
+  ]
+  return (
+    <ul className="pack-details" ref={ref}>
+      {rows.map(([e, k, v]) => <li key={k}><span>{e}</span><div><small>{k}</small><b>{v}</b></div></li>)}
+    </ul>
   )
 }
 
 export default function Festivals() {
   const ref = useReveal('.fest-card, .perk')
+  const [key, setKey] = useState('diwali')
+  const festival = festivals.find((f) => f.key === key)
   return (
     <section className="section fest" id="festivals" ref={ref}>
       <Sparks />
       <div className="section-head">
         <span className="eyebrow">Nine festival packs</span>
         <h2>The app dresses up for every festival. So does your avatar.</h2>
-        <p>From three days before to three days after: a theme with two looks, hanging decor on Home, a festival app icon, an outfit, a sound and a full-screen celebration.</p>
+        <p>Pick a festival to see how Home looks that week — from three days before to three days after — and what the pack brings.</p>
+      </div>
+      <div className="fest-picker" role="tablist" aria-label="Festival">
+        {festivals.map((f) => (
+          <button type="button" role="tab" aria-selected={f.key === key} className={`fest-tab ${f.key === key ? 'on' : ''}`} key={f.key} onClick={() => setKey(f.key)}>
+            <span>{f.emoji}</span>{f.name.split(' &')[0]}
+          </button>
+        ))}
       </div>
       <div className="fest-top">
-        <SwitchDemo />
-        <ul className="perks">
-          {festivalPerks.map((p) => <li className="perk" key={p}><span>✦</span>{p}</li>)}
-        </ul>
+        <SwitchDemo festival={festival} />
+        <div className="fest-info">
+          <h3>{festival.emoji} {festival.name} <small>{festival.when}</small></h3>
+          <PackDetails festival={festival} />
+        </div>
       </div>
+      <ul className="perks">
+        {festivalPerks.map((p) => <li className="perk" key={p}><span>✦</span>{p}</li>)}
+      </ul>
       <div className="fest-grid">
         {festivals.map((f) => (
-          <article className="fest-card" key={f.key} style={{ '--a': f.colors[0], '--b': f.colors[1] }}>
+          <article className={`fest-card ${f.key === key ? 'on' : ''}`} key={f.key} style={{ '--a': f.looks[0].c[0], '--b': f.looks[0].c[2] }} onClick={() => setKey(f.key)}>
             <span className="fest-emoji">{f.emoji}</span>
             <h3>{f.name}</h3>
             <small>{f.when}</small>
             <dl>
-              <div><dt>Theme</dt><dd>{f.theme}</dd></div>
+              <div><dt>Looks</dt><dd>{f.looks[0].name} · {f.looks[1].name}</dd></div>
               <div><dt>Outfit</dt><dd>{f.outfit}</dd></div>
             </dl>
           </article>

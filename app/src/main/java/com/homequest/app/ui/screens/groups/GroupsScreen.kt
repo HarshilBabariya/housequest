@@ -56,6 +56,7 @@ import com.homequest.app.ui.components.HqTextField
 import com.homequest.app.ui.components.PrimaryButton
 import com.homequest.app.ui.screens.expenses.MemberChip
 import com.homequest.app.ui.screens.expenses.OptionSheet
+import com.homequest.app.ui.theme.LocalBottomBarInset
 
 private val groupEmojis = listOf("🏠", "👨‍👩‍👧", "✈️", "🎉", "🍕", "🏖️", "🛒", "💼")
 
@@ -70,12 +71,12 @@ fun GroupsScreen(onOpenGroup: (Long) -> Unit) {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { TopAppBar(title = { Text(stringResource(R.string.tab_groups)) }) },
-        floatingActionButton = { ExtendedFloatingActionButton(onClick = { showCreate = true }, icon = { Icon(Icons.Rounded.Add, contentDescription = null) }, text = { Text(stringResource(R.string.new_group)) }) }
+        floatingActionButton = { ExtendedFloatingActionButton(onClick = { showCreate = true }, icon = { Icon(Icons.Rounded.Add, contentDescription = null) }, text = { Text(stringResource(R.string.new_group)) }, modifier = Modifier.padding(bottom = LocalBottomBarInset.current)) }
     ) { padding ->
         if (state.groups.isEmpty()) {
-            EmptyState("🤝", stringResource(R.string.no_groups_title), stringResource(R.string.no_groups_body), Modifier.padding(padding))
+            EmptyState("🤝", stringResource(R.string.no_groups_title), stringResource(R.string.no_groups_body), Modifier.padding(padding).padding(bottom = LocalBottomBarInset.current))
         } else {
-            LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 100.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 100.dp + LocalBottomBarInset.current), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(state.groups, key = { it.group.id }) { g ->
                     HqCard(Modifier.fillMaxWidth().clip(CardShape).combinedClickable(onClick = { onOpenGroup(g.group.id) }, onLongClick = { pendingDelete = g.group })) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
