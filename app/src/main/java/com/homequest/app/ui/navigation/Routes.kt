@@ -28,6 +28,7 @@ object Routes {
     const val BUDGETS = "budgets"
     const val INSIGHTS = "insights"
     const val CALENDAR = "calendar"
+    const val FESTIVALS = "festivals"
     const val CAPTURE = "capture"
     const val KHATA = "khata"
     const val SERVICES = "services"

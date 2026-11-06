@@ -25,7 +25,7 @@ The repo ships without a Gradle wrapper binary; Android Studio generates one, or
 
 ## Get an APK without a local setup
 
-Push this folder to a GitHub repository (branch `main`). The included workflow `.github/workflows/build-apk.yml` builds both debug APKs on every push and uploads them as run artifacts (`HomeQuest-lite-debug-apk`, `HomeQuest-full-debug-apk`); when it succeeds, the website is republished with those APKs, so the Download buttons on the site always give the latest successful build. Copy the APK to the phone and install (allow "unknown sources" when prompted).
+Push this folder to a GitHub repository (branch `main`). The included workflow `.github/workflows/build-apk.yml` builds both debug APKs on every push and uploads them as run artifacts (`HomeQuest-lite-debug-apk`, `HomeQuest-full-debug-apk`); when it succeeds, the website is republished with those APKs, so the Download buttons on the site always give the latest successful build. Copy the APK to the phone and install (allow "unknown sources" when prompted). Builds are signed with the committed `app/debug.keystore`, so a newer build installs over the previous one; a build older than 1.9.3 (signed with a throwaway key) has to be uninstalled once first.
 
 ## Website
 
@@ -42,6 +42,7 @@ Push this folder to a GitHub repository (branch `main`). The included workflow `
 
 | Version | Date | Notes |
 |---|---|---|
+| 1.9.3 | 2026-11-06 | Festival packs preview in the app (Me → Appearance → Festival packs), mirroring the website's picker: a mini Home per pack with decor, dressed avatar and the banner's Switch playing the full-screen moment, plus looks, outfit, icon, celebration, sound and gift details; CI builds now share one committed debug signing key so updates install in place (uninstall a build older than 1.9.3 once) |
 | 1.9.2 | 2026-11-05 | Glass theme rebuilt as iOS-style frosted glass (blurred, translucent bottom bar that content scrolls under on Android 12+); Switch button stays for the whole festival (no bobbing) and launches a full-screen festival moment while the theme flips (Diwali rocket and fireworks, Holi balloons, Ganesh modaks, Uttarayan kite, tricolour confetti, rakhi, dandiya, Christmas snow), with a soft sparkler sound; festival banner no longer tappable; onboarding without the PIN step; website redesign with animated showcases and a festival picker that previews each pack's Home look, Switch and features; site deploys only after a successful APK build and hosts the APKs itself |
 | 1.9.1 | 2026-11-05 | Festival themes, decor, icons and gifts run from 3 days before to 3 days after each festival; tapping a notification opens its own screen; smaller Switch button; Invite / Rate / Query rows removed; calendar day totals shown compactly (6.5k, 39k); new website on GitHub Pages with Full / Lite download buttons fed by GitHub Releases |
 | 1.9.0 | 2026-11-05 | Blinkit-style festival takeover: hanging decor per festival, 3D Switch theme button with two looks per festival, rocket/chakri/gulal moments; Ganesh emblem and icon; festival banner text always fits |

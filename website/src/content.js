@@ -164,8 +164,9 @@ export const festivalPerks = [
   'Themes, decorations and the festival app icon switch on 3 days before the festival and stay for 3 days after',
   'A full-screen celebration on first open, with the festival’s own sound and your avatar already dressed up',
   'Claim my gifts: the pack, +50 ⭐ and the outfit — free during the window, yours for good',
-  'A 3D Switch button flips between two looks per festival and launches a rocket across the whole screen that bursts into fireworks',
-  'Hanging decor on Home — garlands and diyas, torans, kites, bunting, fairy lights, stars'
+  'A 3D Switch button flips between two looks per festival and plays its own full-screen moment — a pataka rocket, colour balloons, modaks, a kite, tricolour confetti, a rakhi, dandiya or snow',
+  'Hanging decor on Home — garlands and diyas, torans, kites, bunting, fairy lights, stars',
+  'The same preview lives in the app: Me → Appearance → Festival packs shows any pack’s Home, Switch and gifts on any day'
 ]
 
 export const points = [
@@ -200,7 +201,7 @@ export const builds = [
 
 export const installSteps = [
   ['Download', 'Tap Full or Lite above. The APK is the latest build — this page is republished only after a successful build.'],
-  ['Allow the install', 'Open the file; Android asks once to allow installs from your browser or file manager.'],
+  ['Allow the install', 'Open the file; Android asks once to allow installs from your browser or file manager. Updates install over the previous build — only a build older than 1.9.3 has to be uninstalled first, because those were signed with a throwaway key.'],
   ['Full build only', 'Play Protect blocks it from a browser. Copy it to a computer and run adb install -r HomeQuest-full.apk, then grant notification access on Me → Capture.'],
   ['Set up', 'Pick a language, your name and mobile, a currency and an optional budget — two screens. A daily 8:30 PM nudge is ready for you; App lock is a switch on Me whenever you want it.']
 ]

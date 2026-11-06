@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Category
+import androidx.compose.material.icons.rounded.Celebration
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Diamond
 import androidx.compose.material.icons.rounded.Edit
@@ -109,7 +110,8 @@ fun ProfileScreen(
     onOpenKhata: () -> Unit,
     onOpenServices: () -> Unit,
     onOpenSavings: () -> Unit,
-    onOpenCapture: () -> Unit
+    onOpenCapture: () -> Unit,
+    onOpenFestivals: () -> Unit
 ) {
     val vm = appViewModel { ProfileViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -239,7 +241,8 @@ fun ProfileScreen(
         HqCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp).fillMaxWidth(), padding = 0) {
             ToggleRow(stringResource(R.string.festive_mode), stringResource(R.string.festive_mode_sub), state.settings.festiveMode, onChange = vm::setFestiveMode)
             ToggleRow(stringResource(R.string.festive_icon), stringResource(R.string.festive_icon_sub), state.settings.festiveIcon, onChange = vm::setFestiveIcon)
-            ToggleRow(stringResource(R.string.sound_effects), stringResource(R.string.sound_effects_sub), state.settings.soundEffectsEnabled, onChange = vm::setSoundEffects, last = true)
+            ToggleRow(stringResource(R.string.sound_effects), stringResource(R.string.sound_effects_sub), state.settings.soundEffectsEnabled, onChange = vm::setSoundEffects)
+            NavRow(Icons.Rounded.Celebration, Color(0xFFEC4899), stringResource(R.string.festival_packs), stringResource(R.string.festival_packs_sub), onOpenFestivals, last = true)
         }
 
         SectionHeader(stringResource(R.string.currency))

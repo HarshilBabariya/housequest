@@ -6,16 +6,16 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-enum class FestivalPack(@StringRes val nameRes: Int, val emoji: String, val themeId: String, val altThemeId: String) {
-    UTTARAYAN(R.string.fest_uttarayan, "🪁", ThemeIds.KITES, ThemeIds.KITES_SUNSET),
-    TIRANGA(R.string.pack_tiranga, "🇮🇳", ThemeIds.TIRANGA, ThemeIds.TIRANGA_GREEN),
-    HOLI(R.string.fest_holi, "🎨", ThemeIds.HOLI, ThemeIds.HOLI_SPLASH),
-    RAKHI(R.string.fest_rakhi, "🎀", ThemeIds.RAKHI, ThemeIds.RAKHI_SILK),
-    GANESH(R.string.fest_ganesh, "🌺", ThemeIds.BAPPA, ThemeIds.BAPPA_MODAK),
-    NAVRATRI(R.string.fest_navratri, "💃", ThemeIds.GARBA, ThemeIds.GARBA_NIGHT),
-    DIWALI(R.string.fest_diwali, "🪔", ThemeIds.DIWALI, ThemeIds.DIWALI_NIGHT),
-    CHRISTMAS(R.string.fest_christmas, "🎄", ThemeIds.CHRISTMAS, ThemeIds.CHRISTMAS_PINE),
-    NEW_YEAR(R.string.fest_new_year, "🎆", ThemeIds.NEW_YEAR, ThemeIds.NEW_YEAR_SPARKLE)
+enum class FestivalPack(@StringRes val nameRes: Int, val emoji: String, val themeId: String, val altThemeId: String, @StringRes val altLookRes: Int) {
+    UTTARAYAN(R.string.fest_uttarayan, "🪁", ThemeIds.KITES, ThemeIds.KITES_SUNSET, R.string.look_kites_sunset),
+    TIRANGA(R.string.pack_tiranga, "🇮🇳", ThemeIds.TIRANGA, ThemeIds.TIRANGA_GREEN, R.string.look_tiranga_green),
+    HOLI(R.string.fest_holi, "🎨", ThemeIds.HOLI, ThemeIds.HOLI_SPLASH, R.string.look_holi_splash),
+    RAKHI(R.string.fest_rakhi, "🎀", ThemeIds.RAKHI, ThemeIds.RAKHI_SILK, R.string.look_rakhi_silk),
+    GANESH(R.string.fest_ganesh, "🌺", ThemeIds.BAPPA, ThemeIds.BAPPA_MODAK, R.string.look_bappa_modak),
+    NAVRATRI(R.string.fest_navratri, "💃", ThemeIds.GARBA, ThemeIds.GARBA_NIGHT, R.string.look_garba_night),
+    DIWALI(R.string.fest_diwali, "🪔", ThemeIds.DIWALI, ThemeIds.DIWALI_NIGHT, R.string.look_diwali_night),
+    CHRISTMAS(R.string.fest_christmas, "🎄", ThemeIds.CHRISTMAS, ThemeIds.CHRISTMAS_PINE, R.string.look_christmas_pine),
+    NEW_YEAR(R.string.fest_new_year, "🎆", ThemeIds.NEW_YEAR, ThemeIds.NEW_YEAR_SPARKLE, R.string.look_new_year_sparkle)
 }
 
 enum class Festival(
@@ -114,6 +114,9 @@ object FestivalCalendar {
     private fun around(year: Int): List<FestivalDay> = occurrences(year) + occurrences(year + 1)
 
     fun active(date: LocalDate): FestivalDay? = around(date.year).filter { date in it }.minByOrNull { it.daysOutside(date) }
+
+    fun next(pack: FestivalPack, date: LocalDate): FestivalDay? =
+        around(date.year).filter { it.festival.pack == pack && !it.packUntil.isBefore(date) }.minByOrNull { it.start }
 
     fun upcoming(date: LocalDate, withinDays: Long = 7): FestivalDay? =
         around(date.year).filter { it.packFrom.isAfter(date) && !it.main.isAfter(date.plusDays(withinDays)) }.minByOrNull { it.start }

@@ -17,6 +17,7 @@ import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.notifications.Sound
 import com.homequest.app.ui.components.Celebration
 import com.homequest.app.ui.components.FestiveMoment
+import com.homequest.app.ui.components.MOMENT_FLIP_DELAY_MS
 import com.homequest.app.util.Dates
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -32,8 +33,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 enum class Gate { ONBOARDING, LOCKED, OPEN }
-
-private const val SWITCH_FLIP_DELAY_MS = 650L
 
 class MainViewModel(private val container: AppContainer) : ViewModel() {
     val settings: StateFlow<AppSettings?> =
@@ -129,7 +128,7 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         val before = container.settingsRepository.current()
         if (playMoment(before)) {
             if (before.soundEffectsEnabled) container.sounds.play(Sound.SPARKLER)
-            delay(SWITCH_FLIP_DELAY_MS)
+            delay(MOMENT_FLIP_DELAY_MS)
         }
         val s = container.settingsRepository.current()
         if (s.festiveThemeSkipped == day.key) {

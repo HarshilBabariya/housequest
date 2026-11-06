@@ -27,6 +27,8 @@ import kotlin.random.Random
 
 data class FestiveMoment(val pack: FestivalPack, val id: Int)
 
+const val MOMENT_FLIP_DELAY_MS = 650L
+
 private enum class Show(val millis: Int) { ROCKET(2800), BALLOONS(2600), MODAKS(2600), KITE(2800), TIRANGA(2400), RAKHI(2600), DANDIYA(2600), SNOW(2800) }
 
 private fun FestivalPack.show(): Show = when (this) {

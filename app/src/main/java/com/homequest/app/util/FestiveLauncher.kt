@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.graphics.drawable.Drawable
 import android.os.Build
 import com.homequest.app.HomeActivity
 import com.homequest.app.R
@@ -45,6 +46,9 @@ object FestiveLauncher {
             }
         }
     }
+
+    fun icon(context: Context, pack: FestivalPack): Drawable =
+        context.packageManager.getActivityInfo(ComponentName(context, alias(pack)), PackageManager.MATCH_DISABLED_COMPONENTS).loadIcon(context.packageManager)
 
     private fun alias(pack: FestivalPack?) = if (pack == null) "$appPackage.MainActivity" else "$appPackage.Launcher_${pack.name}"
 
