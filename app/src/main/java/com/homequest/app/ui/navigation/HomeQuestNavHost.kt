@@ -101,7 +101,7 @@ import com.homequest.app.ui.theme.glassSource
 import com.homequest.app.ui.theme.glassSurface
 
 @Composable
-fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onCelebrateFestival: () -> Unit, onSignOut: () -> Unit, onEraseAll: () -> Unit) {
+fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onCelebrateFestival: () -> Unit, onCycleDecor: () -> Unit, onSignOut: () -> Unit, onEraseAll: () -> Unit) {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
@@ -157,7 +157,8 @@ fun HomeQuestNavHost(pendingRoute: String?, onRouteOpened: () -> Unit, onCelebra
                         onOpenRewards = { navController.navigate(Routes.rewards()) },
                         onOpenProfile = { navController.openTab(BottomTab.PROFILE) },
                         onOpenCapture = { navController.navigate(Routes.CAPTURE) },
-                        onCelebrateFestival = onCelebrateFestival
+                        onCelebrateFestival = onCelebrateFestival,
+                        onCycleDecor = onCycleDecor
                     )
                 }
                 composable(Routes.EXPENSES) {
@@ -330,7 +331,7 @@ private fun AddButton(onClick: () -> Unit, modifier: Modifier) {
             }
             .clickable(interactionSource = interaction, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center
-    ) { Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_expense), tint = Color.White, modifier = Modifier.size(32.dp)) }
+    ) { Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_expense), tint = scheme.onPrimary, modifier = Modifier.size(32.dp)) }
 }
 
 @Composable

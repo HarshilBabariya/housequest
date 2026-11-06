@@ -4,6 +4,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import com.homequest.app.domain.ThemeIds
 
 data class Palette(
@@ -17,31 +18,36 @@ data class Palette(
     val glass: Boolean = false
 ) {
     fun scheme(dark: Boolean): ColorScheme = if (dark) {
+        val card = darkSurface.lighten(0.04f).mix(primary, 0.08f)
         darkColorScheme(
-            primary = primary.lighten(0.15f),
-            onPrimary = Color(0xFF1A1A1A),
-            primaryContainer = primary.darken(0.45f),
-            onPrimaryContainer = primary.lighten(0.75f),
-            secondary = secondary,
-            onSecondary = Color(0xFF1A1A1A),
-            secondaryContainer = primary.darken(0.55f),
-            onSecondaryContainer = primary.lighten(0.8f),
-            tertiary = tertiary,
-            tertiaryContainer = tertiary.darken(0.5f),
-            onTertiaryContainer = tertiary.lighten(0.75f),
+            primary = primary.lighten(0.36f).readableOn(card),
+            onPrimary = primary.darken(0.78f),
+            primaryContainer = darkBackground.mix(primary, 0.32f),
+            onPrimaryContainer = primary.lighten(0.82f),
+            secondary = secondary.lighten(0.15f).readableOn(card),
+            onSecondary = secondary.darken(0.78f),
+            secondaryContainer = darkBackground.mix(secondary, 0.26f),
+            onSecondaryContainer = secondary.lighten(0.82f),
+            tertiary = tertiary.lighten(0.2f).readableOn(card),
+            onTertiary = tertiary.darken(0.78f),
+            tertiaryContainer = darkBackground.mix(tertiary, 0.28f),
+            onTertiaryContainer = tertiary.lighten(0.82f),
             background = darkBackground,
-            onBackground = Color(0xFFF2EDE9),
+            onBackground = Color(0xFFF5F2EF),
             surface = darkBackground,
-            onSurface = Color(0xFFF2EDE9),
-            surfaceVariant = darkSurface.lighten(0.06f),
-            onSurfaceVariant = Color(0xFFBDB4AE),
-            surfaceContainerLowest = darkBackground.darken(0.2f),
-            surfaceContainerLow = darkSurface.darken(0.1f),
-            surfaceContainer = darkSurface,
-            surfaceContainerHigh = darkSurface.lighten(0.05f),
-            surfaceContainerHighest = darkSurface.lighten(0.1f),
-            outline = Color(0xFF7A716B),
-            outlineVariant = darkSurface.lighten(0.14f)
+            onSurface = Color(0xFFF5F2EF),
+            surfaceVariant = card.lighten(0.05f),
+            onSurfaceVariant = Color(0xFFC4BFBA).mix(primary, 0.1f),
+            surfaceContainerLowest = card,
+            surfaceContainerLow = card.lighten(0.02f),
+            surfaceContainer = card.lighten(0.04f),
+            surfaceContainerHigh = card.lighten(0.07f),
+            surfaceContainerHighest = card.lighten(0.1f),
+            outline = Color(0xFF8C8580),
+            outlineVariant = card.lighten(0.12f).mix(primary, 0.1f),
+            error = Color(0xFFFF8A80),
+            errorContainer = Color(0xFF5C1A1A),
+            onErrorContainer = Color(0xFFFFDAD6)
         )
     } else {
         lightColorScheme(
@@ -89,6 +95,16 @@ fun ColorScheme.glassy(dark: Boolean): ColorScheme {
 }
 
 private fun Color.darken(amount: Float) = Color(red * (1 - amount), green * (1 - amount), blue * (1 - amount), alpha)
+private fun Color.readableOn(background: Color): Color {
+    var color = this
+    repeat(12) {
+        if ((color.luminance() + 0.05f) / (background.luminance() + 0.05f) >= 4.5f) return color
+        color = color.lighten(0.08f)
+    }
+    return color
+}
+
+private fun Color.mix(other: Color, amount: Float) = Color(red + (other.red - red) * amount, green + (other.green - green) * amount, blue + (other.blue - blue) * amount, alpha)
 private fun Color.lighten(amount: Float) = Color(red + (1 - red) * amount, green + (1 - green) * amount, blue + (1 - blue) * amount, alpha)
 
 object Palettes {

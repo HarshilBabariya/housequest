@@ -1334,6 +1334,7 @@
         <item quantity="one">सिर्फ़ आप · बाँटने के लिए परिवार जोड़ें</item>
         <item quantity="other">%1$d लोग · सबका अपना लॉगिन</item>
     </plurals>
+    <string name="fest_lights">रोशनी</string>
     <plurals name="fest_countdown">
         <item quantity="one">%1$s कल है!</item>
         <item quantity="other">%1$s %2$d दिन में</item>

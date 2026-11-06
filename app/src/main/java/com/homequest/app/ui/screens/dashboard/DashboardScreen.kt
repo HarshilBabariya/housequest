@@ -104,7 +104,8 @@ fun DashboardScreen(
     onOpenRewards: () -> Unit,
     onOpenProfile: () -> Unit,
     onOpenCapture: () -> Unit,
-    onCelebrateFestival: () -> Unit
+    onCelebrateFestival: () -> Unit,
+    onCycleDecor: () -> Unit
 ) {
     val vm = appViewModel { DashboardViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -116,10 +117,10 @@ fun DashboardScreen(
     Scaffold(contentWindowInsets = WindowInsets(0, 0, 0, 0)) { padding ->
         LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(bottom = 40.dp + LocalBottomBarInset.current)) {
             item {
-                val pack = state.festival?.takeIf { state.settings.festiveMode }?.festival?.pack
+                val decorated = state.festival?.takeIf { state.settings.festiveMode }
                 Box {
-                    pack?.let { FestiveBackdrop(it, Modifier.matchParentSize()) }
-                    Header(state, onOpenProfile, onVoiceExpense, onOpenRewards, decorated = pack != null)
+                    decorated?.let { FestiveBackdrop(it.festival.pack, state.settings.decorVariantFor(it), Modifier.matchParentSize()) }
+                    Header(state, onOpenProfile, onVoiceExpense, onOpenRewards, decorated = decorated != null)
                 }
             }
             (state.festival ?: state.upcomingFestival)?.let { day ->
@@ -130,6 +131,7 @@ fun DashboardScreen(
                         today = state.today,
                         name = state.member?.name.orEmpty(),
                         onClick = if (state.festival != null && state.settings.festiveMode) onCelebrateFestival else null,
+                        onLights = if (state.festival != null && state.settings.festiveMode) onCycleDecor else null,
                         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp)
                     )
                 }

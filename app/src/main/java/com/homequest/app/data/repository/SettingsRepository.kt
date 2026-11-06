@@ -40,8 +40,11 @@ data class AppSettings(
     val festiveIcon: Boolean = true,
     val festivalSeen: String = "",
     val festivalGifted: String = "",
-    val festiveThemeSkipped: String = ""
+    val festiveThemeSkipped: String = "",
+    val festiveDecor: String = ""
 ) {
+    fun decorVariantFor(festival: FestivalDay): Int = festiveDecor.takeIf { it.startsWith("${festival.key}|") }?.substringAfterLast('|')?.toIntOrNull() ?: 0
+
     fun festiveThemeOn(festival: FestivalDay?): Boolean = festival != null && festiveMode && festiveThemeSkipped != festival.key
 
     fun themeFor(festival: FestivalDay?): String = festival?.takeIf { festiveThemeOn(it) }?.festival?.pack?.themeId ?: themeId
@@ -69,6 +72,7 @@ class SettingsRepository(private val context: Context) {
         val FESTIVAL_SEEN = stringPreferencesKey("festival_seen")
         val FESTIVAL_GIFTED = stringPreferencesKey("festival_gifted")
         val FESTIVE_THEME_SKIPPED = stringPreferencesKey("festive_theme_skipped")
+        val FESTIVE_DECOR = stringPreferencesKey("festive_decor")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -91,7 +95,8 @@ class SettingsRepository(private val context: Context) {
             festiveIcon = p[Keys.FESTIVE_ICON] ?: true,
             festivalSeen = p[Keys.FESTIVAL_SEEN] ?: "",
             festivalGifted = p[Keys.FESTIVAL_GIFTED] ?: "",
-            festiveThemeSkipped = p[Keys.FESTIVE_THEME_SKIPPED] ?: ""
+            festiveThemeSkipped = p[Keys.FESTIVE_THEME_SKIPPED] ?: "",
+            festiveDecor = p[Keys.FESTIVE_DECOR] ?: ""
         )
     }
 
@@ -118,4 +123,8 @@ class SettingsRepository(private val context: Context) {
     suspend fun setFestivalSeen(key: String) = context.dataStore.edit { it[Keys.FESTIVAL_SEEN] = key }
     suspend fun setFestivalGifted(key: String) = context.dataStore.edit { it[Keys.FESTIVAL_GIFTED] = key }
     suspend fun setFestiveThemeSkipped(key: String) = context.dataStore.edit { it[Keys.FESTIVE_THEME_SKIPPED] = key }
+    suspend fun cycleFestiveDecor(festival: FestivalDay, variants: Int) = context.dataStore.edit {
+        val current = AppSettings(festiveDecor = it[Keys.FESTIVE_DECOR] ?: "").decorVariantFor(festival)
+        it[Keys.FESTIVE_DECOR] = "${festival.key}|${(current + 1) % variants}"
+    }
 }

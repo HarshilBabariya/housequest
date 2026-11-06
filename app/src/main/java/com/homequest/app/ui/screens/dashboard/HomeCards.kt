@@ -13,14 +13,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Lightbulb
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -43,42 +50,68 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 @Composable
-fun FestivalBanner(day: FestivalDay, upcoming: Boolean, today: LocalDate, name: String, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
+fun FestivalBanner(day: FestivalDay, upcoming: Boolean, today: LocalDate, name: String, onClick: (() -> Unit)?, onLights: (() -> Unit)?, modifier: Modifier = Modifier) {
     val pack = day.festival.pack
     val palette = Palettes.forId(pack.themeId)
     val shape = RoundedCornerShape(22.dp)
-    Box(
-        modifier
-            .fillMaxWidth()
-            .heightIn(min = 112.dp)
-            .clip(shape)
-            .background(Brush.linearGradient(listOf(palette.primary, palette.tertiary.copy(alpha = 0.9f), palette.secondary)))
-            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
-    ) {
-        FestiveEffect(pack.look(), Modifier.matchParentSize())
-        Box(Modifier.matchParentSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent))))
-        Row(Modifier.align(Alignment.CenterStart).padding(horizontal = 18.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            FestivalEmblem(pack, 48.dp)
-            Column(Modifier.padding(start = 14.dp)) {
-                val days = ChronoUnit.DAYS.between(today, day.main).toInt()
-                Text(
-                    if (days > 0) pluralStringResource(R.plurals.fest_countdown, days, stringResource(day.festival.nameRes), days) else stringResource(day.festival.titleRes, name),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    if (upcoming) stringResource(R.string.fest_upcoming_hint, PointsRules.FESTIVAL_GIFT) else stringResource(day.festival.lineRes),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.9f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+    Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 112.dp)
+                .clip(shape)
+                .background(Brush.linearGradient(listOf(palette.primary, palette.tertiary.copy(alpha = 0.9f), palette.secondary)))
+                .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+        ) {
+            FestiveEffect(pack.look(), Modifier.matchParentSize())
+            Box(Modifier.matchParentSize().background(Brush.horizontalGradient(listOf(Color.Black.copy(alpha = 0.55f), Color.Black.copy(alpha = 0.46f)))))
+            Row(
+                Modifier.align(Alignment.CenterStart).fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = if (onLights != null) LIGHTS_OVERLAP + 10.dp else 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FestivalEmblem(pack, 48.dp)
+                Column(Modifier.weight(1f).padding(start = 14.dp)) {
+                    val days = ChronoUnit.DAYS.between(today, day.main).toInt()
+                    Text(
+                        if (days > 0) pluralStringResource(R.plurals.fest_countdown, days, stringResource(day.festival.nameRes), days) else stringResource(day.festival.titleRes, name),
+                        style = MaterialTheme.typography.titleLarge.copy(shadow = BANNER_SHADOW),
+                        color = Color.White
+                    )
+                    Text(
+                        if (upcoming) stringResource(R.string.fest_upcoming_hint, PointsRules.FESTIVAL_GIFT) else stringResource(day.festival.lineRes),
+                        style = MaterialTheme.typography.bodyMedium.copy(shadow = BANNER_SHADOW),
+                        color = Color.White,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+            }
+        }
+        if (onLights != null) {
+            Row(
+                Modifier
+                    .layout { measurable, constraints ->
+                        val overlap = LIGHTS_OVERLAP.roundToPx()
+                        val pill = measurable.measure(constraints)
+                        layout(pill.width, pill.height - overlap) { pill.place(0, -overlap) }
+                    }
+                    .shadow(6.dp, CircleShape)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), CircleShape)
+                    .clickable(role = Role.Button, onClick = onLights)
+                    .heightIn(min = 44.dp)
+                    .padding(horizontal = 18.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Rounded.Lightbulb, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(18.dp))
+                Text(stringResource(R.string.fest_lights), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.padding(start = 6.dp))
             }
         }
     }
 }
+
+private val LIGHTS_OVERLAP = 18.dp
+private val BANNER_SHADOW = Shadow(Color.Black.copy(alpha = 0.6f), Offset(0f, 2f), 6f)
 
 @Composable
 fun StreakCard(streak: Int, loggedToday: Boolean, today: LocalDate, onClick: () -> Unit, modifier: Modifier = Modifier) {

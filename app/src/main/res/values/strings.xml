@@ -1334,6 +1334,7 @@
         <item quantity="one">Just you · add family to split</item>
         <item quantity="other">%1$d people · each with their own login</item>
     </plurals>
+    <string name="fest_lights">Lights</string>
     <plurals name="fest_countdown">
         <item quantity="one">%1$s is tomorrow!</item>
         <item quantity="other">%1$s in %2$d days</item>

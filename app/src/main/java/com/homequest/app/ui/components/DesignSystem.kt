@@ -58,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -88,7 +89,11 @@ fun HqCard(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, padding
         modifier = modifier.glassSurface(CardShape, elevation = 10.dp).then(if (onClick != null) Modifier.clip(CardShape).clickable(onClick = onClick) else Modifier),
         shape = CardShape,
         color = if (glass) Color.Transparent else scheme.surfaceContainerLowest,
-        border = if (glass) null else BorderStroke(1.dp, scheme.outlineVariant.copy(alpha = 0.6f))
+        border = when {
+            glass -> null
+            scheme.background.luminance() < 0.5f -> BorderStroke(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.14f), scheme.outlineVariant.copy(alpha = 0.35f))))
+            else -> BorderStroke(1.dp, scheme.outlineVariant.copy(alpha = 0.6f))
+        }
     ) {
         Column(Modifier.padding(padding.dp), content = content)
     }
@@ -142,6 +147,7 @@ fun ProCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
         modifier
             .fillMaxWidth()
             .clip(CardShape)
+            .background(scheme.surfaceContainerLowest)
             .background(Brush.linearGradient(listOf(scheme.primary.copy(alpha = 0.14f), gold.copy(alpha = 0.2f))))
             .border(1.dp, gold.copy(alpha = 0.55f), CardShape)
             .clickable(onClick = onClick)

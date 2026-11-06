@@ -16,6 +16,7 @@ import com.homequest.app.domain.RepeatRule
 import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.notifications.Sound
 import com.homequest.app.ui.components.Celebration
+import com.homequest.app.ui.components.DECOR_VARIANTS
 import com.homequest.app.ui.components.FestiveMoment
 import com.homequest.app.util.Dates
 import kotlinx.coroutines.NonCancellable
@@ -115,6 +116,11 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         if (!settings.onboarded || !settings.festiveMode) return false
         _moment.value = FestiveMoment(day.festival.pack, ++moments)
         return true
+    }
+
+    fun cycleDecor() = viewModelScope.launch {
+        val day = festival.value ?: return@launch
+        container.settingsRepository.cycleFestiveDecor(day, DECOR_VARIANTS)
     }
 
     fun celebrateFestival() = viewModelScope.launch {
