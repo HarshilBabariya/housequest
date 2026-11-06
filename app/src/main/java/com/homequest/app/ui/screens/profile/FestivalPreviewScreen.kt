@@ -66,8 +66,8 @@ import com.homequest.app.domain.FestivalCalendar
 import com.homequest.app.domain.FestivalDay
 import com.homequest.app.domain.FestivalPack
 import com.homequest.app.domain.PointsRules
+import com.homequest.app.domain.RewardCatalog
 import com.homequest.app.domain.RewardKind
-import com.homequest.app.domain.Rewards
 import com.homequest.app.notifications.Sound
 import com.homequest.app.ui.appViewModel
 import com.homequest.app.ui.components.AvatarView
@@ -118,7 +118,7 @@ fun FestivalPreviewScreen(onBack: () -> Unit) {
     var alt by remember(selected) { mutableStateOf(false) }
     var moment by remember { mutableStateOf<FestiveMoment?>(null) }
     var moments by remember { mutableIntStateOf(0) }
-    val themeName = stringResource(Rewards.ofPack(selected).first { it.kind == RewardKind.THEME }.nameRes)
+    val themeName = stringResource(RewardCatalog.ofPack(selected).first { it.kind == RewardKind.THEME }.nameRes)
     val altName = stringResource(selected.altLookRes)
 
     fun celebrate(flip: Boolean) {
@@ -160,7 +160,7 @@ fun FestivalPreviewScreen(onBack: () -> Unit) {
                     DetailRow(
                         "👕",
                         stringResource(R.string.preview_outfit),
-                        Rewards.ofPack(selected).filter { it.kind == RewardKind.OUTFIT || it.kind == RewardKind.ACCESSORY }.map { stringResource(it.nameRes) }.joinToString(" + ")
+                        RewardCatalog.ofPack(selected).filter { it.kind == RewardKind.OUTFIT || it.kind == RewardKind.ACCESSORY }.map { stringResource(it.nameRes) }.joinToString(" + ")
                     )
                     DetailRow("📱", stringResource(R.string.preview_icon), stringResource(R.string.preview_icon_sub)) {
                         val context = LocalContext.current
@@ -193,7 +193,7 @@ private fun PreviewHome(pack: FestivalPack, day: FestivalDay, themeId: String, s
                 Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 44.dp, bottom = 16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.border(2.dp, scheme.primary.copy(alpha = 0.35f), CircleShape).padding(3.dp).clip(CircleShape)) {
-                            state.member?.let { AvatarView(Rewards.dressFor(pack, it.avatar()), size = 48.dp) }
+                            state.member?.let { AvatarView(RewardCatalog.dressFor(pack, it.avatar()), size = 48.dp) }
                         }
                         Column(Modifier.weight(1f).padding(start = 12.dp)) {
                             Text(name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
